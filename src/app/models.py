@@ -34,11 +34,14 @@ class Fighter(Base):
 
     id: Mapped[intpk]
     name: Mapped[str] = mapped_column(String(50))
-    nationality_id = mapped_column(ForeignKey("nationalities.id"))
     birth_date: Mapped[date] = mapped_column(Date)
     level: Mapped[LevelEnum]
+    ##foreignkeys##
+    nationality_id = mapped_column(ForeignKey("nationalities.id"))
+
+    ## relations##
     nationality: Mapped["Nationality"] = relationship(
-        back_populates="fighters"
+        back_populates="figthers"
     )
     fight_statistic: Mapped["FightStatistic"] = relationship(
         back_populates="fighter"
@@ -49,6 +52,8 @@ class Nationality(Base):
     __tablename__ = "nationalities"
     id: Mapped[intpk]
     name: Mapped[str] = mapped_column(String(50))
+
+    ## relations##
     figthers: Mapped[List["Fighter"]] = relationship(
         back_populates="nationality"
     )
@@ -58,6 +63,8 @@ class Tournament(Base):
     __tablename__ = "tournaments"
     id: Mapped[intpk]
     name: Mapped[str]
+
+    ## relations##
     fightinfos: Mapped[List["FightInfo"]] = relationship(
         back_populates="tournament"
     )
@@ -66,40 +73,67 @@ class Tournament(Base):
 class FightInfo(Base):
     __tablename__ = "fightinfos"
     id: Mapped[intpk]
-    fighter_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
-    oponent_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
     wrestling_type: Mapped[WrestlingTypeEnum]
     fight_date: Mapped[date] = mapped_column(Date)
-    tournament_id: Mapped[int] = mapped_column(ForeignKey("tournaments.id"))
     location: Mapped[str] = mapped_column(String(200))
     weight_category: Mapped[str] = mapped_column(String(50))
     stage: Mapped[StageEnum]
     author: Mapped[str] = mapped_column(String(60))
+
+    ##foreignkeys##
+    fighter_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
+    oponent_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
+    tournament_id: Mapped[int] = mapped_column(ForeignKey("tournaments.id"))
+
+    ## relations##
     tournament: Mapped["Tournament"] = relationship(
         back_populates="fightinfos"
     )
     fight_statistic = relationship("FightStatistic", back_populates="fightinfos", uselist=False)
 
 
+class ActionName(Base):
+    __tablename__ = "actions"
+    id: Mapped[intpk]
+    name: Mapped[str] = mapped_column(String(100))
+    
+    ## relations##
+    action_fightstatistics: Mapped[List["FightStatistic"]] = relationship(
+        back_populates="action_name"
+    )
+
 class FightStatistic(Base):
     __tablename__ = "fightstatistics"
     id: Mapped[intpk]
-    fight_id: Mapped[int] = mapped_column(ForeignKey("fightinfos.id"))
     action_time: Mapped[str] = mapped_column(String(15))
     action_time_second: Mapped[int]
-    fighter_number: Mapped[int]
+    action_number: Mapped[int]
     score: Mapped[int]
-    action: Mapped[int]
     successful: Mapped[bool]
-    technique_id: Mapped[int] = mapped_column(ForeignKey("techniques.id"))
+    fighter_number: Mapped[int]
     video_second_begin = Column(TIMESTAMP)
     video_second_end = Column(TIMESTAMP)
     video_link: Mapped[str] = mapped_column(String(100))
+    
+
+    ##foreignkeys##
+    fight_id: Mapped[int] = mapped_column(ForeignKey("fightinfos.id"))
+    action_name_id: Mapped[int] = mapped_column(ForeignKey("actions.id"))
+    technique_id: Mapped[int] = mapped_column(ForeignKey("techniques.id"))
     fighter_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
+
+    ## relations##
     technique: Mapped["Technique"] = relationship(
-        back_populates="fightstatistics"
+        back_populates="fightstatistics",
+        
     )
     fighter: Mapped["Fighter"] = relationship(
+        back_populates="fight_statistic"
+    )
+    action_name: Mapped["ActionName"] = relationship(
+        back_populates="action_fightstatistics"
+    )
+    fightinfos: Mapped["FightInfo"] = relationship(
         back_populates="fight_statistic"
     )
 
@@ -108,6 +142,8 @@ class Technique(Base):
     __tablename__ = "techniques"
     id: Mapped[intpk]
     name: Mapped[str] = mapped_column(String(100))
+
+    ## relations##
     fightstatistics: Mapped[List["FightStatistic"]] = relationship(
         back_populates="technique"
     )
