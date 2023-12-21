@@ -7,6 +7,13 @@ from database import Base
 
 intpk = Annotated[int, mapped_column(primary_key=True)]
 
+class DecisionEnum(enum.Enum):
+    VPO1 = "VPO1"
+    VSU = "VSU"
+    VPO = "VPO"
+    VFO = "VFO"
+    VIN = "VIN"
+    VFA = "VFA"
 
 class LevelEnum(enum.Enum):
     Seniors = "Seniors"
@@ -37,14 +44,23 @@ class Fighter(Base):
     birth_date: Mapped[date] = mapped_column(Date)
     level: Mapped[LevelEnum]
     ##foreignkeys##
-    nationality_id = mapped_column(ForeignKey("nationalities.id"))
-
+    # nationality_id = mapped_column(ForeignKey("nationalities.id"))
+    natinality_name: Mapped[str] = mapped_column(String(5))
     ## relations##
-    nationality: Mapped["Nationality"] = relationship(
-        back_populates="figthers"
-    )
+    # nationality: Mapped["Nationality"] = relationship(
+    #     back_populates="figthers"
+    # )
     fight_statistic: Mapped["FightStatistic"] = relationship(
         back_populates="fighter"
+    )
+    fighter_info: Mapped["FightInfo"] = relationship(
+        back_populates="fighter"
+    )
+    oponent_info: Mapped["FightInfo"] = relationship(
+        back_populates="oponent"
+    )
+    winner_info: Mapped["FightInfo"] = relationship(
+        back_populates="winner"
     )
 
 
@@ -54,9 +70,9 @@ class Nationality(Base):
     name: Mapped[str] = mapped_column(String(50))
 
     ## relations##
-    figthers: Mapped[List["Fighter"]] = relationship(
-        back_populates="nationality"
-    )
+    # figthers: Mapped[List["Fighter"]] = relationship(
+    #     back_populates="nationality"
+    # )
 
 
 class Tournament(Base):
@@ -79,17 +95,30 @@ class FightInfo(Base):
     weight_category: Mapped[str] = mapped_column(String(50))
     stage: Mapped[StageEnum]
     author: Mapped[str] = mapped_column(String(60))
+    decision: Mapped[DecisionEnum]
+    oponent1_point: Mapped[int]
+    oponent2_point: Mapped[int]
 
     ##foreignkeys##
     fighter_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
     oponent_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
+    winner_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
     tournament_id: Mapped[int] = mapped_column(ForeignKey("tournaments.id"))
 
     ## relations##
     tournament: Mapped["Tournament"] = relationship(
         back_populates="fightinfos"
     )
-    fight_statistic = relationship("FightStatistic", back_populates="fightinfos", uselist=False)
+    fight_statistic: Mapped["FightStatistic"] = relationship(back_populates="fightinfos", uselist=False)
+    fighter: Mapped["Fighter"] = relationship(
+        back_populates= "fighter_info", uselist=False
+    )
+    oponent: Mapped["Fighter"] = relationship(
+        back_populates= "oponent_info", uselist=False
+    )
+    winner: Mapped["Fighter"] = relationship(
+        back_populates= "winner", uselist=False
+    )
 
 
 class ActionName(Base):
