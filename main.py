@@ -37,15 +37,11 @@ def add_fighter(file: Annotated[bytes, File()]):
     with session_factory() as session:
         for i in range(len(final_op)):
             op_name = final_op['Opponent1'][i]
-            nationality = (
-            session.query(Nationality)
-            .filter(Nationality.name ==  final_op['Opponent1 nation'][i])
-            .first()
-            )
+
         
             fighter = Fighter(name=op_name, 
                               birth_date = date(1990, 5, 15),
-                              nationality_id = nationality.id,
+                              natinality_name = final_op['Opponent1 nation'][i],
                               level = "Seniors")
             session.add(fighter)
         session.commit()
@@ -71,8 +67,37 @@ def add_fight_info(file: Annotated[bytes, File()]):
     df = pd.read_excel(file)
     with session_factory() as session:
         for i in range(len(df)):
-            tornament = (
+            tournament = (
                 session.query(Tournament)
                 .filter(Tournament.name == df['Tournament Name'][i])
                 .first()
             )
+            
+            fighter = (
+                session.query(Fighter)
+                .filter(Fighter.name == df['Opponent1'][i])
+                .first()
+            )
+            
+            opponent = (
+                session.query(Fighter)
+                .filter(Fighter.name == df['Opponent2'][i])
+                .first()
+            )
+            
+            fightinfo = FightInfo(wrestling_type = df['Wrestling type'][i],
+                                  fight_date = date(2018, 1, 28),
+                                  location = df['Place'][i],
+                                  weight_category = str(df['Weight (kg)'][i]),
+                                  stage = df['Stage1'][i],
+                                  author = "Tamerlan",
+                                  decision = df['Win by'][i],
+                                  oponent1_point = int(df['Opponent1 points'][i]),
+                                  oponent2_point = int(df['Opponent2 points'][i]),
+                                  tournament_id = tournament.id,
+                                  fighter_id = fighter.id,
+                                  oponent_id = opponent.id,
+                                  winner_id = fighter.id)
+            session.add(fightinfo)
+        session.commit()
+        return {"message": "Success added fight infos"}

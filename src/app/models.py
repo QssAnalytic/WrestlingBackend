@@ -7,95 +7,17 @@ from database import Base
 
 intpk = Annotated[int, mapped_column(primary_key=True)]
 
-class DecisionEnum(enum.Enum):
-    VPO1 = "VPO1"
-    VSU = "VSU"
-    VPO = "VPO"
-    VFO = "VFO"
-    VIN = "VIN"
-    VFA = "VFA"
-
-class LevelEnum(enum.Enum):
-    Seniors = "Seniors"
-    U17 = "U17"
-    U20 = "U20"
-    U23 = "U23"
-    Veterans = "Veterans"
-
-
-class StageEnum(enum.Enum):
-    Qualification = "Qualification"
-    onesixteen = "1/16"
-    oneeighth = "1/8"
-    onequarter = "1/4"
-    onehalf = "1/2"
-    Final = "Final"
-
-
-class WrestlingTypeEnum(enum.Enum):
-    Freestyle = "Freestyle"
-
-
-class Fighter(Base):
-    __tablename__ = "fighters"
-
-    id: Mapped[intpk]
-    name: Mapped[str] = mapped_column(String(50))
-    birth_date: Mapped[date] = mapped_column(Date)
-    level: Mapped[LevelEnum]
-    ##foreignkeys##
-    # nationality_id = mapped_column(ForeignKey("nationalities.id"))
-    natinality_name: Mapped[str] = mapped_column(String(5))
-    ## relations##
-    # nationality: Mapped["Nationality"] = relationship(
-    #     back_populates="figthers"
-    # )
-    fight_statistic: Mapped["FightStatistic"] = relationship(
-        back_populates="fighter"
-    )
-    fighter_info: Mapped["FightInfo"] = relationship(
-        back_populates="fighter"
-    )
-    oponent_info: Mapped["FightInfo"] = relationship(
-        back_populates="oponent"
-    )
-    winner_info: Mapped["FightInfo"] = relationship(
-        back_populates="winner"
-    )
-
-
-class Nationality(Base):
-    __tablename__ = "nationalities"
-    id: Mapped[intpk]
-    name: Mapped[str] = mapped_column(String(50))
-
-    ## relations##
-    # figthers: Mapped[List["Fighter"]] = relationship(
-    #     back_populates="nationality"
-    # )
-
-
-class Tournament(Base):
-    __tablename__ = "tournaments"
-    id: Mapped[intpk]
-    name: Mapped[str]
-
-    ## relations##
-    fightinfos: Mapped[List["FightInfo"]] = relationship(
-        back_populates="tournament"
-    )
-
 
 class FightInfo(Base):
     __tablename__ = "fightinfos"
     id: Mapped[intpk]
-    wrestling_type: Mapped[WrestlingTypeEnum]
+    wrestling_type: Mapped[str]
     fight_date: Mapped[date] = mapped_column(Date)
     location: Mapped[str] = mapped_column(String(200))
     weight_category: Mapped[str] = mapped_column(String(50))
-    stage: Mapped[StageEnum]
+    stage: Mapped[str]
     author: Mapped[str] = mapped_column(String(60))
-    decision: Mapped[DecisionEnum]
+    decision: Mapped[str]
     oponent1_point: Mapped[int]
     oponent2_point: Mapped[int]
 
@@ -111,13 +33,35 @@ class FightInfo(Base):
     )
     fight_statistic: Mapped["FightStatistic"] = relationship(back_populates="fightinfos", uselist=False)
     fighter: Mapped["Fighter"] = relationship(
-        back_populates= "fighter_info", uselist=False
+        back_populates="fighter_info", uselist=False, foreign_keys=[fighter_id]
     )
     oponent: Mapped["Fighter"] = relationship(
-        back_populates= "oponent_info", uselist=False
+        back_populates="oponent_info", uselist=False, foreign_keys=[oponent_id]
     )
     winner: Mapped["Fighter"] = relationship(
-        back_populates= "winner", uselist=False
+        back_populates="winner", uselist=False, foreign_keys=[winner_id]
+    )
+
+class Fighter(Base):
+    __tablename__ = "fighters"
+
+    id: Mapped[intpk]
+    name: Mapped[str] = mapped_column(String(50))
+    birth_date: Mapped[date] = mapped_column(Date)
+    level: Mapped[str]
+    natinality_name: Mapped[str] = mapped_column(String(5))
+
+    fight_statistic: Mapped["FightStatistic"] = relationship(
+        back_populates="fighter"
+    )
+    fighter_info: Mapped["FightInfo"] = relationship(
+        back_populates="fighter", uselist=False, foreign_keys=[FightInfo.fighter_id]
+    )
+    oponent_info: Mapped["FightInfo"] = relationship(
+        back_populates="oponent", uselist=False, foreign_keys=[FightInfo.oponent_id]
+    )
+    winner: Mapped["FightInfo"] = relationship(
+        back_populates="winner", uselist=False, foreign_keys=[FightInfo.winner_id]
     )
 
 
@@ -166,6 +110,26 @@ class FightStatistic(Base):
         back_populates="fight_statistic"
     )
 
+class Nationality(Base):
+    __tablename__ = "nationalities"
+    id: Mapped[intpk]
+    name: Mapped[str] = mapped_column(String(50))
+
+    ## relations##
+    # figthers: Mapped[List["Fighter"]] = relationship(
+    #     back_populates="nationality"
+    # )
+
+
+class Tournament(Base):
+    __tablename__ = "tournaments"
+    id: Mapped[intpk]
+    name: Mapped[str]
+
+    ## relations##
+    fightinfos: Mapped[List["FightInfo"]] = relationship(
+        back_populates="tournament"
+    )
 
 class Technique(Base):
     __tablename__ = "techniques"
@@ -179,5 +143,34 @@ class Technique(Base):
 
 
 
+class DecisionEnum(enum.Enum):
+    VPO1 = "VPO1"
+    VSU = "VSU"
+    VPO = "VPO"
+    VFO = "VFO"
+    VIN = "VIN"
+    VFA = "VFA"
 
+class LevelEnum(enum.Enum):
+    Seniors = "Seniors"
+    U17 = "U17"
+    U20 = "U20"
+    U23 = "U23"
+    Veterans = "Veterans"
+
+
+class StageEnum(enum.Enum):
+    Qualification = "Qualification"
+    GOLD = "GOLD"
+    BRONZE = "BRONZE"
+    Repechage = "Repechage"
+    onesixteen = "1/16"
+    oneeighth = "1/8"
+    onequarter = "1/4"
+    onehalf = "1/2"
+    Final = "Final"
+
+
+class WrestlingTypeEnum(enum.Enum):
+    Freestyle = "Freestyle"
 
