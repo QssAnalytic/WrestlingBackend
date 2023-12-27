@@ -55,13 +55,13 @@ class Fighter(Base):
         back_populates="fighter"
     )
     fighter_info: Mapped["FightInfo"] = relationship(
-        back_populates="fighter", uselist=False, foreign_keys=[FightInfo.fighter_id]
+        back_populates="fighter", uselist=False, foreign_keys="FightInfo.fighter_id"
     )
     oponent_info: Mapped["FightInfo"] = relationship(
-        back_populates="oponent", uselist=False, foreign_keys=[FightInfo.oponent_id]
+        back_populates="oponent", uselist=False, foreign_keys="FightInfo.oponent_id"
     )
     winner: Mapped["FightInfo"] = relationship(
-        back_populates="winner", uselist=False, foreign_keys=[FightInfo.winner_id]
+        back_populates="winner", uselist=False, foreign_keys="FightInfo.winner_id"
     )
 
 
@@ -143,34 +143,34 @@ class Technique(Base):
 
 
 
-class DecisionEnum(enum.Enum):
-    VPO1 = "VPO1"
-    VSU = "VSU"
-    VPO = "VPO"
-    VFO = "VFO"
-    VIN = "VIN"
-    VFA = "VFA"
+# class DecisionEnum(enum.Enum):
+#     VPO1 = "VPO1"
+#     VSU = "VSU"
+#     VPO = "VPO"
+#     VFO = "VFO"
+#     VIN = "VIN"
+#     VFA = "VFA"
 
-class LevelEnum(enum.Enum):
-    Seniors = "Seniors"
-    U17 = "U17"
-    U20 = "U20"
-    U23 = "U23"
-    Veterans = "Veterans"
-
-
-class StageEnum(enum.Enum):
-    Qualification = "Qualification"
-    GOLD = "GOLD"
-    BRONZE = "BRONZE"
-    Repechage = "Repechage"
-    onesixteen = "1/16"
-    oneeighth = "1/8"
-    onequarter = "1/4"
-    onehalf = "1/2"
-    Final = "Final"
+# class LevelEnum(enum.Enum):
+#     Seniors = "Seniors"
+#     U17 = "U17"
+#     U20 = "U20"
+#     U23 = "U23"
+#     Veterans = "Veterans"
 
 
-class WrestlingTypeEnum(enum.Enum):
-    Freestyle = "Freestyle"
+# class StageEnum(enum.Enum):
+#     Qualification = "Qualification"
+#     GOLD = "GOLD"
+#     BRONZE = "BRONZE"
+#     Repechage = "Repechage"
+#     onesixteen = "1/16"
+#     oneeighth = "1/8"
+#     onequarter = "1/4"
+#     onehalf = "1/2"
+#     Final = "Final"
+
+
+# class WrestlingTypeEnum(enum.Enum):
+#     Freestyle = "Freestyle"
 

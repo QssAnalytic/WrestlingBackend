@@ -1,10 +1,17 @@
 import pandas as pd
+from sqlalchemy.orm import Session
 from typing import Annotated
-from fastapi import FastAPI, File, UploadFile
-from database import engine, Base, session_factory
+from fastapi import FastAPI, File, UploadFile, Depends
+from database import engine, Base, session_factory, get_db
 from src.app.models import *
-
+from src.app import dashbord_routers
 app = FastAPI()
+
+app.include_router(
+    dashbord_routers.router,
+    prefix="/dashbord",
+    tags=["dashbord"]
+    )
 
 
 @app.post("/add-nationalty")

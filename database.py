@@ -12,6 +12,12 @@ engine = create_engine(
 session_factory = sessionmaker(engine)
 
 
+def get_db():
+    db = session_factory()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 class Base(DeclarativeBase):
