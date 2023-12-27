@@ -1,11 +1,22 @@
 import pandas as pd
-from sqlalchemy.orm import Session
 from typing import Annotated
+from sqlalchemy.orm import Session
 from fastapi import FastAPI, File, UploadFile, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base, session_factory, get_db
 from src.app.models import *
 from src.app import dashbord_routers
 app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(
     dashbord_routers.router,
