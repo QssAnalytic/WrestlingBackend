@@ -20,6 +20,7 @@ class FightInfo(Base):
     decision: Mapped[str]
     oponent1_point: Mapped[int]
     oponent2_point: Mapped[int]
+    level: Mapped[str] = mapped_column(nullable=True, server_default="Senior")
 
     ##foreignkeys##
     fighter_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
@@ -28,10 +29,11 @@ class FightInfo(Base):
     tournament_id: Mapped[int] = mapped_column(ForeignKey("tournaments.id"))
 
     ## relations##
-    tournament: Mapped["Tournament"] = relationship(
+    tournament: Mapped[List["Tournament"]] = relationship(
         back_populates="fightinfos"
     )
-    fight_statistic: Mapped["FightStatistic"] = relationship(back_populates="fightinfos", uselist=False)
+    fight_statistic: Mapped[List["FightStatistic"]] = relationship(back_populates="fightinfos",
+                                                             primaryjoin="FightInfo.id==FightStatistic.fight_id")
     fighter: Mapped["Fighter"] = relationship(
         back_populates="fighter_info", uselist=False, foreign_keys=[fighter_id]
     )
@@ -80,20 +82,22 @@ class FightStatistic(Base):
     id: Mapped[intpk]
     action_time: Mapped[str] = mapped_column(String(15))
     action_time_second: Mapped[int]
-    action_number: Mapped[int]
+    action_number: Mapped[str] # stringe cevirmek
     score: Mapped[int]
     successful: Mapped[bool]
-    fighter_number: Mapped[int]
+    # fighter_number: Mapped[int] #delete this column
     video_second_begin = Column(TIMESTAMP)
     video_second_end = Column(TIMESTAMP)
     video_link: Mapped[str] = mapped_column(String(100))
-    
+    defense_reason: Mapped[bool]
 
     ##foreignkeys##
     fight_id: Mapped[int] = mapped_column(ForeignKey("fightinfos.id"))
     action_name_id: Mapped[int] = mapped_column(ForeignKey("actions.id"))
     technique_id: Mapped[int] = mapped_column(ForeignKey("techniques.id"))
     fighter_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
+
+
 
     ## relations##
     technique: Mapped["Technique"] = relationship(
@@ -107,7 +111,7 @@ class FightStatistic(Base):
         back_populates="action_fightstatistics"
     )
     fightinfos: Mapped["FightInfo"] = relationship(
-        back_populates="fight_statistic"
+        back_populates="fight_statistic", uselist=True
     )
 
 class Nationality(Base):
@@ -174,3 +178,10 @@ class Technique(Base):
 # class WrestlingTypeEnum(enum.Enum):
 #     Freestyle = "Freestyle"
 
+# id e gore fight ifno goturmek
+
+# fight infonun icine statisticani elave etmek
+    
+# technequenin apisini yazmaq
+    
+# statistic post - fighter_id, opponent_id, second, score, action_id, successfull, technique_id, defense_reason, author
