@@ -1,27 +1,18 @@
 from typing import List
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import select
+from sqlalchemy.orm import Session
 from database import get_db
-from src.app.schemas.fight_info_schemas import AllFightInfoBase
-from src.app.schemas.fight_statistic_schemas import CreateFightStatistic
-from src.app.models import FightInfo
-from src.app.crud.crud_statistic import statistic
-
-
+from src.app.schemas.fight_info_schemas import AllFightInfoBase, FightInfoBase
+from src.app.crud.crud_fight_infos import fight_info
 
 router = APIRouter()
 
 @router.get("/", response_model=List[AllFightInfoBase])
-def get_fight_infos(db: Session = Depends(get_db)):
-    response = db.execute(
-        select(FightInfo).options(
-        joinedload(FightInfo.fighter),
-        joinedload(FightInfo.oponent),
-        joinedload(FightInfo.winner),
-    )
-    ).scalars().unique().all()
-
-
+def fight_infos(db: Session = Depends(get_db)):
+    response = fight_info.get_multi( db=db)
     return response
 
+@router.get("/{fight_info_id}", response_model=FightInfoBase)
+def get_fight_info(fight_info_id: int, db: Session=Depends(get_db)):
+    response = fight_info.get_by_id(id=fight_info_id, db=db)
+    return response

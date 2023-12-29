@@ -1,11 +1,10 @@
 from typing import List
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import select
+from sqlalchemy.orm import Session
 from database import get_db
-from src.app.schemas.fight_info_schemas import AllFightInfoBase
+
 from src.app.schemas.fight_statistic_schemas import CreateFightStatistic
-from src.app.models import FightInfo
+
 from src.app.crud.crud_statistic import statistic
 
 
