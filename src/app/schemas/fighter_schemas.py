@@ -4,13 +4,13 @@ from typing import Optional, List
 
 
 
-class FighterBase(BaseModel):
+class Fighter(BaseModel):
     name: str
     level: str
     birth_date: date
     natinality_name: str
 
-class FighterResponse(FighterBase):
+class FighterBase(Fighter):
     id: int
 
     class Config:

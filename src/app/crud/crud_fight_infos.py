@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from src.app.crud.base import CRUDBase
-from src.app.models import FightInfo
+from src.app.models import FightInfo, FightStatistic
 from src.app.schemas.fight_info_schemas import CreateFighterInfo
 
 class CRUDStatistic(CRUDBase[FightInfo,CreateFighterInfo]):
@@ -26,7 +26,7 @@ class CRUDStatistic(CRUDBase[FightInfo,CreateFighterInfo]):
         joinedload(FightInfo.fighter),
         joinedload(FightInfo.oponent),
         joinedload(FightInfo.winner),
-        joinedload(FightInfo.fight_statistic)
+        joinedload(FightInfo.fight_statistic).joinedload(FightStatistic.action_name)
         )
         ).scalars().unique().first()
         return data
