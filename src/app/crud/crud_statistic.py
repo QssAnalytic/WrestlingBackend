@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session, joinedload
 from src.app.crud.base import CRUDBase
 from src.app.models import FightStatistic
 from src.app.schemas.fight_statistic_schemas import CreateFightStatistic
-from src.app.crud.crud_fight_infos import fight_info
+
 
 class CRUDStatistic(CRUDBase[FightStatistic,CreateFightStatistic]):
     def get_by_action_number(self, action_number:str, fight_id:int, db: Session) -> Optional[FightStatistic]:

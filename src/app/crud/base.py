@@ -16,6 +16,10 @@ class CRUDBase(Generic[ModelType, CreateSchemaType]):
     def get(self, id:int, db:Session) -> Optional[ModelType]:
         data = select(self.model).filter(self.model.id==id).first()
         return data
+    
+    def get_multi(self, db:Session) -> Optional[ModelType]:
+        data = db.execute(select(self.model)).scalars().all()
+        return data
 
     def create(self, data: CreateSchemaType, db: Session)-> ModelType:
         data_obj = jsonable_encoder(data)

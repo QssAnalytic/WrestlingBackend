@@ -5,7 +5,7 @@ from fastapi import FastAPI, File, UploadFile, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base, session_factory, get_db
 from src.app.models import *
-from src.app.routers import actions_routers, fight_infos_routers, statistics_routers
+from src.app.routers import actions_routers, fight_infos_routers, statistics_routers, technique_routers
 app = FastAPI()
 
 origins = ["*"]
@@ -32,6 +32,12 @@ app.include_router(
     actions_routers.router,
     prefix="/actions",
     tags=["actions"]
+)
+
+app.include_router(
+    technique_routers.router,
+    prefix="/techniques",
+    tags=["techniques"]
 )
 
 
