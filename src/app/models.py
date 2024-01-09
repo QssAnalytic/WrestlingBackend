@@ -29,7 +29,7 @@ class FightInfo(Base):
     tournament_id: Mapped[int] = mapped_column(ForeignKey("tournaments.id"))
 
     ## relations##
-    tournament: Mapped[List["Tournament"]] = relationship(
+    tournament: Mapped["Tournament"] = relationship(
         back_populates="fightinfos"
     )
     fight_statistic: Mapped[List["FightStatistic"]] = relationship(back_populates="fightinfos",

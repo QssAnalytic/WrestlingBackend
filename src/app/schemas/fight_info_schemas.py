@@ -17,6 +17,9 @@ class CreateFighterInfo(BaseModel):
     oponent2_point: int
     level: str
 
+class UpdateFighterInfo(BaseModel):
+    pass
+
 
 class AllFightInfoBase(CreateFighterInfo):
     id: int

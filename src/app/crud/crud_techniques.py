@@ -1,9 +1,9 @@
 from src.app.crud.base import CRUDBase
 from src.app.models import Technique
-from src.app.schemas.fight_statistic_schemas import CreateFightStatistic
+from src.app.schemas.technique_schemas import TechniqueNameCreate, UpdateTechnique
 
 
-class CRUDTechnique(CRUDBase[Technique,CreateFightStatistic]):
+class CRUDTechnique(CRUDBase[Technique,TechniqueNameCreate, UpdateTechnique]):
     ...
 
 technique = CRUDTechnique(Technique)

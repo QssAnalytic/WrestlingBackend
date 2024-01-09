@@ -5,10 +5,10 @@ from sqlalchemy.orm import Session, joinedload
 
 from src.app.crud.base import CRUDBase
 from src.app.models import FightStatistic
-from src.app.schemas.fight_statistic_schemas import CreateFightStatistic
+from src.app.schemas.fight_statistic_schemas import CreateFightStatistic, UpdateFightStatistic
 
 
-class CRUDStatistic(CRUDBase[FightStatistic,CreateFightStatistic]):
+class CRUDStatistic(CRUDBase[FightStatistic,CreateFightStatistic,UpdateFightStatistic]):
     def get_by_action_number(self, action_number:str, fight_id:int, db: Session) -> Optional[FightStatistic]:
         data = db.execute(select(FightStatistic)
         .filter(and_(FightStatistic.action_number==action_number, FightStatistic.fight_id==fight_id))

@@ -1,21 +1,23 @@
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from pydantic import BaseModel
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import select
+from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session
 
 from database import Base
 
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
+UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 
-class CRUDBase(Generic[ModelType, CreateSchemaType]):
+
+class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def __init__(self, model: Type[ModelType]):
         self.model = model
 
     def get(self, id:int, db:Session) -> Optional[ModelType]:
-        data = select(self.model).filter(self.model.id==id).first()
-        return data
+        return db.query(self.model).filter(self.model.id == id).first()
+        
     
     def get_multi(self, db:Session) -> Optional[ModelType]:
         data = db.execute(select(self.model)).scalars().all()
@@ -28,3 +30,22 @@ class CRUDBase(Generic[ModelType, CreateSchemaType]):
         db.commit()
         db.refresh(db_data)
         return db_data
+    
+    def update(self, id:int, data: UpdateSchemaType, db: Session):
+        db_data = self.get(id=id, db=db)
+        data_obj = jsonable_encoder(data)
+        db.execute(
+            update(self.model)
+            .filter(self.model.id==id)
+            .values(**data_obj)
+        )
+        db.commit()
+        db.refresh(db_data)
+        return data
+
+
+    def delete(self, id: int, db: Session):
+        db.execute(
+            delete(self.model).filter(self.model.id==id)
+        )
+        db.commit()

@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session, joinedload
 
 from src.app.crud.base import CRUDBase
 from src.app.models import FightInfo, FightStatistic
-from src.app.schemas.fight_info_schemas import CreateFighterInfo
+from src.app.schemas.fight_info_schemas import CreateFighterInfo, UpdateFighterInfo
 
-class CRUDStatistic(CRUDBase[FightInfo,CreateFighterInfo]):
+class CRUDStatistic(CRUDBase[FightInfo,CreateFighterInfo, UpdateFighterInfo]):
 
     def get_multi(self, db:Session) -> List[FightInfo]:
         data = db.execute(
@@ -16,7 +16,7 @@ class CRUDStatistic(CRUDBase[FightInfo,CreateFighterInfo]):
         joinedload(FightInfo.oponent),
         joinedload(FightInfo.winner),
         joinedload(FightInfo.tournament)
-        )
+        ).order_by(FightInfo.id) 
         ).scalars().unique().all()
         return data
     

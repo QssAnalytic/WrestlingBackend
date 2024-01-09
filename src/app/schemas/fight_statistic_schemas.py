@@ -4,6 +4,7 @@ from typing import Optional, List
 from src.app.schemas.action_schemas import ActionBaseInfos
 from src.app.schemas.technique_schemas import TechniqueBaseInfos
 from src.app.schemas.fighter_schemas import FighterBase
+
 class CreateFightStatistic(BaseModel):
     action_time: str
     action_time_second: int
@@ -18,9 +19,10 @@ class CreateFightStatistic(BaseModel):
     fighter_id: int
     video_second_begin: datetime
     video_second_end: datetime
-    # class Config:
-    #     from_attributes = True
+    
 
+class UpdateFightStatistic(CreateFightStatistic):
+    __annotations__ = {k: Optional[v] for k, v in CreateFightStatistic.__annotations__.items()}
 
 class FightStatistic(BaseModel):
     action_time: str
