@@ -14,7 +14,8 @@ class CRUDStatistic(CRUDBase[FightInfo,CreateFighterInfo]):
         select(FightInfo).options(
         joinedload(FightInfo.fighter),
         joinedload(FightInfo.oponent),
-        joinedload(FightInfo.winner)
+        joinedload(FightInfo.winner),
+        joinedload(FightInfo.tournament)
         )
         ).scalars().unique().all()
         return data
@@ -26,6 +27,7 @@ class CRUDStatistic(CRUDBase[FightInfo,CreateFighterInfo]):
         joinedload(FightInfo.fighter),
         joinedload(FightInfo.oponent),
         joinedload(FightInfo.winner),
+        joinedload(FightInfo.tournament),
         joinedload(FightInfo.fight_statistic).joinedload(FightStatistic.action_name)
         )
         ).scalars().unique().first()

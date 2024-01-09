@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 from src.app.schemas.fight_statistic_schemas import GetFightStatisticBase
 from src.app.schemas.fighter_schemas import FighterBase
+from src.app.schemas.tournament_schemas import TournamentBaseInfos
 
 class CreateFighterInfo(BaseModel):
     wrestling_type: str
@@ -14,6 +15,7 @@ class CreateFighterInfo(BaseModel):
     decision: str
     oponent1_point: int
     oponent2_point: int
+    level: str
 
 
 class AllFightInfoBase(CreateFighterInfo):
@@ -21,6 +23,7 @@ class AllFightInfoBase(CreateFighterInfo):
     fighter: Optional[FighterBase]
     oponent: Optional[FighterBase]
     winner: Optional[FighterBase]
+    tournament: TournamentBaseInfos
 
     class Config:
         from_attributes = True
@@ -30,6 +33,7 @@ class FightInfoBase(CreateFighterInfo):
     fighter: Optional[FighterBase]
     oponent: Optional[FighterBase]
     winner: Optional[FighterBase]
+    tournament: TournamentBaseInfos
     fight_statistic: Optional[List[GetFightStatisticBase]]
     class Config:
         from_attributes = True
