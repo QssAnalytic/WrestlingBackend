@@ -22,7 +22,7 @@ class CreateFightStatistic(BaseModel):
 
 class FightStatisticOutPut(CreateFightStatistic):
     id: int
-
+    fighter: Optional[FighterBase]
     class Config:
         from_attributes = True
 
