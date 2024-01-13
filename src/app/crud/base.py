@@ -41,7 +41,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         )
         db.commit()
         db.refresh(db_data)
-        return data
+        return db_data
 
 
     def delete(self, id: int, db: Session):

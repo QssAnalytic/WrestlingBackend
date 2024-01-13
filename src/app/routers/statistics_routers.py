@@ -11,7 +11,7 @@ from src.app.crud.crud_statistic import statistic
 router = APIRouter()
 
 
-@router.get("/{action_id}/", response_model=GetFightStatisticBase)
+@router.get("/{action_id}/", response_model=FightStatisticOutPut)
 def get_statistic(action_id:int, db: Session = Depends(get_db)):
     response = statistic.get_by_id(action_id=action_id, db=db)
     if response is None:
@@ -29,7 +29,7 @@ def delete_fight_statistic(statistic_id: int, db: Session = Depends(get_db)):
     statistic.delete(id=statistic_id, db=db)
     return "Succsess"
 
-@router.put("/{statistic_id}/", response_model=UpdateFightStatistic)
+@router.put("/{statistic_id}/", response_model=FightStatisticOutPut)
 def update_fight_statistic(statistic_id: int, statistic_data: UpdateFightStatistic,db: Session = Depends(get_db)):
     updated_data = statistic.update(id = statistic_id,data = statistic_data, db = db)
     return updated_data
