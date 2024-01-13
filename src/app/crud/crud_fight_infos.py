@@ -7,7 +7,7 @@ from src.app.crud.base import CRUDBase
 from src.app.models import FightInfo, FightStatistic
 from src.app.schemas.fight_info_schemas import CreateFighterInfo, UpdateFighterInfo
 
-class CRUDStatistic(CRUDBase[FightInfo,CreateFighterInfo, UpdateFighterInfo]):
+class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfo, UpdateFighterInfo]):
 
     def get_multi(self, db:Session) -> List[FightInfo]:
         data = db.execute(
@@ -34,4 +34,4 @@ class CRUDStatistic(CRUDBase[FightInfo,CreateFighterInfo, UpdateFighterInfo]):
         return data
 
 
-fight_info = CRUDStatistic(FightInfo)
+fight_info = CRUDFightInfos(FightInfo)

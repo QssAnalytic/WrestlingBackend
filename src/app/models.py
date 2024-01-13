@@ -1,6 +1,6 @@
 import enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import TIMESTAMP, Table, Column, String, Date, ForeignKey, Time
+from sqlalchemy import TIMESTAMP, Table, Column, String, Date, ForeignKey, text
 from typing import Annotated, List, Optional
 from datetime import date, time
 from database import Base
@@ -21,7 +21,7 @@ class FightInfo(Base):
     oponent1_point: Mapped[int]
     oponent2_point: Mapped[int]
     level: Mapped[str] = mapped_column(nullable=True, server_default="Senior")
-
+    is_submitted: Mapped[bool] = mapped_column(nullable=True, server_default=text('false'))
     ##foreignkeys##
     fighter_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
     oponent_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
@@ -80,15 +80,15 @@ class ActionName(Base):
 class FightStatistic(Base):
     __tablename__ = "fightstatistics"
     id: Mapped[intpk]
-    action_time: Mapped[str] = mapped_column(String(15))
+    action_time: Mapped[str] = mapped_column(String(15), nullable=True)
     action_time_second: Mapped[int]
-    action_number: Mapped[str] # stringe cevirmek
+    action_number: Mapped[str]
     score: Mapped[int]
     successful: Mapped[bool]
     # fighter_number: Mapped[int] #delete this column
-    video_second_begin = Column(TIMESTAMP)
-    video_second_end = Column(TIMESTAMP)
-    video_link: Mapped[str] = mapped_column(String(100))
+    video_second_begin = Column(TIMESTAMP, nullable=True)
+    video_second_end = Column(TIMESTAMP, nullable=True)
+    video_link: Mapped[str] = mapped_column(String(100), nullable=True)
     defense_reason: Mapped[bool]
 
     ##foreignkeys##

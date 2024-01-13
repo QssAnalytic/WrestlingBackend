@@ -1,9 +1,9 @@
 from typing import List
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
 
-from src.app.schemas.fight_statistic_schemas import CreateFightStatistic, GetFightStatisticBase, UpdateFightStatistic
+from src.app.schemas.fight_statistic_schemas import CreateFightStatistic, GetFightStatisticBase, UpdateFightStatistic, FightStatisticOutPut
 
 from src.app.crud.crud_statistic import statistic
 
@@ -11,12 +11,15 @@ from src.app.crud.crud_statistic import statistic
 router = APIRouter()
 
 
-@router.get("/{fight_info_id}/{action_number}/", response_model=List[GetFightStatisticBase])
-def get_statistic(fight_info_id:int, action_number: str, db: Session = Depends(get_db)):
-    response = statistic.get_by_action_number(action_number=action_number, fight_id=fight_info_id, db=db)
+@router.get("/{action_id}/", response_model=GetFightStatisticBase)
+def get_statistic(action_id:int, db: Session = Depends(get_db)):
+    response = statistic.get_by_id(action_id=action_id, db=db)
+    if response is None:
+        raise HTTPException(status_code=404, detail="Statistic not found")
+
     return response
 
-@router.post("/", response_model=CreateFightStatistic)
+@router.post("/", response_model=FightStatisticOutPut)
 def create_fight_statistic(statistic_data: CreateFightStatistic, db: Session = Depends(get_db)):
     stat = statistic.create(data=statistic_data, db=db)
     return stat

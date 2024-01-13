@@ -6,7 +6,7 @@ from src.app.schemas.technique_schemas import TechniqueBaseInfos
 from src.app.schemas.fighter_schemas import FighterBase
 
 class CreateFightStatistic(BaseModel):
-    action_time: str
+    # action_time: str
     action_time_second: int
     action_number: str
     score: int
@@ -17,15 +17,20 @@ class CreateFightStatistic(BaseModel):
     action_name_id: int
     technique_id: int
     fighter_id: int
-    video_second_begin: datetime
-    video_second_end: datetime
-    
+    # video_second_begin: datetime
+    # video_second_end: datetime
+
+class FightStatisticOutPut(CreateFightStatistic):
+    id: int
+
+    class Config:
+        from_attributes = True
 
 class UpdateFightStatistic(CreateFightStatistic):
     __annotations__ = {k: Optional[v] for k, v in CreateFightStatistic.__annotations__.items()}
 
 class FightStatistic(BaseModel):
-    action_time: str
+    action_time: Optional[str]
     action_time_second: int
     action_number: str
     score: int
@@ -36,8 +41,8 @@ class FightStatistic(BaseModel):
     action_name: ActionBaseInfos
     technique: TechniqueBaseInfos
     fighter: FighterBase
-    video_second_begin: datetime
-    video_second_end: datetime
+    video_second_begin: Optional[datetime]
+    video_second_end: Optional[datetime]
 
 class GetFightStatisticBase(FightStatistic):
     id: int

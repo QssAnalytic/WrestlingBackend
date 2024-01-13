@@ -9,7 +9,7 @@ router = APIRouter()
 
 @router.get("/", response_model=List[AllFightInfoBase])
 def fight_infos(db: Session = Depends(get_db)):
-    response = fight_info.get_multi( db=db)
+    response = fight_info.get_multi(db=db)
     return response
 
 @router.get("/{fight_info_id}", response_model=FightInfoBase)
