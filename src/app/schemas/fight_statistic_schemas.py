@@ -11,7 +11,7 @@ class CreateFightStatistic(BaseModel):
     action_number: str
     score: int
     successful: bool
-    author: str
+    author: Optional[str]
     video_link: HttpUrl
     defense_reason: bool
     fight_id: int
