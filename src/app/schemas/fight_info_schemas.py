@@ -11,7 +11,6 @@ class CreateFighterInfo(BaseModel):
     location: str
     weight_category: str
     stage: str
-    author: str
     decision: str
     oponent1_point: int
     oponent2_point: int

@@ -6,7 +6,7 @@ from config import settings
 
 engine = create_engine(
     url= settings.DATABASE_URL_psycopg,
-    echo=True
+    # echo=True
 )
 
 session_factory = sessionmaker(engine)

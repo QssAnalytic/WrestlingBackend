@@ -1,8 +1,8 @@
-"""initial
+"""first migrate
 
-Revision ID: 878810bb7fa9
+Revision ID: e301128434ca
 Revises: 
-Create Date: 2023-12-22 21:07:28.508924
+Create Date: 2024-01-15 21:02:05.749023
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '878810bb7fa9'
+revision: str = 'e301128434ca'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -59,6 +59,8 @@ def upgrade() -> None:
     sa.Column('decision', sa.String(), nullable=False),
     sa.Column('oponent1_point', sa.Integer(), nullable=False),
     sa.Column('oponent2_point', sa.Integer(), nullable=False),
+    sa.Column('level', sa.String(), server_default='Senior', nullable=True),
+    sa.Column('is_submitted', sa.Boolean(), server_default=sa.text('false'), nullable=True),
     sa.Column('fighter_id', sa.Integer(), nullable=False),
     sa.Column('oponent_id', sa.Integer(), nullable=False),
     sa.Column('winner_id', sa.Integer(), nullable=False),
@@ -71,15 +73,15 @@ def upgrade() -> None:
     )
     op.create_table('fightstatistics',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('action_time', sa.String(length=15), nullable=False),
     sa.Column('action_time_second', sa.Integer(), nullable=False),
-    sa.Column('action_number', sa.Integer(), nullable=False),
+    sa.Column('action_number', sa.String(), nullable=False),
     sa.Column('score', sa.Integer(), nullable=False),
     sa.Column('successful', sa.Boolean(), nullable=False),
-    sa.Column('fighter_number', sa.Integer(), nullable=False),
+    sa.Column('author', sa.String(length=100), nullable=False),
     sa.Column('video_second_begin', sa.TIMESTAMP(), nullable=True),
     sa.Column('video_second_end', sa.TIMESTAMP(), nullable=True),
-    sa.Column('video_link', sa.String(length=100), nullable=False),
+    sa.Column('video_link', sa.String(length=100), nullable=True),
+    sa.Column('defense_reason', sa.Boolean(), nullable=False),
     sa.Column('fight_id', sa.Integer(), nullable=False),
     sa.Column('action_name_id', sa.Integer(), nullable=False),
     sa.Column('technique_id', sa.Integer(), nullable=False),

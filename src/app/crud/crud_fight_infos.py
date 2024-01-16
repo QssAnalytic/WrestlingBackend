@@ -1,7 +1,7 @@
 from typing import Optional, List
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from src.app.crud.base import CRUDBase
 from src.app.models import FightInfo, FightStatistic
@@ -12,11 +12,11 @@ class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfo, UpdateFighterInfo]):
     def get_multi(self, db:Session) -> List[FightInfo]:
         data = db.execute(
         select(FightInfo).options(
-        joinedload(FightInfo.fighter),
-        joinedload(FightInfo.oponent),
-        joinedload(FightInfo.winner),
-        joinedload(FightInfo.tournament)
-        ).order_by(FightInfo.id) 
+        joinedload(FightInfo.fighter,  innerjoin=True),
+        joinedload(FightInfo.oponent,  innerjoin=True),
+        joinedload(FightInfo.winner,  innerjoin=True),
+        joinedload(FightInfo.tournament,  innerjoin=True)
+        ).order_by(FightInfo.id)
         ).scalars().unique().all()
         return data
     

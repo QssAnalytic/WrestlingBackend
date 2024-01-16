@@ -1,6 +1,9 @@
+import re
 import pandas as pd
+from datetime import datetime
 from typing import Annotated
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 from fastapi import FastAPI, File, UploadFile, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base, session_factory, get_db
@@ -63,21 +66,26 @@ def add_fighter(file: Annotated[bytes, File()]):
     op1 = df[['Opponent1','Opponent1 nation']].drop_duplicates()
 
     op2 = df[['Opponent2','Opponent2 nation']].drop_duplicates()
-    print(op2.columns)
+    
     op2.rename(columns = {'Opponent2': 'Opponent1', 'Opponent2 nation' : 'Opponent1 nation'}, inplace=True)
     
     final_op = pd.concat([op1, op2],ignore_index=True)
-
+    final_op = final_op.drop_duplicates(subset=['Opponent1']).reset_index(drop=True)
+    
+    
     with session_factory() as session:
+        fighters = []
         for i in range(len(final_op)):
+            print(i)
             op_name = final_op['Opponent1'][i]
-
+            print(op_name)
         
             fighter = Fighter(name=op_name, 
                               birth_date = date(1990, 5, 15),
                               natinality_name = final_op['Opponent1 nation'][i],
                               level = "Seniors")
-            session.add(fighter)
+            fighters.append(fighter)
+        session.bulk_save_objects(fighters)
         session.commit()
 
     return {"message": "Success added fighters"}
@@ -86,11 +94,16 @@ def add_fighter(file: Annotated[bytes, File()]):
 @app.post("/add-tournament")
 def add_fighter(file: Annotated[bytes, File()]):
     df = pd.read_excel(file)
-    tournaments = df['Tournament Name'].drop_duplicates()
+    tournaments_df = df[['tournament_name', 'tournament_date']].drop_duplicates(subset=['tournament_name', 'tournament_date']).reset_index(drop=True)
+    
+
     with session_factory() as session:
-        for tour in tournaments:
-            tournament = Tournament(name = tour)
-            session.add(tournament)
+        tournaments = []
+        for tour in range(len(tournaments_df)):
+
+            tournament = Tournament(name = tournaments_df['tournament_name'][tour], date=tournaments_df['tournament_date'][tour])
+            tournaments.append(tournament)
+        session.bulk_save_objects(tournaments)
         session.commit()
 
 
@@ -100,38 +113,42 @@ def add_fighter(file: Annotated[bytes, File()]):
 def add_fight_info(file: Annotated[bytes, File()]):
     df = pd.read_excel(file)
     with session_factory() as session:
+        fightinfos = []
         for i in range(len(df)):
             tournament = (
                 session.query(Tournament)
-                .filter(Tournament.name == df['Tournament Name'][i])
+                .filter(Tournament.name == df['tournament_name'][i])
                 .first()
             )
             
             fighter = (
                 session.query(Fighter)
-                .filter(Fighter.name == df['Opponent1'][i])
+                .filter(Fighter.name == df['opponent1'][i])
                 .first()
             )
             
             opponent = (
                 session.query(Fighter)
-                .filter(Fighter.name == df['Opponent2'][i])
+                .filter(Fighter.name == df['opponent2'][i])
                 .first()
             )
+            print(i)
             
-            fightinfo = FightInfo(wrestling_type = df['Wrestling type'][i],
-                                  fight_date = date(2018, 1, 28),
-                                  location = df['Place'][i],
-                                  weight_category = str(df['Weight (kg)'][i]),
-                                  stage = df['Stage1'][i],
-                                  author = "Tamerlan",
-                                  decision = df['Win by'][i],
-                                  oponent1_point = int(df['Opponent1 points'][i]),
-                                  oponent2_point = int(df['Opponent2 points'][i]),
+            fightinfo = FightInfo(wrestling_type = df['style'][i],
+                                  fight_date = df['tournament_date'][i],
+                                  location = df['place'][i],
+                                  weight_category = str(df['weight'][i]),
+                                  stage = df['stage'][i],
+                                  decision = df['decision'][i],
+                                  oponent1_point = int(df['opponent1_points'][i]),
+                                  oponent2_point = int(df['opponent2_points'][i]),
                                   tournament_id = tournament.id,
                                   fighter_id = fighter.id,
                                   oponent_id = opponent.id,
                                   winner_id = fighter.id)
-            session.add(fightinfo)
+            fightinfos.append(fightinfo)
+            if i==100:
+                break
+        session.bulk_save_objects(fightinfos)
         session.commit()
         return {"message": "Success added fight infos"}

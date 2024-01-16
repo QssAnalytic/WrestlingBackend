@@ -16,7 +16,7 @@ class FightInfo(Base):
     location: Mapped[str] = mapped_column(String(200))
     weight_category: Mapped[str] = mapped_column(String(50))
     stage: Mapped[str]
-    author: Mapped[str] = mapped_column(String(60))
+    author: Mapped[str] = mapped_column(String(60), nullable=True)
     decision: Mapped[str]
     oponent1_point: Mapped[int]
     oponent2_point: Mapped[int]
@@ -48,10 +48,10 @@ class Fighter(Base):
     __tablename__ = "fighters"
 
     id: Mapped[intpk]
-    name: Mapped[str] = mapped_column(String(50))
+    name: Mapped[str] = mapped_column(String(255))
     birth_date: Mapped[date] = mapped_column(Date)
-    level: Mapped[str]
-    natinality_name: Mapped[str] = mapped_column(String(5))
+    level: Mapped[str] = mapped_column(String(255))
+    natinality_name: Mapped[str] = mapped_column(String(255))
 
     fight_statistic: Mapped["FightStatistic"] = relationship(
         back_populates="fighter"
@@ -80,12 +80,12 @@ class ActionName(Base):
 class FightStatistic(Base):
     __tablename__ = "fightstatistics"
     id: Mapped[intpk]
-    action_time: Mapped[str] = mapped_column(String(15), nullable=True)
+    # action_time: Mapped[str] = mapped_column(String(15), nullable=True)
     action_time_second: Mapped[int]
     action_number: Mapped[str]
     score: Mapped[int]
     successful: Mapped[bool]
-    author: Mapped[str] = mapped_column(String(100), nullable=True)
+    author: Mapped[str] = mapped_column(String(100))
     # fighter_number: Mapped[int] #delete this column
     video_second_begin = Column(TIMESTAMP, nullable=True)
     video_second_end = Column(TIMESTAMP, nullable=True)
@@ -130,6 +130,7 @@ class Tournament(Base):
     __tablename__ = "tournaments"
     id: Mapped[intpk]
     name: Mapped[str]
+    date = Column(Date)
 
     ## relations##
     fightinfos: Mapped[List["FightInfo"]] = relationship(

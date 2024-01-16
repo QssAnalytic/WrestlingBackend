@@ -10,23 +10,11 @@ from src.app.schemas.fight_statistic_schemas import CreateFightStatistic, Update
 
 
 class CRUDStatistic(CRUDBase[FightStatistic,CreateFightStatistic,UpdateFightStatistic]):
-    # def get_by_id(self, action_id: int, db: Session) -> Optional[FightStatistic]:
-    #     data = db.execute(select(FightStatistic)
-    #     .filter(FightStatistic.id == action_id)
-    #     .options(
-    #         joinedload(FightStatistic.fighter),
-    #         joinedload(FightStatistic.technique),
-    #         joinedload(FightStatistic.action_name)
-    #     )
-    #     ).scalars().first()
-    #     return data
     def get_by_id(self, action_id: int, db: Session) -> Optional[FightStatistic]:
         data = db.execute(select(FightStatistic)
         .filter(FightStatistic.id == action_id)
         .options(
-            joinedload(FightStatistic.fighter),
-            joinedload(FightStatistic.technique),
-            joinedload(FightStatistic.action_name)
+            joinedload(FightStatistic.fighter)
         )
         ).scalars().first()
         return data
