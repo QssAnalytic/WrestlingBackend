@@ -16,7 +16,7 @@ class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfo, UpdateFighterInfo]):
         joinedload(FightInfo.oponent,  innerjoin=True),
         joinedload(FightInfo.winner,  innerjoin=True),
         joinedload(FightInfo.tournament,  innerjoin=True)
-        ).order_by(FightInfo.id)
+        ).order_by(FightInfo.id).limit(100)
         ).scalars().unique().all()
         return data
     
