@@ -115,7 +115,7 @@ def add_fight_info(file: Annotated[bytes, File()]):
     with session_factory() as session:
         fightinfos = []
         id_index = session.query(FightInfo).count()
-        
+        print(id_index)
         for i in range(id_index,len(df)):
 
             
@@ -156,9 +156,9 @@ def add_fight_info(file: Annotated[bytes, File()]):
                                   winner_id = fighter.id)
             fightinfos.append(fightinfo)
             
-            if fightinfos!=[]:
-                session.bulk_save_objects(fightinfos)
-                session.commit()
+        if fightinfos!=[]:
+            session.bulk_save_objects(fightinfos)
+            session.commit()
             
 
         return {"message": "Success added fight infos"}
