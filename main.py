@@ -155,7 +155,7 @@ def add_fight_info(file: Annotated[bytes, File()]):
                                   oponent_id = opponent.id,
                                   winner_id = fighter.id)
             fightinfos.append(fightinfo)
-            if i==id_index+4000:
+            if i%4000==0:
                 if fightinfos!=[]:
                     session.bulk_save_objects(fightinfos)
                     session.commit()
