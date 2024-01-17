@@ -18,12 +18,16 @@ class CreateFightStatistic(BaseModel):
     action_name_id: int
     technique_id: int
     fighter_id: int
+    opponent_id: Optional[int]
     # video_second_begin: datetime
     # video_second_end: datetime
 
 class FightStatisticOutPut(CreateFightStatistic):
     id: int
     fighter: Optional[FighterBase]
+    opponent: Optional[FighterBase]
+    action_name: Optional[ActionBaseInfos]
+    technique: Optional[TechniqueBaseInfos]
     class Config:
         from_attributes = True
 

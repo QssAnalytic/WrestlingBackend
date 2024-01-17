@@ -44,19 +44,28 @@ app.include_router(
 )
 
 
-@app.post("/add-nationalty")
-def add_nationalty(file: Annotated[bytes, File()]):
+@app.post("/add-actions-and-techniques")
+def add_actions_and_techniques(file: Annotated[bytes, File()]):
     df = pd.read_excel(file)
-    op1_national = df['Opponent1 nation']
-    op2_national = df['Opponent2 nation']
-    final_nation = pd.concat([op1_national, op2_national]).drop_duplicates()
+    df_actions = df['Actions'].drop_duplicates().reset_index(drop=True)
+    df_techniques = df['Techniques'].drop_duplicates().reset_index(drop=True)
     
+    actions = []
+    techniques = []
     with session_factory() as session:
-        for index in final_nation:
-            nationality = Nationality(name = index)
-            session.add(nationality)
+        for ac in range(len(df_actions)):
+            action = ActionName(name = df_actions[ac])
+            actions.append(action)
+        session.bulk_save_objects(actions)
         session.commit()
-    return {"message": "Success added nationalty"}
+        for te in range(len(df_actions)):
+            technique = Technique(name = df_techniques[te])
+            techniques.append(technique)
+        session.bulk_save_objects(techniques)
+        session.commit()     
+    
+    
+    return {"message": "Success added actions and techniques"}
 
 
 
@@ -162,3 +171,5 @@ def add_fight_info(file: Annotated[bytes, File()]):
             
 
         return {"message": "Success added fight infos"}
+    
+

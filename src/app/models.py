@@ -54,7 +54,10 @@ class Fighter(Base):
     natinality_name: Mapped[str] = mapped_column(String(255))
 
     fight_statistic: Mapped["FightStatistic"] = relationship(
-        back_populates="fighter"
+        back_populates="fighter", foreign_keys="FightStatistic.fighter_id"
+    )
+    oponent_statistic: Mapped["FightStatistic"] = relationship(
+        back_populates="opponent", uselist=False, foreign_keys="FightStatistic.opponent_id"
     )
     fighter_info: Mapped["FightInfo"] = relationship(
         back_populates="fighter", uselist=False, foreign_keys="FightInfo.fighter_id"
@@ -97,7 +100,7 @@ class FightStatistic(Base):
     action_name_id: Mapped[int] = mapped_column(ForeignKey("actions.id"))
     technique_id: Mapped[int] = mapped_column(ForeignKey("techniques.id"))
     fighter_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
-
+    opponent_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"), nullable=True)
 
 
     ## relations##
@@ -106,7 +109,10 @@ class FightStatistic(Base):
         
     )
     fighter: Mapped["Fighter"] = relationship(
-        back_populates="fight_statistic"
+        back_populates="fight_statistic", foreign_keys=[fighter_id]
+    )
+    opponent: Mapped["Fighter"] = relationship(
+        back_populates="oponent_statistic", foreign_keys=[opponent_id]
     )
     action_name: Mapped["ActionName"] = relationship(
         back_populates="action_fightstatistics"
