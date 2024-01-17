@@ -115,7 +115,7 @@ def add_fight_info(file: Annotated[bytes, File()]):
     with session_factory() as session:
         fightinfos = []
         id_index = session.execute(select(FightInfo).order_by(FightInfo.id.desc())).scalars().first()
-        for i in range(id_index.id-502,len(df)):
+        for i in range(len(df)):
 
             
             tournament = (
@@ -154,7 +154,7 @@ def add_fight_info(file: Annotated[bytes, File()]):
                                   oponent_id = opponent.id,
                                   winner_id = fighter.id)
             fightinfos.append(fightinfo)
-            if i==id_index.id-502+4000:
+            if i==4000:
                 break
         if fightinfos!=[]:
             session.bulk_save_objects(fightinfos)
