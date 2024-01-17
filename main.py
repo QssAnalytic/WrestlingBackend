@@ -114,8 +114,9 @@ def add_fight_info(file: Annotated[bytes, File()]):
     df = pd.read_excel(file)
     with session_factory() as session:
         fightinfos = []
-        id_index = session.execute(select(FightInfo).order_by(FightInfo.id.desc())).scalars().first()
-        for i in range(len(df)):
+        id_index = session.query(FightInfo).count()
+        
+        for i in range(id_index,len(df)):
 
             
             tournament = (
@@ -154,9 +155,10 @@ def add_fight_info(file: Annotated[bytes, File()]):
                                   oponent_id = opponent.id,
                                   winner_id = fighter.id)
             fightinfos.append(fightinfo)
-            if i==4000:
+            if i==id_index+4000:
+                if fightinfos!=[]:
+                    session.bulk_save_objects(fightinfos)
+                    session.commit()
                 break
-        if fightinfos!=[]:
-            session.bulk_save_objects(fightinfos)
-            session.commit()
+
         return {"message": "Success added fight infos"}
