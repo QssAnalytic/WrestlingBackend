@@ -14,7 +14,7 @@ class FightInfo(Base):
     wrestling_type: Mapped[str]
     fight_date: Mapped[date] = mapped_column(Date)
     location: Mapped[str] = mapped_column(String(200))
-    weight_category: Mapped[str] = mapped_column(String(50))
+    weight_category: Mapped[int]
     stage: Mapped[str]
     author: Mapped[str] = mapped_column(String(60), nullable=True)
     decision: Mapped[str]

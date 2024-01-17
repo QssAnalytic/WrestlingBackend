@@ -9,7 +9,7 @@ class CreateFighterInfo(BaseModel):
     wrestling_type: str
     fight_date: date
     location: str
-    weight_category: str
+    weight_category: int
     stage: str
     decision: str
     oponent1_point: int
@@ -18,6 +18,9 @@ class CreateFighterInfo(BaseModel):
 
 class UpdateFighterInfo(BaseModel):
     pass
+
+
+
 
 
 class AllFightInfoBase(CreateFighterInfo):
@@ -29,6 +32,12 @@ class AllFightInfoBase(CreateFighterInfo):
 
     class Config:
         from_attributes = True
+
+
+class FightInfoOut(BaseModel):
+    count: int
+    data: List[AllFightInfoBase]
+
 
 class FightInfoBase(CreateFighterInfo):
     id: int

@@ -1,15 +1,15 @@
-from typing import List
-from fastapi import APIRouter, Depends
+from typing import List, Optional
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from database import get_db
-from src.app.schemas.fight_info_schemas import AllFightInfoBase, FightInfoBase
+from src.app.schemas.fight_info_schemas import AllFightInfoBase, FightInfoBase, FightInfoOut
 from src.app.crud.crud_fight_infos import fight_info
 
 router = APIRouter()
 
-@router.get("/", response_model=List[AllFightInfoBase])
-def fight_infos(db: Session = Depends(get_db)):
-    response = fight_info.get_multi(db=db)
+@router.get("/", response_model=FightInfoOut)
+def fight_infos(page: Optional[int]= Query(1, ge=0), limit:int=Query(100, ge=100), db: Session = Depends(get_db)):
+    response = fight_info.get_multi(db=db, page=page, limit=limit)
     return response
 
 @router.get("/{fight_info_id}", response_model=FightInfoBase)

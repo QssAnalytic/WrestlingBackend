@@ -115,7 +115,7 @@ def add_fight_info(file: Annotated[bytes, File()]):
     with session_factory() as session:
         fightinfos = []
         id_index = session.execute(select(FightInfo).order_by(FightInfo.id.desc())).scalars().first()
-        for i in range(id_index.id+1,len(df)):
+        for i in range(id_index.id-502,len(df)):
 
             
             tournament = (
@@ -144,7 +144,7 @@ def add_fight_info(file: Annotated[bytes, File()]):
             fightinfo = FightInfo(wrestling_type = df['style'][i],
                                   fight_date = df['tournament_date'][i],
                                   location = df['place'][i],
-                                  weight_category = str(df['weight'][i]),
+                                  weight_category = int(df['weight'][i].split()[0]),
                                   stage = df['stage'][i],
                                   decision = df['decision'][i],
                                   oponent1_point = int(df['opponent1_points'][i]),
@@ -154,7 +154,7 @@ def add_fight_info(file: Annotated[bytes, File()]):
                                   oponent_id = opponent.id,
                                   winner_id = fighter.id)
             fightinfos.append(fightinfo)
-            if i==id_index.id+1000:
+            if i==id_index.id-502+1000:
                 break
         if fightinfos!=[]:
             session.bulk_save_objects(fightinfos)
