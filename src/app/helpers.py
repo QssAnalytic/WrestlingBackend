@@ -2,21 +2,26 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import select
 from src.app.models import FightInfo
 class FightInfoPagination:
-    def __init__(self, session: Session, page:int, limit:int, query):
+    def __init__(self, session: Session, page:int, limit:int, query, count:int):
         self.page = page
         self.limit = limit
         self.offset = (page-1)*limit
         self.db=session
         self.query = query
+        self.count = count
 
     def _get_next_page(self):
-        pass
+        if self.page < self.count:
+            return self.page+1
+        return None
 
     def _get_previous_page(self):
-        pass
+        if self.page == 1:
+            return None
+        return self.page - 1
 
     def _total_page_count(self):
-        total_records = self.query.count()
+        total_records = self.count
         return (total_records + self.limit - 1) // self.limit
 
     def get_response(self):
@@ -28,5 +33,7 @@ class FightInfoPagination:
         ).order_by(FightInfo.id).offset(self.offset).limit(self.limit)
         return {
             'count':self._total_page_count(),
+            'next_page': self._get_next_page(),
+            'previous_page': self._get_previous_page(),
             'data':data
         }

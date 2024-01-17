@@ -11,8 +11,9 @@ from src.app.helpers import FightInfoPagination
 class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfo, UpdateFighterInfo]):
 
     def get_multi(self, db:Session, page:Optional[int], limit: int) -> List[FightInfo]:
-        data = db.query(FightInfo) 
-        pagination = FightInfoPagination(session=db, page=page, limit=limit, query = data) 
+        data = db.query(FightInfo)
+        count = db.query(FightInfo).count() 
+        pagination = FightInfoPagination(session=db, page=page, limit=limit, query = data, count=count) 
         return pagination.get_response()
 
     def get_by_id(self, id:int, db:Session) -> Optional[FightInfo]:

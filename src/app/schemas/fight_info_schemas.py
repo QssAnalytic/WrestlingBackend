@@ -36,6 +36,8 @@ class AllFightInfoBase(CreateFighterInfo):
 
 class FightInfoOut(BaseModel):
     count: int
+    next_page: Optional[int]
+    previous_page: Optional[int]
     data: List[AllFightInfoBase]
 
 
