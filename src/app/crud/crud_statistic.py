@@ -19,6 +19,14 @@ class CRUDStatistic(CRUDBase[FightStatistic,CreateFightStatistic,UpdateFightStat
         ).scalars().first()
         return data
     
+    def create_statistic(self, data: CreateFightStatistic, db: Session)-> CreateFightStatistic:
+        data_obj = jsonable_encoder(data)
+        data_obj['score'] = data_obj.pop('score_id')
+        db_data = self.model(**data_obj)
+        db.add(db_data)
+        db.commit()
+        db.refresh(db_data)
+        return db_data
 
 
 statistic = CRUDStatistic(FightStatistic)
