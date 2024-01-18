@@ -26,6 +26,9 @@ class CRUDStatistic(CRUDBase[FightStatistic,CreateFightStatistic,UpdateFightStat
         db.add(db_data)
         db.commit()
         db.refresh(db_data)
+        # fight_info = db.query(FightInfo).filter(FightInfo.id == data_obj.fight_id).first()
+        # fight_info.status = "smt"
+        # db.commit()
         return db_data
 
 

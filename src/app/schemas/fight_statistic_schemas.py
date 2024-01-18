@@ -23,7 +23,7 @@ class CreateFightStatistic(BaseModel):
     # video_second_end: datetime
 
 
-class StatisticOutPut(CreateFightStatistic):
+class StatisticOutPut(BaseModel):
 
     # action_time: str
     action_time_second: int
