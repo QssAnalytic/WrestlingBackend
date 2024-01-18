@@ -22,13 +22,13 @@ class CRUDStatistic(CRUDBase[FightStatistic,CreateFightStatistic,UpdateFightStat
     def create_statistic(self, data: CreateFightStatistic, db: Session) -> CreateFightStatistic:
         data_obj = jsonable_encoder(data)
         data_obj['score'] = data_obj.pop('score_id')
-        db_data = self.model(**data_obj)
+        db_data = FightStatistic(**data_obj)
+        fight_info = db.query(FightInfo).filter(FightInfo.id == data_obj.fight_id).first()
+        fight_info.status = "in progress"
+        
         db.add(db_data)
         db.commit()
         db.refresh(db_data)
-        # fight_info = db.query(FightInfo).filter(FightInfo.id == data_obj.fight_id).first()
-        # fight_info.status = "smt"
-        # db.commit()
         return db_data
     
     def update_statistic(self, id:int,data: UpdateFightStatistic, db: Session) -> UpdateFightStatistic:
@@ -37,8 +37,8 @@ class CRUDStatistic(CRUDBase[FightStatistic,CreateFightStatistic,UpdateFightStat
         data_obj['score'] = data_obj.pop('score_id')
         print(data_obj)
         db.execute(
-            update(self.model)
-            .filter(self.model.id==id)
+            update(FightStatistic)
+            .filter(FightStatistic.id==id)
             .values(**data_obj)
         )
         db.commit()

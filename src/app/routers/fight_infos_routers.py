@@ -20,15 +20,16 @@ def get_fight_info(fight_info_id: int, db: Session=Depends(get_db)):
 
 @router.put("/status/{fight_info_id}")
 def change_fight_info_status(fight_info_id: int, db: Session=Depends(get_db)):
-    # fight_info = db.query(FightInfo).filter(FightInfo.id == fight_info_id).first()
-    # fight_info.status = "smt"
-    # db.commit()
-    return "Ok"
+    fight_info = db.query(FightInfo).filter(FightInfo.id == fight_info_id).first()
+    fight_info.status = "completed"
+    db.commit()
+    return "completed"
 
 
 @router.put("/check/{fight_info_id}")
 def change_fight_info_submit(fight_info_id: int, db: Session=Depends(get_db)):
-    # fight_info = db.query(FightInfo).filter(FightInfo.id == fight_info_id).first()
-    # fight_info.is_submitted = True
-    # db.commit()
+    fight_info = db.query(FightInfo).filter(FightInfo.id == fight_info_id).first()
+    fight_info.is_submitted = True
+    # fight_info.
+    db.commit()
     return "Ok"
