@@ -22,8 +22,9 @@ class CRUDStatistic(CRUDBase[FightStatistic,CreateFightStatistic,UpdateFightStat
     def create_statistic(self, data: CreateFightStatistic, db: Session) -> CreateFightStatistic:
         data_obj = jsonable_encoder(data)
         data_obj['score'] = data_obj.pop('score_id')
+        print(data_obj['fight_id'])
         db_data = FightStatistic(**data_obj)
-        fight_info = db.query(FightInfo).filter(FightInfo.id == data_obj.fight_id).first()
+        fight_info = db.query(FightInfo).filter(FightInfo.id == data_obj['fight_id']).first()
         fight_info.status = "in progress"
         
         db.add(db_data)
