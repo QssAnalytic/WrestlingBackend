@@ -1,7 +1,7 @@
 from datetime import date
 from pydantic import BaseModel
 from typing import Optional, List
-from src.app.schemas.fight_statistic_schemas import FightStatisticOutPut
+from src.app.schemas.fight_statistic_schemas import FightStatisticOutPutBase
 from src.app.schemas.fighter_schemas import FighterBase
 from src.app.schemas.tournament_schemas import TournamentBaseInfos
 
@@ -47,7 +47,7 @@ class FightInfoBase(CreateFighterInfo):
     oponent: Optional[FighterBase]
     winner: Optional[FighterBase]
     tournament: TournamentBaseInfos
-    fight_statistic: Optional[List[FightStatisticOutPut]]
+    fight_statistic: Optional[List[FightStatisticOutPutBase]]
     class Config:
         from_attributes = True
 
