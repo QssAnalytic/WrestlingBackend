@@ -1,7 +1,7 @@
 from typing import Optional, List
 from fastapi.encoders import jsonable_encoder
 from fastapi import HTTPException
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, update
 from sqlalchemy.orm import Session, joinedload
 
 from src.app.crud.base import CRUDBase
@@ -19,7 +19,7 @@ class CRUDStatistic(CRUDBase[FightStatistic,CreateFightStatistic,UpdateFightStat
         ).scalars().first()
         return data
     
-    def create_statistic(self, data: CreateFightStatistic, db: Session)-> CreateFightStatistic:
+    def create_statistic(self, data: CreateFightStatistic, db: Session) -> CreateFightStatistic:
         data_obj = jsonable_encoder(data)
         data_obj['score'] = data_obj.pop('score_id')
         db_data = self.model(**data_obj)
@@ -29,6 +29,20 @@ class CRUDStatistic(CRUDBase[FightStatistic,CreateFightStatistic,UpdateFightStat
         # fight_info = db.query(FightInfo).filter(FightInfo.id == data_obj.fight_id).first()
         # fight_info.status = "smt"
         # db.commit()
+        return db_data
+    
+    def update_statistic(self, id:int,data: UpdateFightStatistic, db: Session) -> UpdateFightStatistic:
+        db_data = self.get(id=id, db=db)
+        data_obj = jsonable_encoder(data)
+        data_obj['score'] = data_obj.pop('score_id')
+        print(data_obj)
+        db.execute(
+            update(self.model)
+            .filter(self.model.id==id)
+            .values(**data_obj)
+        )
+        db.commit()
+        db.refresh(db_data)
         return db_data
 
 

@@ -31,5 +31,5 @@ def delete_fight_statistic(statistic_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{statistic_id}/", response_model=FightStatisticOutPutBase)
 def update_fight_statistic(statistic_id: int, statistic_data: UpdateFightStatistic,db: Session = Depends(get_db)):
-    updated_data = statistic.update(id = statistic_id,data = statistic_data, db = db)
+    updated_data = statistic.update_statistic(id = statistic_id,data = statistic_data, db = db)
     return updated_data
