@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
 
-from src.app.schemas.fight_statistic_schemas import CreateFightStatistic, GetFightStatisticBase, UpdateFightStatistic, FightStatisticOutPutBase
+from src.app.schemas.fight_statistic_schemas import CreateFightStatistic,  UpdateFightStatistic, FightStatisticOutPutBase
 
 from src.app.crud.crud_statistic import statistic
 

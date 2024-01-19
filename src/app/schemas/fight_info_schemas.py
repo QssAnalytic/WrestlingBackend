@@ -27,6 +27,7 @@ class AllFightInfoBase(CreateFighterInfo):
     id: int
     is_submitted: bool
     status: str
+    author: Optional[str]
     fighter: Optional[FighterBase]
     oponent: Optional[FighterBase]
     winner: Optional[FighterBase]
@@ -46,6 +47,7 @@ class FightInfoOut(BaseModel):
 class FightInfoBase(CreateFighterInfo):
     id: int
     is_submitted: bool
+    author: Optional[str]
     status: str
     fighter: Optional[FighterBase]
     oponent: Optional[FighterBase]

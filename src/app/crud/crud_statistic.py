@@ -26,7 +26,7 @@ class CRUDStatistic(CRUDBase[FightStatistic,CreateFightStatistic,UpdateFightStat
         db_data = FightStatistic(**data_obj)
         fight_info = db.query(FightInfo).filter(FightInfo.id == data_obj['fight_id']).first()
         fight_info.status = "in progress"
-        if fight_info.author is not None:
+        if fight_info.author is None:
             fight_info.author = data_obj['author']
         
         db.add(db_data)
