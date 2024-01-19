@@ -20,4 +20,13 @@ class CRUDTournament(CRUDBase[Tournament,TournamentBaseInfos, TournamentBaseInfo
             select(func.extract('year', Tournament.date).cast(Integer)).distinct().order_by(func.extract('year', Tournament.date).cast(Integer))
         ).scalars().all()
         return data
+    
+    def get_stages(self, weight: int, db: Session):
+        data = db.execute(
+            select(FightInfo).filter(FightInfo.weight_category == weight)\
+                .distinct(FightInfo.stage)
+        ).scalars().all()
+        return data
+    
+    
 filter = CRUDTournament(Tournament)

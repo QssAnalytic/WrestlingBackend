@@ -4,3 +4,6 @@ from typing import Optional, List
 
 class WeightOutPutBase(BaseModel):
     weight_category: int
+
+class StageOutPutBase(BaseModel):
+    stage: str
