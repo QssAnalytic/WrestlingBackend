@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime
 from typing import Annotated
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from fastapi import FastAPI, File, UploadFile, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base, session_factory, get_db
@@ -53,12 +53,14 @@ def add_actions_and_techniques(file: Annotated[bytes, File()]):
     actions = []
     techniques = []
     with session_factory() as session:
+        
         for ac in range(len(df_actions)):
             action = ActionName(name = df_actions[ac])
             actions.append(action)
         session.bulk_save_objects(actions)
         session.commit()
-        for te in range(len(df_actions)):
+        for te in range(len(df_techniques)):
+            print(te)
             technique = Technique(name = df_techniques[te])
             techniques.append(technique)
         session.bulk_save_objects(techniques)
@@ -130,7 +132,7 @@ def add_fight_info(file: Annotated[bytes, File()]):
             
             tournament = (
                 session.query(Tournament)
-                .filter(Tournament.name == df['tournament_name'][i])
+                .filter(and_(Tournament.name == df['tournament_name'][i], Tournament.date == df['tournament_date'][i]))
                 .first()
             )
             
