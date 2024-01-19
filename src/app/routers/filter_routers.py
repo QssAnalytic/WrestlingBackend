@@ -20,7 +20,7 @@ def get_dates(db: Session = Depends(get_db)):
 
 @router.get("/tournaments/{date}/", response_model=List[TournamentBaseInfos])
 def get_all_tournament(date: int, db: Session = Depends(get_db)):
-    data = filter.get_multii(date=date,db=db)
+    data = filter.get_multi(date=date,db=db)
     return data
 
 
