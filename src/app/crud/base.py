@@ -19,7 +19,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return db.query(self.model).filter(self.model.id == id).first()
         
     
-    def get_multi(self, date:int, db:Session) -> Optional[ModelType]:
+    def get_multii(self, date:int, db:Session) -> Optional[ModelType]:
         data = db.execute(select(self.model).filter(func.extract('year',self.model.date).cast(Integer) == date)).scalars().all()
         return data
 

@@ -28,4 +28,9 @@ class CRUDTournament(CRUDBase[Tournament,TournamentBaseInfos, TournamentBaseInfo
         ).scalars().all()
         return data
     
+    def get_fightinfos(self, date:int, db:Session):
+        data = db.execute(select(FightInfo).filter(func.extract('year',FightInfo.date).cast(Integer) == date)).scalars().all()
+        return data
+    
+
 filter = CRUDTournament(Tournament)

@@ -20,14 +20,13 @@ def get_dates(db: Session = Depends(get_db)):
 
 @router.get("/tournaments/{date}/", response_model=List[TournamentBaseInfos])
 def get_all_tournament(date: int, db: Session = Depends(get_db)):
-    data = filter.get_multi(date=date,db=db)
+    data = filter.get_multii(date=date,db=db)
     return data
 
 
 @router.get("/weights/{tournament_id}/", response_model=List[WeightOutPutBase])
 def get_weight_list(tournament_id: int, db: Session = Depends(get_db)):
     response = filter.get_weights(tournament_id=tournament_id, db=db)
-    print(response)
     return response
 
 
