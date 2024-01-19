@@ -1,7 +1,7 @@
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from pydantic import BaseModel
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import select, delete, update
+from sqlalchemy import select, delete, update, extract,func, Integer
 from sqlalchemy.orm import Session
 
 from database import Base
@@ -19,8 +19,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return db.query(self.model).filter(self.model.id == id).first()
         
     
-    def get_multi(self, db:Session) -> Optional[ModelType]:
-        data = db.execute(select(self.model)).scalars().all()
+    def get_multi(self, date:int, db:Session) -> Optional[ModelType]:
+        data = db.execute(select(self.model).filter(func.extract('year',self.model.date).cast(Integer) == date)).scalars().all()
         return data
 
     def create(self, data: CreateSchemaType, db: Session)-> ModelType:

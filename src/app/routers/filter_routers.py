@@ -1,0 +1,36 @@
+from typing import List
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from database import get_db
+from src.app.schemas.filter_schemas import WeightOutPutBase
+
+from src.app.crud.crud_filters import filter
+from src.app.schemas.tournament_schemas import TournamentBaseInfos
+router = APIRouter()
+
+@router.get("/dates/", response_model=List[int])
+def get_dates(db: Session = Depends(get_db)):
+    response = filter.get_dates(db=db)
+
+    return response
+
+
+
+
+@router.get("/tournaments/{date}/", response_model=List[TournamentBaseInfos])
+def get_all_tournament(date: int, db: Session = Depends(get_db)):
+    data = filter.get_multi(date=date,db=db)
+    return data
+
+
+@router.get("/weight/{tournament_id}/", response_model=List[WeightOutPutBase])
+def get_weight_list(tournament_id: int, db: Session = Depends(get_db)):
+    response = filter.get_weights(tournament_id=tournament_id, db=db)
+    return response
+
+
+
+
+
+
+

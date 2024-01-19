@@ -7,3 +7,4 @@ class TournamentCreate(BaseModel):
 
 class TournamentBaseInfos(TournamentCreate):
     id: int
+    date: date
