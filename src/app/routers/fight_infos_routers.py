@@ -2,14 +2,16 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from database import get_db
-from src.app.models import FightInfo
+from src.app.models import FightInfo, Fighter
 from src.app.schemas.fight_info_schemas import AllFightInfoBase, FightInfoBase, FightInfoOut
 from src.app.crud.crud_fight_infos import fight_info
 
 router = APIRouter()
 
 @router.get("/", response_model=FightInfoOut)
-def fight_infos(page: Optional[int]= Query(1, ge=0), limit:int=Query(100, ge=100), db: Session = Depends(get_db)):
+def fight_infos(tournament_id: int | None = None, place: str | None = None, wrestler_name: str | None = None,
+                author: str | None = None, is_check: bool | None = None, status: str | None = None,
+                page: Optional[int]= Query(1, ge=0),limit:int=Query(100, ge=100),db: Session = Depends(get_db)):
     response = fight_info.get_multi(db=db, page=page, limit=limit)
     return response
 

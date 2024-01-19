@@ -28,5 +28,4 @@ class CRUDTournament(CRUDBase[Tournament,TournamentBaseInfos, TournamentBaseInfo
         ).scalars().all()
         return data
     
-    
 filter = CRUDTournament(Tournament)
