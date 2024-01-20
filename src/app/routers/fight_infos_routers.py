@@ -1,7 +1,7 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, func
 from database import get_db
 from src.app.models import FightInfo, Fighter
 from src.app.schemas.fight_info_schemas import AllFightInfoBase, FightInfoBase, FightInfoOut, CreateFighterInfoBase
@@ -11,7 +11,7 @@ router = APIRouter()
 
 @router.get("/", response_model=FightInfoOut)
 def fight_infos(tournament_id: int | None = None, place: str | None = None, wrestler_name: str | None = None,
-                author: str | None = None, is_submitted: bool | None = None, status: str | None = None,
+                author: str | None = None, is_submitted: bool | None = None, status: str | None = None, date: int | None = None,
                 page: Optional[int]= Query(1, ge=0),limit:int=Query(100, ge=100),db: Session = Depends(get_db)):
     query = db.query(FightInfo)
     fighter_ids=db.query(Fighter.id).filter(Fighter.name == wrestler_name)
@@ -29,7 +29,8 @@ def fight_infos(tournament_id: int | None = None, place: str | None = None, wres
         query = query.filter(FightInfo.is_submitted == is_submitted)
     if status is not None:
         query = query.filter(FightInfo.status == status)
-    
+    if date is not None:
+        query = query.filter(func.extract("year", FightInfo.fight_date) == date)
     response = fight_info.get_multi(db=db, page=page, limit=limit, data=query)
     return response
 
