@@ -1,6 +1,4 @@
-import re
 import pandas as pd
-from datetime import datetime
 from typing import Annotated
 from sqlalchemy.orm import Session
 from sqlalchemy import select, and_
@@ -9,6 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base, session_factory, get_db
 from src.app.models import *
 from src.app.routers import actions_routers, fight_infos_routers, statistics_routers, technique_routers, filter_routers
+from src.app.schemas.fighter_schemas import FighterBase
+from database import get_db
 app = FastAPI()
 
 origins = ["*"]
@@ -20,6 +20,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
 
 app.include_router(
     fight_infos_routers.router,

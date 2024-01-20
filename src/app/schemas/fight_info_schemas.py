@@ -1,5 +1,5 @@
 from datetime import date
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
 from src.app.schemas.fight_statistic_schemas import FightStatisticOutPutBase
 from src.app.schemas.fighter_schemas import FighterBase
@@ -12,21 +12,29 @@ class CreateFighterInfo(BaseModel):
     weight_category: int
     stage: str
     decision: str
+    is_submitted: bool
+    status: str
+    
     oponent1_point: int
     oponent2_point: int
     level: str
 
-class UpdateFighterInfo(BaseModel):
+
+class CreateFighterInfoBase(CreateFighterInfo):
+    fight_name: str
+    opponent_name: str
+    winner_name: str
+    tournament_name: str
+    tournament_date: date
+
+
+
+class UpdateFighterInfo(CreateFighterInfo):
     pass
-
-
-
 
 
 class AllFightInfoBase(CreateFighterInfo):
     id: int
-    is_submitted: bool
-    status: str
     author: Optional[str]
     fighter: Optional[FighterBase]
     oponent: Optional[FighterBase]
@@ -46,9 +54,7 @@ class FightInfoOut(BaseModel):
 
 class FightInfoBase(CreateFighterInfo):
     id: int
-    is_submitted: bool
     author: Optional[str]
-    status: str
     fighter: Optional[FighterBase]
     oponent: Optional[FighterBase]
     winner: Optional[FighterBase]
