@@ -9,4 +9,4 @@ class DateOutPutBase(BaseModel):
     date: int
 
 class StageOutPutBase(BaseModel):
-    stage: int
+    stage: str
