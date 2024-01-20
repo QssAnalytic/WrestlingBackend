@@ -12,6 +12,7 @@ router = APIRouter()
 @router.get("/", response_model=FightInfoOut)
 def fight_infos(tournament_id: int | None = None, place: str | None = None, wrestler_name: str | None = None,
                 author: str | None = None, is_submitted: bool | None = None, status: str | None = None, date: int | None = None,
+                weight_category: int | None = None,
                 page: Optional[int]= Query(1, ge=0),limit:int=Query(100, ge=100),db: Session = Depends(get_db)):
     query = db.query(FightInfo)
     fighter_ids=db.query(Fighter.id).filter(Fighter.name == wrestler_name)
@@ -21,7 +22,6 @@ def fight_infos(tournament_id: int | None = None, place: str | None = None, wres
     if place is not None:
         query = query.filter(FightInfo.location == place)
     if wrestler_name is not None:
-        
         query = query.filter(or_(FightInfo.fighter_id.in_(fighter_ids), FightInfo.oponent_id.in_(fighter_ids)))
     if author is not None:
         query = query.filter(FightInfo.author == author)
@@ -31,6 +31,9 @@ def fight_infos(tournament_id: int | None = None, place: str | None = None, wres
         query = query.filter(FightInfo.status == status)
     if date is not None:
         query = query.filter(func.extract("year", FightInfo.fight_date) == date)
+
+    if weight_category is not None:
+        query = query.filter(FightInfo.weight_category == weight_category)
     response = fight_info.get_multi(db=db, page=page, limit=limit, data=query)
     return response
 
