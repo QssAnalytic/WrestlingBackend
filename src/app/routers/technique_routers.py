@@ -8,5 +8,5 @@ router = APIRouter()
 
 @router.get("/", response_model=List[TechniqueBaseInfos])
 def get_all_tecneques(db: Session = Depends(get_db)):
-    response = technique.get_multi(db=db)
+    response = technique.fech_multi(db=db)
     return response
