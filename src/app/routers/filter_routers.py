@@ -31,7 +31,7 @@ def get_weight_list(tournament_id: int, wrestling_type: str, db: Session = Depen
     return response
 
 
-@router.get("/style/{tournament_id}", response_model=List[WrestlingStyleOutPutBase])
+@router.get("/style/{tournament_id}/", response_model=List[WrestlingStyleOutPutBase])
 def get_weight_type(tournament_id: int, db: Session = Depends(get_db)):
     response = filter.get_wrestling_type(tournament_id=tournament_id, db=db)
     return response
