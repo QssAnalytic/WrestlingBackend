@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from database import get_db
-from src.app.schemas.filter_schemas import WeightOutPutBase, StageOutPutBase, DateOutPutBase
+from src.app.schemas.filter_schemas import WeightOutPutBase, StageOutPutBase, DateOutPutBase, WrestlingStyleOutPutBase
 
 from src.app.crud.crud_filters import filter
 from src.app.schemas.tournament_schemas import TournamentBaseInfos
@@ -25,11 +25,16 @@ def get_all_tournament(date: int, db: Session = Depends(get_db)):
     return data
 
 
-@router.get("/weights/{tournament_id}/", response_model=List[WeightOutPutBase])
-def get_weight_list(tournament_id: int, db: Session = Depends(get_db)):
-    response = filter.get_weights(tournament_id=tournament_id, db=db)
+@router.get("/weights/{tournament_id}/{wrestling_type}/", response_model=List[WeightOutPutBase])
+def get_weight_list(tournament_id: int, wrestling_type: str, db: Session = Depends(get_db)):
+    response = filter.get_weights(tournament_id=tournament_id, wrestling_type=wrestling_type, db=db)
     return response
 
+
+@router.get("/style/{tournament_id}", response_model=List[WrestlingStyleOutPutBase])
+def get_weight_type(tournament_id: int, db: Session = Depends(get_db)):
+    response = filter.get_wrestling_type(tournament_id=tournament_id, db=db)
+    return response
 
 
 @router.get("/stages/{weight}/", response_model=List[StageOutPutBase])

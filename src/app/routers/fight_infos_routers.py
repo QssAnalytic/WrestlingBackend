@@ -11,11 +11,12 @@ router = APIRouter()
 
 @router.get("/", response_model=FightInfoOut)
 def fight_infos(tournament_id: int | None = None, place: str | None = None, wrestler_name: str | None = None,
-                author: str | None = None, is_submitted: bool | None = None, status: str | None = None, date: int | None = None,
-                weight_category: int | None = None,
+                author: str | None = None, is_submitted: bool | None = None, status: str | None = None,
+                weight_category: int | None = None, date: int | None = None,
                 page: Optional[int]= Query(1, ge=0),limit:int=Query(100, ge=100),db: Session = Depends(get_db)):
     query = db.query(FightInfo)
-    fighter_ids=db.query(Fighter.id).filter(Fighter.name == wrestler_name)
+    
+    fighter_ids=db.query(Fighter.id).filter(func.upper(Fighter.name) == func.upper(wrestler_name))
     
     if tournament_id is not None:
         query = query.filter(FightInfo.tournament_id == tournament_id)
