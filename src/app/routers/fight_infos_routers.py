@@ -13,11 +13,13 @@ router = APIRouter()
 def fight_infos(tournament_id: int | None = None, place: str | None = None, wrestler_name: str | None = None,
                 author: str | None = None, is_submitted: bool | None = None, status: str | None = None,
                 weight_category: int | None = None, date: int | None = None, stage: str | None = None,
+                wrestling_type: str | None = None,
                 page: Optional[int]= Query(1, ge=0),limit:int=Query(100, ge=100),db: Session = Depends(get_db)):
     query = db.query(FightInfo)
     
-    fighter_ids=db.query(Fighter.id).filter(func.upper(Fighter.name) == func.upper(wrestler_name))
     
+    if wrestling_type is not None:
+        query = query.filter(FightInfo.wrestling_type == wrestling_type)
     if stage is not None:
         query = query.filter(FightInfo.stage == stage)
     if tournament_id is not None:
@@ -25,6 +27,7 @@ def fight_infos(tournament_id: int | None = None, place: str | None = None, wres
     if place is not None:
         query = query.filter(FightInfo.location == place)
     if wrestler_name is not None:
+        fighter_ids=db.query(Fighter.id).filter(func.upper(Fighter.name) == func.upper(wrestler_name))
         query = query.filter(or_(FightInfo.fighter_id.in_(fighter_ids), FightInfo.oponent_id.in_(fighter_ids)))
     if author is not None:
         query = query.filter(func.upper(FightInfo.author) == func.upper((author)))
