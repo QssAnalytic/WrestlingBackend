@@ -6,7 +6,7 @@ from fastapi import FastAPI, File, UploadFile, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base, session_factory, get_db
 from src.app.models import *
-from src.app.routers import actions_routers, fight_infos_routers, statistics_routers, technique_routers, filter_routers
+from src.app.base_routres import router
 from src.app.schemas.fighter_schemas import FighterBase
 from database import get_db
 app = FastAPI()
@@ -24,31 +24,11 @@ app.add_middleware(
 
 
 app.include_router(
-    fight_infos_routers.router,
-    prefix="/fight-infos",
+    router,
+    prefix="/app",
     tags=["fight-infos"]
 )
-app.include_router(
-    statistics_routers.router,
-    prefix="/statistics",
-    tags=["statistics"]
-)
-app.include_router(
-    actions_routers.router,
-    prefix="/actions",
-    tags=["actions"]
-)
 
-app.include_router(
-    technique_routers.router,
-    prefix="/techniques",
-    tags=["techniques"]
-)
-app.include_router(
-    filter_routers.router,
-    prefix="/filters",
-    tags=["filters"]
-)
 
 @app.post("/add-actions-and-techniques")
 def add_actions_and_techniques(file: Annotated[bytes, File()]):
