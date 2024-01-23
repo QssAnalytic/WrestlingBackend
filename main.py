@@ -1,14 +1,19 @@
 import pandas as pd
 from typing import Annotated
+
 from sqlalchemy.orm import Session
 from sqlalchemy import select, and_
+
 from fastapi import FastAPI, File, UploadFile, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from database import engine, Base, session_factory, get_db
+
 from src.app.models import *
-from src.app.base_routres import router
+from src.app.base_routres import router as app_routre
 from src.app.schemas.fighter_schemas import FighterBase
-from database import get_db
+
+from src.dashbord.base_routers import router as dashbord_router
+from database import engine, Base, session_factory, get_db
+
 app = FastAPI()
 
 origins = ["*"]
@@ -22,12 +27,16 @@ app.add_middleware(
 )
 
 
+app.include_router(
+    dashbord_router,
+    prefix="/dashbord",
+)
 
 app.include_router(
-    router,
+    app_routre,
     prefix="/app",
-    tags=["fight-infos"]
 )
+
 
 
 @app.post("/add-actions-and-techniques")

@@ -4,12 +4,12 @@ from src.app.routers import actions_routers, fight_infos_routers, statistics_rou
 
 router = APIRouter()
 
-
 router.include_router(
     fight_infos_routers.router,
     prefix="/fight-infos",
     tags=["fight-infos"]
 )
+
 router.include_router(
     statistics_routers.router,
     prefix="/statistics",
