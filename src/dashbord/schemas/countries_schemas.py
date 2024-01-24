@@ -3,4 +3,4 @@ from typing import Optional
 
 
 class FilterOutPut(BaseModel):
-    data: int | str
+    data: int | str | dict
