@@ -10,7 +10,7 @@ router = APIRouter()
 
 @router.get("/countries/", response_model=List[FilterOutPut])
 def get_all_countries(db: Session = Depends(get_db)):
-    query = text("SELECT DISTINCT natinality_name FROM Fighter ORDER BY natinality_name")
+    query = text("SELECT DISTINCT natinality_name FROM fighters ORDER BY natinality_name")
     result = db.execute(query).fetchall()
     nationalities = [res[0] for res in result]
     return [FilterOutPut(data=nat) for nat in nationalities]
