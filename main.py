@@ -29,14 +29,12 @@ app.add_middleware(
 
 app.include_router(
     dashbord_router,
-    prefix="/dashbord",
+    prefix="/dashboard",
 )
-
 app.include_router(
     app_routre,
     prefix="/app",
 )
-
 
 
 @app.post("/add-actions-and-techniques")

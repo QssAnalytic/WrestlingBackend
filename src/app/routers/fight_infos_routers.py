@@ -1,12 +1,12 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, func
 from database import get_db
 from src.app.models import FightInfo, Fighter
 from src.app.schemas.fight_info_schemas import AllFightInfoBase, FightInfoBase, FightInfoOut, CreateFighterInfoBase
 from src.app.crud.crud_fight_infos import fight_info
-
+from src.app.helpers import check_status_helper
 router = APIRouter()
 
 @router.get("/", response_model=FightInfoOut)
@@ -42,7 +42,7 @@ def fight_infos(tournament_id: int | None = None, place: str | None = None, wres
         query = query.filter(FightInfo.weight_category == weight_category)
     response = fight_info.get_multi(db=db, page=page, limit=limit, data=query)
     return response
-
+#change fightinfo logic
 @router.post("/", response_model=FightInfoBase)
 def create_fight_info(data: CreateFighterInfoBase, db: Session = Depends(get_db)):
     response  = fight_info.create_fightinfo(data=data, db=db)
@@ -53,20 +53,42 @@ def get_fight_info(fight_info_id: int, db: Session=Depends(get_db)):
     response = fight_info.get_by_id(id=fight_info_id, db=db)
     return response
 
-@router.put("/status/{fight_info_id}")
-def change_fight_info_status(fight_info_id: int, db: Session=Depends(get_db)):
+@router.put("/status/")
+def change_fight_info_status(status: str, fight_info_id: int, db: Session=Depends(get_db)):
     fight_info = db.query(FightInfo).filter(FightInfo.id == fight_info_id).first()
-    fight_info.status = "completed"
+    status_list = ["completed", "in progress", "not started"]
+    if fight_info == None:
+        return HTTPException(status_code=404, detail="content not found")
+    if status not in status_list:
+        return HTTPException(status_code=404, detail="wrong data")
+    if status == "completed":
+        fight_info.status = status
+        fight_info.is_submitted = False
+    elif status == "in progress":
+        fight_info.status = status
+        fight_info.is_submitted = False
+    elif status == "not started":
+        fight_info.status = status
+        fight_info.is_submitted = False
     db.commit()
-    return "completed"
+    db.refresh(fight_info)
+    return fight_info.status
 
 
-@router.put("/check/{fight_info_id}")
-def change_fight_info_submit(fight_info_id: int, db: Session=Depends(get_db)):
+@router.put("/check/")
+def change_fight_info_submit(checked: str, fight_info_id: int, db: Session=Depends(get_db)):
     fight_info = db.query(FightInfo).filter(FightInfo.id == fight_info_id).first()
-    fight_info.is_submitted = True
-    fight_info.status = "checked"
+    if fight_info == None:
+        return HTTPException(status_code=404, detail="content not found")
+    if fight_info.status == "completed" or fight_info.status == "checked":
+        status = check_status_helper(db=db, query=fight_info, checked=checked)
+    else:
+        return HTTPException(status_code=403, detail="Permission denied")
+    
     db.commit()
-    return "checked"
+    db.refresh(fight_info)
+    return fight_info.status
+
+    
 
 

@@ -1,6 +1,12 @@
+from typing import TypeVar
 from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import select
 from src.app.models import FightInfo
+
+from database import Base
+
+ModelType = TypeVar("ModelType", bound=Base)
+
 class FightInfoPagination:
     def __init__(self, session: Session, page:int, limit:int, query, count:int, total_page: int):
         self.page = page
@@ -39,3 +45,16 @@ class FightInfoPagination:
             'previous_page': self._get_previous_page(),
             'data':data
         }
+    
+
+def check_status_helper(db: Session, checked: str, query: Session):
+    fight_info = query
+    if checked == "checked":
+        fight_info.is_submitted = True
+        fight_info.status = "checked" 
+    elif checked == "unchecked" or checked == "completed":
+        fight_info.is_submitted = False
+        fight_info.status = "completed"
+    return checked
+
+    

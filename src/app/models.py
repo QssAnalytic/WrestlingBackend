@@ -23,6 +23,7 @@ class FightInfo(Base):
     level: Mapped[str] = mapped_column(nullable=True, server_default="Senior")
     is_submitted: Mapped[bool] = mapped_column(nullable=True, server_default=text('false'))
     status: Mapped[str] = mapped_column(String(50), nullable=True, server_default="not started")
+    source_type: Mapped[str] = mapped_column(String(20), server_default="app")
     ##foreignkeys##
     fighter_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
     oponent_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))

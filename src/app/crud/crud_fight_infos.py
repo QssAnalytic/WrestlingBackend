@@ -44,7 +44,7 @@ class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfoBase, UpdateFighterInfo
             location = data_dict['location'],
             weight_category = data_dict['weight_category'],
             stage = data_dict['stage'],
-            
+            source_type = 'app',
             decision = data_dict['decision'],
             oponent1_point = data_dict['oponent1_point'],
             oponent2_point = data_dict['oponent2_point'],

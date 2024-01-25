@@ -28,6 +28,7 @@ def get_fighters(country_name: str,db: Session = Depends(get_db)):
     fighters = [{'id': row.id, 'data': row.name} for row in response]
     return fighters
 
+
 @router.get("/years/{wrestler_id}/", response_model=List[FilterOutPut])
 def get_years(wrestler_id: int, db: Session = Depends(get_db)):
     response = db.execute(
@@ -45,7 +46,3 @@ def get_years(wrestler_id: int, db: Session = Depends(get_db)):
         )
     ).scalars().all()
     return [FilterOutPut(data=row) for row in response]
-    
-    
-    
-    
