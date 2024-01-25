@@ -56,7 +56,7 @@ def get_fight_info(fight_info_id: int, db: Session=Depends(get_db)):
 @router.put("/status/")
 def change_fight_info_status(status: str, fight_info_id: int, db: Session=Depends(get_db)):
     fight_info = db.query(FightInfo).filter(FightInfo.id == fight_info_id).first()
-    status_list = ["completed", "in progress", "not started"]
+    status_list = ["completed", "in progress", "not started", "checked"]
     if fight_info == None:
         return HTTPException(status_code=404, detail="content not found")
     if status not in status_list:
@@ -70,24 +70,29 @@ def change_fight_info_status(status: str, fight_info_id: int, db: Session=Depend
     elif status == "not started":
         fight_info.status = status
         fight_info.is_submitted = False
+
+    elif status == "checked":
+        fight_info.is_submitted = True
+        fight_info.status = "checked" 
     db.commit()
     db.refresh(fight_info)
     return fight_info.status
 
 
-@router.put("/check/")
-def change_fight_info_submit(checked: str, fight_info_id: int, db: Session=Depends(get_db)):
-    fight_info = db.query(FightInfo).filter(FightInfo.id == fight_info_id).first()
-    if fight_info == None:
-        return HTTPException(status_code=404, detail="content not found")
-    if fight_info.status == "completed" or fight_info.status == "checked":
-        status = check_status_helper(db=db, query=fight_info, checked=checked)
-    else:
-        return HTTPException(status_code=403, detail="Permission denied")
+# @router.put("/check/")
+# def change_fight_info_submit(checked: str, fight_info_id: int, db: Session=Depends(get_db)):
+#     fight_info = db.query(FightInfo).filter(FightInfo.id == fight_info_id).first()
+#     if fight_info == None:
+#         return HTTPException(status_code=404, detail="content not found")
+#     if fight_info.status == "completed" or fight_info.status == "checked":
+#         status = check_status_helper(db=db, query=fight_info, checked=checked)
+#     else:
+#         return HTTPException(status_code=403, detail="Permission denied")
     
-    db.commit()
-    db.refresh(fight_info)
-    return fight_info.status
+#     db.commit()
+#     db.refresh(fight_info)
+    
+#     return fight_info.status
 
     
 
