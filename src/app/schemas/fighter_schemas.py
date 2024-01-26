@@ -6,8 +6,8 @@ from typing import Optional, List
 
 class Fighter(BaseModel):
     name: str
-    level: str
-    birth_date: date
+    # level: str
+    # birth_date: date
     natinality_name: str
 
 class FighterBase(Fighter):

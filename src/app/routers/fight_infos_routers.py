@@ -43,7 +43,7 @@ def fight_infos(tournament_id: int | None = None, place: str | None = None, wres
         query = query.filter(FightInfo.weight_category == weight_category)
     response = fight_info.get_multi(db=db, page=page, limit=limit, data=query)
     return response
-#change fightinfo logic
+
 @router.post("/", response_model=FightInfoBase)
 def create_fight_info(data: CreateFighterInfoBase, db: Session = Depends(get_db)):
     response  = fight_info.create_fightinfo(data=data, db=db)

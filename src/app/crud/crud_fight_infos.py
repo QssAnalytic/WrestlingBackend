@@ -31,36 +31,47 @@ class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfoBase, UpdateFighterInfo
     
     def create_fightinfo(self, data: CreateFighterInfoBase, db: Session):
         data_dict = jsonable_encoder(data)
+        opponent1_id_or_name = data_dict['opponent1']
+        opponent2_id_or_name = data_dict['opponent2']
+        if type(opponent1_id_or_name) == int:
+            opponent1 = db.query(Fighter).filter(Fighter.id==opponent1_id_or_name).first()
+        else:
+            opponent1 = Fighter(name=opponent1_id_or_name, natinality_name=data_dict['opponent1_nationality'])
+            db.add(opponent1)
+
+        if type(opponent2_id_or_name) == int:
+            opponent2 = db.query(Fighter).filter(Fighter.id==opponent2_id_or_name).first()
+        else:
+            opponent2 = Fighter(name=opponent2_id_or_name, natinality_name=data_dict['opponent2_nationality'])
+            db.add(opponent2)
+        
         tournament = Tournament(name = data_dict['tournament_name'], date=data_dict['tournament_date'])
         db.add(tournament)
         db.commit()
         db.refresh(tournament)
-        fighter = db.query(Fighter).filter(Fighter.name==data_dict['fight_name']).first()
-        opponent = db.query(Fighter).filter(Fighter.name==data_dict['opponent_name']).first()
-        # winner = db.query(Fighter).filter(Fighter.name==data_dict['winner_name']).first()
-        fight_info = FightInfo(
+        db.refresh(opponent1)
+        db.refresh(opponent2)
+
+        fight_info_db = FightInfo(
             wrestling_type = data_dict['wrestling_type'],
-            fight_date = data_dict['fight_date'],
+            fight_date = data_dict['tournament_date'],
             location = data_dict['location'],
             weight_category = data_dict['weight_category'],
             stage = data_dict['stage'],
             source_type = 'app',
             decision = data_dict['decision'],
-            oponent1_point = data_dict['oponent1_point'],
-            oponent2_point = data_dict['oponent2_point'],
-            level = data_dict['level'],
-            is_submitted = data_dict['is_submitted'],
-            status = data_dict['status'],
-            
-            fighter_id = fighter.id,
-            oponent_id = opponent.id,
-            winner_id = fighter.id,
+            oponent1_point = 0,
+            oponent2_point = 0,
+            level = data_dict['level'],            
+            fighter_id = opponent1.id,
+            oponent_id = opponent2.id,
+            winner_id = opponent1.id,
             tournament_id = tournament.id
         )
-        # db.add(fight_info)
-        # db.commit()
-        # db.refresh(fight_info)
-        return fight_info
+        db.add(fight_info_db)
+        db.commit()
+        db.refresh(fight_info_db)
+        return fight_info_db
 
 
 fight_info = CRUDFightInfos(FightInfo)

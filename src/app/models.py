@@ -31,7 +31,7 @@ class FightInfo(Base):
     fighter_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
     oponent_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
     winner_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
-    tournament_id: Mapped[int] = mapped_column(ForeignKey("tournaments.id"))
+    tournament_id: Mapped[int] = mapped_column(ForeignKey("tournaments.id", ondelete='CASCADE'))
 
     ## relations##
     tournament: Mapped["Tournament"] = relationship(
@@ -54,8 +54,8 @@ class Fighter(Base):
 
     id: Mapped[intpk]
     name: Mapped[str] = mapped_column(String(255))
-    birth_date: Mapped[date] = mapped_column(Date)
-    level: Mapped[str] = mapped_column(String(255))
+    birth_date: Mapped[date] = mapped_column(Date, nullable=True)
+    level: Mapped[str] = mapped_column(String(255), nullable=True)
     natinality_name: Mapped[str] = mapped_column(String(255))
 
     fight_statistic: Mapped["FightStatistic"] = relationship(
