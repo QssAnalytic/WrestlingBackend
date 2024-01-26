@@ -57,9 +57,9 @@ class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfoBase, UpdateFighterInfo
             winner_id = fighter.id,
             tournament_id = tournament.id
         )
-        db.add(fight_info)
-        db.commit()
-        db.refresh(fight_info)
+        # db.add(fight_info)
+        # db.commit()
+        # db.refresh(fight_info)
         return fight_info
 
 

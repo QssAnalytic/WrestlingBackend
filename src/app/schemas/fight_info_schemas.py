@@ -20,8 +20,8 @@ class CreateFighterInfo(BaseModel):
 
 
 class CreateFighterInfoBase(BaseModel):
-    opponent1_name: str
-    opponent2_name: str
+    opponent1: str | int
+    opponent2: str | int
     opponent1_nationality: str
     opponent2_nationality: str
     level: str
