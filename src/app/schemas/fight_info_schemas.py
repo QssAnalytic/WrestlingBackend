@@ -14,18 +14,24 @@ class CreateFighterInfo(BaseModel):
     decision: str
     is_submitted: bool
     status: str
-    
     oponent1_point: int
     oponent2_point: int
     level: str
 
 
-class CreateFighterInfoBase(CreateFighterInfo):
-    fight_name: str
-    opponent_name: str
-    winner_name: str
-    tournament_name: str
+class CreateFighterInfoBase(BaseModel):
+    opponent1_name: str
+    opponent2_name: str
+    opponent1_nationality: str
+    opponent2_nationality: str
+    level: str
+    location: str
+    wrestling_type: str
+    weight_category: int
+    stage: str
+    decision: str
     tournament_date: date
+    tournament_name: str
 
 
 

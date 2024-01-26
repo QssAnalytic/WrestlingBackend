@@ -37,7 +37,7 @@ class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfoBase, UpdateFighterInfo
         db.refresh(tournament)
         fighter = db.query(Fighter).filter(Fighter.name==data_dict['fight_name']).first()
         opponent = db.query(Fighter).filter(Fighter.name==data_dict['opponent_name']).first()
-        winner = db.query(Fighter).filter(Fighter.name==data_dict['winner_name']).first()
+        # winner = db.query(Fighter).filter(Fighter.name==data_dict['winner_name']).first()
         fight_info = FightInfo(
             wrestling_type = data_dict['wrestling_type'],
             fight_date = data_dict['fight_date'],
@@ -54,7 +54,7 @@ class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfoBase, UpdateFighterInfo
             
             fighter_id = fighter.id,
             oponent_id = opponent.id,
-            winner_id = winner.id,
+            winner_id = fighter.id,
             tournament_id = tournament.id
         )
         db.add(fight_info)
