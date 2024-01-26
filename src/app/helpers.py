@@ -1,3 +1,5 @@
+import datetime
+import pytz
 from typing import TypeVar
 from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import select
@@ -47,14 +49,19 @@ class FightInfoPagination:
         }
     
 
-def check_status_helper(db: Session, checked: str, query: Session):
-    fight_info = query
-    if checked == "checked":
-        fight_info.is_submitted = True
-        fight_info.status = "checked" 
-    elif checked == "unchecked" or checked == "completed":
-        fight_info.is_submitted = False
-        fight_info.status = "completed"
-    return checked
 
+
+def get_currenct_date():
     
+    # Specify the location
+    location = "Baku, Azerbaijan"
+
+    # Get the timezone for Baku
+    timezone = pytz.timezone(pytz.country_timezones['AZ'][0])
+
+    # Get the current date and time with timezone awareness
+    now = datetime.datetime.now()
+    aware_now = timezone.localize(now)
+
+    formatted_time = aware_now.strftime("%Y-%m-%d")
+    print(formatted_time)

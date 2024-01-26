@@ -1,3 +1,4 @@
+
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
@@ -6,7 +7,7 @@ from database import get_db
 from src.app.models import FightInfo, Fighter
 from src.app.schemas.fight_info_schemas import AllFightInfoBase, FightInfoBase, FightInfoOut, CreateFighterInfoBase
 from src.app.crud.crud_fight_infos import fight_info
-from src.app.helpers import check_status_helper
+from src.app.helpers import get_currenct_date
 router = APIRouter()
 
 @router.get("/", response_model=FightInfoOut)
@@ -56,6 +57,7 @@ def get_fight_info(fight_info_id: int, db: Session=Depends(get_db)):
 @router.put("/status/")
 def change_fight_info_status(status: str, fight_info_id: int, db: Session=Depends(get_db)):
     fight_info = db.query(FightInfo).filter(FightInfo.id == fight_info_id).first()
+    current_date = get_currenct_date()
     status_list = ["completed", "in progress", "not started", "checked"]
     if fight_info == None:
         return HTTPException(status_code=404, detail="content not found")
@@ -73,26 +75,12 @@ def change_fight_info_status(status: str, fight_info_id: int, db: Session=Depend
 
     elif status == "checked":
         fight_info.is_submitted = True
-        fight_info.status = "checked" 
+        fight_info.status = "checked"
     db.commit()
     db.refresh(fight_info)
     return fight_info.status
 
 
-# @router.put("/check/")
-# def change_fight_info_submit(checked: str, fight_info_id: int, db: Session=Depends(get_db)):
-#     fight_info = db.query(FightInfo).filter(FightInfo.id == fight_info_id).first()
-#     if fight_info == None:
-#         return HTTPException(status_code=404, detail="content not found")
-#     if fight_info.status == "completed" or fight_info.status == "checked":
-#         status = check_status_helper(db=db, query=fight_info, checked=checked)
-#     else:
-#         return HTTPException(status_code=403, detail="Permission denied")
-    
-#     db.commit()
-#     db.refresh(fight_info)
-    
-#     return fight_info.status
 
     
 

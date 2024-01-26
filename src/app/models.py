@@ -24,6 +24,9 @@ class FightInfo(Base):
     is_submitted: Mapped[bool] = mapped_column(nullable=True, server_default=text('false'))
     status: Mapped[str] = mapped_column(String(50), nullable=True, server_default="not started")
     source_type: Mapped[str] = mapped_column(String(20), server_default="app")
+    submited_date: Mapped[date] = mapped_column(Date, nullable=True)
+    checked_date: Mapped[date] = mapped_column(Date, nullable=True)
+    created_date: Mapped[date] = mapped_column(Date, nullable=True)
     ##foreignkeys##
     fighter_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
     oponent_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
@@ -98,7 +101,7 @@ class FightStatistic(Base):
     defense_reason: Mapped[bool]
 
     ##foreignkeys##
-    fight_id: Mapped[int] = mapped_column(ForeignKey("fightinfos.id"))
+    fight_id: Mapped[int] = mapped_column(ForeignKey("fightinfos.id", ondelete='CASCADE'))
     action_name_id: Mapped[int] = mapped_column(ForeignKey("actions.id"))
     technique_id: Mapped[int] = mapped_column(ForeignKey("techniques.id"))
     fighter_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
