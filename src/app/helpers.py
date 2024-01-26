@@ -64,4 +64,4 @@ def get_currenct_date():
     aware_now = timezone.localize(now)
 
     formatted_time = aware_now.strftime("%Y-%m-%d")
-    print(formatted_time)
+    return formatted_time

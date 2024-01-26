@@ -57,6 +57,7 @@ def get_fight_info(fight_info_id: int, db: Session=Depends(get_db)):
 @router.put("/status/")
 def change_fight_info_status(status: str, fight_info_id: int, db: Session=Depends(get_db)):
     fight_info = db.query(FightInfo).filter(FightInfo.id == fight_info_id).first()
+    
     current_date = get_currenct_date()
     status_list = ["completed", "in progress", "not started", "checked"]
     if fight_info == None:
@@ -64,6 +65,8 @@ def change_fight_info_status(status: str, fight_info_id: int, db: Session=Depend
     if status not in status_list:
         return HTTPException(status_code=404, detail="wrong data")
     if status == "completed":
+        if fight_info.submited_date is None:
+            fight_info.submited_date = current_date
         fight_info.status = status
         fight_info.is_submitted = False
     elif status == "in progress":
@@ -74,6 +77,7 @@ def change_fight_info_status(status: str, fight_info_id: int, db: Session=Depend
         fight_info.is_submitted = False
 
     elif status == "checked":
+        fight_info.checked_date = current_date
         fight_info.is_submitted = True
         fight_info.status = "checked"
     db.commit()

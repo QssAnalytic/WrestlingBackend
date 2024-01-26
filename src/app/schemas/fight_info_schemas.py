@@ -36,6 +36,9 @@ class UpdateFighterInfo(CreateFighterInfo):
 class AllFightInfoBase(CreateFighterInfo):
     id: int
     author: Optional[str]
+    submited_date: Optional[date]
+    checked_date: Optional[date]
+    created_date: Optional[date]
     fighter: Optional[FighterBase]
     oponent: Optional[FighterBase]
     winner: Optional[FighterBase]
