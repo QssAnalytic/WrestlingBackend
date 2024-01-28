@@ -38,7 +38,6 @@ class CRUDStatistic(CRUDBase[FightStatistic,CreateFightStatistic,UpdateFightStat
         db_data = self.get(id=id, db=db)
         data_obj = jsonable_encoder(data)
         data_obj['score'] = data_obj.pop('score_id')
-        print(data_obj)
         db.execute(
             update(FightStatistic)
             .filter(FightStatistic.id==id)

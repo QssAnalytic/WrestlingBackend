@@ -29,7 +29,7 @@ class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfoBase, UpdateFighterInfo
         ).scalars().unique().first()
         return data
     
-    def create_fightinfo(self, data: CreateFighterInfoBase, db: Session):
+    def create_fight_info(self, data: CreateFighterInfoBase, db: Session):
         data_dict = jsonable_encoder(data)
         opponent1_id_or_name = data_dict['opponent1']
         opponent2_id_or_name = data_dict['opponent2']
@@ -72,6 +72,9 @@ class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfoBase, UpdateFighterInfo
         db.commit()
         db.refresh(fight_info_db)
         return fight_info_db
+    
+    def update_fight_info(self, fight_info_id: int, data: UpdateFighterInfo, db: Session):
+        pass
 
 
 fight_info = CRUDFightInfos(FightInfo)

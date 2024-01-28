@@ -4,7 +4,7 @@ from typing import Optional, List
 from src.app.schemas.fight_statistic_schemas import FightStatisticOutPutBase
 from src.app.schemas.fighter_schemas import FighterBase
 from src.app.schemas.tournament_schemas import TournamentBaseInfos
-
+from src.app.enums import SourceTypeEnum, StatusEnum
 class CreateFighterInfo(BaseModel):
     wrestling_type: str
     fight_date: date
@@ -35,8 +35,26 @@ class CreateFighterInfoBase(BaseModel):
 
 
 
-class UpdateFighterInfo(CreateFighterInfo):
-    pass
+class UpdateFighterInfo(BaseModel):
+    level: str
+    oponent1_point: int
+    oponent2_point: int
+    fight_date: date
+    location: str
+    wrestling_type: str
+    weight_category: int
+    stage: str
+    decision: str
+    author: str
+    status: StatusEnum
+    source_type: SourceTypeEnum
+    submited_date: date
+    checked_date: date
+    created_date: date
+    fighter_id: int
+    oponent_id: int
+    winner_id: int
+    tournament_id: int
 
 
 class AllFightInfoBase(CreateFighterInfo):
