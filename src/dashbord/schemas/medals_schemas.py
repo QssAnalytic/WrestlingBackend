@@ -22,3 +22,8 @@ class MedalsOutPut(BaseModel):
     Silver: int
     place: List[GoldBronzeMedalsPlaceOutPut]
     silver_place: List[SilverMedalsPlaceOutPut]
+
+class FightCountsOutPut(BaseModel):
+    win: int
+    lose: int
+    all_fights: int
