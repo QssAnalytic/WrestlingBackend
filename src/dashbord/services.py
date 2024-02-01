@@ -59,7 +59,7 @@ class MedalDasgbordSerivices(Generic[ModelTypeVar]):
                 self.model.oponent_id == fighter_id,
                 func.extract('year', self.model.fight_date) == year),
                 self.model.stage == 'Gold').all()
-
+    
         return gold_bornc_place, silver_place
     
     def get_fights_count(self, fighter_id: int, year: int, db: Session):

@@ -27,6 +27,8 @@ class FightInfo(Base):
     submited_date: Mapped[date] = mapped_column(Date, nullable=True)
     checked_date: Mapped[date] = mapped_column(Date, nullable=True)
     created_date: Mapped[date] = mapped_column(Date, nullable=True)
+    check_author: Mapped[str] = mapped_column(String(60), nullable=True)
+    order: Mapped[str] = mapped_column(String(60), nullable=True)
     ##foreignkeys##
     fighter_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
     oponent_id: Mapped[int] = mapped_column(ForeignKey("fighters.id"))
