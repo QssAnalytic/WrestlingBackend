@@ -1,10 +1,10 @@
 from datetime import date
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError, validator
 from typing import Optional, List
 from src.app.schemas.fight_statistic_schemas import FightStatisticOutPutBase
 from src.app.schemas.fighter_schemas import FighterBase
 from src.app.schemas.tournament_schemas import TournamentBaseInfos
-from src.app.enums import SourceTypeEnum, StatusEnum
+from src.app.enums import SourceTypeEnum, StatusEnum, OrderEnum
 class CreateFighterInfo(BaseModel):
     wrestling_type: str
     fight_date: date
@@ -55,6 +55,26 @@ class UpdateFighterInfo(BaseModel):
     oponent_id: int
     winner_id: int
     tournament_id: int
+
+
+class UpdateFightInfoAuthorStatusOrder(BaseModel):
+    order: OrderEnum
+    author: Optional[str]
+    status: StatusEnum
+    check_author: Optional[str]
+
+    @validator("author")
+    def check_author(cls, author):
+        if author == None or author == '':
+            return None
+        raise ValueError("author field error")
+    
+    @validator("check_author")
+    def check_author_check(cls, check_author):
+        if check_author == None or check_author == '':
+            return None
+        raise ValueError("check_author field error")
+    
 
 
 class AllFightInfoBase(CreateFighterInfo):

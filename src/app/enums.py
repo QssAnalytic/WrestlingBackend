@@ -10,3 +10,8 @@ class StatusEnum(Enum):
     in_progress = "in progress"
     not_started = "not started"
     checked = "checked"
+
+
+class OrderEnum(Enum):
+    ascending = "ascending"
+    descending = "descending"

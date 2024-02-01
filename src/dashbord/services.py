@@ -42,17 +42,23 @@ class MedalDasgbordSerivices(Generic[ModelTypeVar]):
         return result_obj
     
     def get_medals_list(self, fighter_id: int, year: int, db: Session):
-        gold_bornc_place = db.query(
+        gold_place = db.query(
             self.model
         ).filter(and_(or_(
                 self.model.fighter_id == fighter_id,
                 self.model.oponent_id == fighter_id
                 ),
                 func.extract('year', self.model.fight_date) == year),
-                self.model.stage.in_(['Gold', 'Bronze'])
-                )\
-                .order_by(desc(self.model.stage)).all()
-        
+                self.model.stage =='Gold')
+                
+        bronze_place = db.query(
+            self.model
+        ).filter(and_(or_(
+                self.model.fighter_id == fighter_id,
+                self.model.oponent_id == fighter_id
+                ),
+                func.extract('year', self.model.fight_date) == year),
+                self.model.stage =='Bronze')
         silver_place = db.query(
             self.model
             ).filter(and_(
@@ -60,7 +66,7 @@ class MedalDasgbordSerivices(Generic[ModelTypeVar]):
                 func.extract('year', self.model.fight_date) == year),
                 self.model.stage == 'Gold').all()
     
-        return gold_bornc_place, silver_place
+        return gold_place, silver_place, bronze_place
     
     def get_fights_count(self, fighter_id: int, year: int, db: Session):
         response_obj = {

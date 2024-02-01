@@ -90,6 +90,9 @@ def change_fight_info_status(status: str, fight_info_id: int, db: Session=Depend
     db.refresh(fight_info)
     return fight_info.status
 
+# @router.put("/state{fight_info_id}/")
+# def change_fight_info_athor_order(fight_info_id: int, db:Session):
+#     pass
 
 
     
