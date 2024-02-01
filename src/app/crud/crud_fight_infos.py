@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 from fastapi.encoders import jsonable_encoder
 from src.app.crud.base import CRUDBase
 from src.app.models import FightInfo, FightStatistic, Tournament, Fighter
-from src.app.schemas.fight_info_schemas import CreateFighterInfo, UpdateFighterInfo, CreateFighterInfoBase
+from src.app.schemas.fight_info_schemas import CreateFighterInfo, UpdateFighterInfo, CreateFighterInfoBase, UpdateFightInfoAuthorStatusOrder
 from src.app.helpers import FightInfoPagination
 
 class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfoBase, UpdateFighterInfo]):
@@ -73,7 +73,7 @@ class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfoBase, UpdateFighterInfo
         db.refresh(fight_info_db)
         return fight_info_db
     
-    def update_fight_info_status_author(self, fight_info_id: int, data: UpdateFighterInfo, db: Session):
+    def update_fight_info_status_author(self, fight_info_id: int, data: UpdateFightInfoAuthorStatusOrder, db: Session):
         pass
 
 

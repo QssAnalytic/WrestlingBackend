@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, func
 from database import get_db
 from src.app.models import FightInfo, Fighter
-from src.app.schemas.fight_info_schemas import AllFightInfoBase, FightInfoBase, FightInfoOut, CreateFighterInfoBase, UpdateFighterInfo
+from src.app.schemas.fight_info_schemas import AllFightInfoBase, FightInfoBase, FightInfoOut, CreateFighterInfoBase\
+,UpdateFighterInfo, UpdateFightInfoAuthorStatusOrder
 from src.app.crud.crud_fight_infos import fight_info
 from src.app.helpers import get_currenct_date
 router = APIRouter()
@@ -90,9 +91,10 @@ def change_fight_info_status(status: str, fight_info_id: int, db: Session=Depend
     db.refresh(fight_info)
     return fight_info.status
 
-# @router.put("/state{fight_info_id}/")
-# def change_fight_info_athor_order(fight_info_id: int, db:Session):
-#     pass
+@router.put("/state{fight_info_id}/", response_model=UpdateFightInfoAuthorStatusOrder)
+def change_fight_info_athor_order(fight_info_id: int, data: UpdateFightInfoAuthorStatusOrder, db:Session = Depends(get_db)):
+    response = fight_info.update(id=fight_info_id, data=data, db=db) 
+    return response
 
 
     

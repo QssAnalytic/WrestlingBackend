@@ -58,22 +58,24 @@ class UpdateFighterInfo(BaseModel):
 
 
 class UpdateFightInfoAuthorStatusOrder(BaseModel):
-    order: OrderEnum
+    order: Optional[OrderEnum]
     author: Optional[str]
-    status: StatusEnum
+    status: Optional[StatusEnum]
     check_author: Optional[str]
 
     @validator("author")
     def check_author(cls, author):
         if author == None or author == '':
             return None
-        raise ValueError("author field error")
+        return author
+        
     
     @validator("check_author")
     def check_author_check(cls, check_author):
         if check_author == None or check_author == '':
             return None
-        raise ValueError("check_author field error")
+        return check_author
+        
     
 
 
