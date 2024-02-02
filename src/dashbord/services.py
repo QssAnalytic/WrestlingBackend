@@ -9,7 +9,7 @@ ModelTypeVar = TypeVar("ModelTypeVar", bound=Base)
 
 
 
-class MedalDasgbordSerivices(Generic[ModelTypeVar]):
+class MedalDashbordSerivices(Generic[ModelTypeVar]):
     def __init__(self, model: Type[ModelTypeVar]) -> None:
         self.model = model
 
@@ -94,7 +94,8 @@ class MedalDasgbordSerivices(Generic[ModelTypeVar]):
         response_obj['win_rate'] = round((win_fight_count / all_fight_count) * 100)
         return response_obj
     
-    def get_total_points(self, fighter_id: int, year: int, db: Session) -> tuple:
+    def get_total_points(self, fighter_id: int, year: int, db: Session) -> dict:
+        response_obj = {}
         gained_points = db.query(
             func.sum(
                 case(
@@ -125,9 +126,38 @@ class MedalDasgbordSerivices(Generic[ModelTypeVar]):
                 )),func.extract('year', self.model.fight_date) == year).count()
         total_average = round(gained_points / all_fight_count, 1)
         average_skip = round(skipped_points / all_fight_count, 1)
-        return (gained_points, total_average, skipped_points, average_skip)
 
+        response_obj['total_gained_points'] = gained_points
+        response_obj['avg_gained_points'] = total_average
+        response_obj['total_skipped_points'] = skipped_points
+        response_obj['avg_skipped_points'] = average_skip
+        return response_obj
+
+
+    def get_decision_point(self, fighter_id: int, year: int, db: Session):
+        response_obj = {
+            'win_decision': {},
+            'lose_decision':{}
+        }
+
+        win_decision = db.query(
+            self.model.decision, func.count(self.model.decision).label("decision_count")
+        ).filter(and_(
+                self.model.fighter_id == fighter_id),
+                func.extract('year', self.model.fight_date) == year).group_by(self.model.decision).all()
+        lose_decision = db.query(
+            self.model.decision, func.count(self.model.decision).label("decision_count")
+        ).filter(and_(
+                self.model.oponent_id == fighter_id),
+                func.extract('year', self.model.fight_date) == year).group_by(self.model.decision).all()
         
-medal_dashbord_service = MedalDasgbordSerivices(FightInfo)
+        for w_d in win_decision:
+            response_obj['win_decision'] = w_d
+        for l_d in lose_decision:
+            response_obj['lose_decision'] = l_d
+        return response_obj
+    
+    
+medal_dashbord_service = MedalDashbordSerivices(FightInfo)
 
 

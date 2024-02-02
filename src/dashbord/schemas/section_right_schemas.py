@@ -1,6 +1,6 @@
 from datetime import date
-from pydantic import BaseModel, validator, root_validator, model_validator
-from typing import Optional, List
+from pydantic import BaseModel, validator, root_validator, model_validator, Field
+from typing import Optional, List, Union
 
 
 class GoldBronzeMedalsPlaceOutPut(BaseModel):
@@ -54,3 +54,16 @@ class FightCountsOutPut(BaseModel):
     lose: int
     all_fights: int
     win_rate: int
+
+class WinDecisionResult(BaseModel):
+    decision: str
+    decision_count: int
+
+
+class DecisionOutPut(BaseModel):
+    win_decision: Union[WinDecisionResult, dict] = Field(union_mode='left_to_right')
+    lose_decision: Union[WinDecisionResult, dict] = Field(union_mode='left_to_right')
+
+    class Config:
+        from_attributes = True
+
