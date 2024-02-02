@@ -39,7 +39,18 @@ class MedalsOutPut(BaseModel):
     silver_place: List[SilverMedalsPlaceOutPut]
     bronze_place: List[GoldBronzeMedalsPlaceOutPut]
 
+
+
+# class MedalsOutPut(BaseModel):
+#     Gold: int
+#     Bronze: int
+#     Silver: int
+#     place: List[GoldBronzeMedalsPlaceOutPut]
+
+
+
 class FightCountsOutPut(BaseModel):
     win: int
     lose: int
     all_fights: int
+    win_rate: int

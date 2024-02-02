@@ -73,8 +73,7 @@ class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfoBase, UpdateFighterInfo
         db.refresh(fight_info_db)
         return fight_info_db
     
-    def update_fight_info_status_author(self, fight_info_id: int, data: UpdateFightInfoAuthorStatusOrder, db: Session):
-        pass
+
 
 
 fight_info = CRUDFightInfos(FightInfo)

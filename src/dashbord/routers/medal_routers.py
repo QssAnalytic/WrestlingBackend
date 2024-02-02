@@ -12,11 +12,14 @@ router = APIRouter()
 @router.get("/medal-filter/", response_model=MedalsOutPut)
 def filter_by_medal(fighter_id: int, year:int, db: Session = Depends(get_db)):
     response = medal_dashbord_service.get_medals_count(fighter_id=fighter_id, year=year, db=db)
-    gold_bronze_response, silver_response, bronze_response = medal_dashbord_service.get_medals_list(fighter_id=fighter_id, year=year, db=db)
+    # gold_bronze_response, silver_response, bronze_response = medal_dashbord_service.get_medals_list(fighter_id=fighter_id, year=year, db=db)
+    # response_obj = response
+    # response_obj['gold_place'] = gold_bronze_response
+    # response_obj['silver_place'] = silver_response
+    # response_obj['bronze_place'] = bronze_response
     response_obj = response
-    response_obj['gold_place'] = gold_bronze_response
-    response_obj['silver_place'] = silver_response
-    response_obj['bronze_place'] = bronze_response
+    gold_bronze_response = medal_dashbord_service.get_medals_list(fighter_id=fighter_id, year=year, db=db)
+    response_obj['place'] = gold_bronze_response
     return response_obj
 
 @router.get("/get-fight-count/", response_model=FightCountsOutPut)

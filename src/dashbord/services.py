@@ -67,12 +67,23 @@ class MedalDasgbordSerivices(Generic[ModelTypeVar]):
                 self.model.stage == 'Gold').all()
     
         return gold_place, silver_place, bronze_place
+        # gold_place = db.query(
+        #     self.model
+        # ).filter(and_(or_(
+        #         self.model.fighter_id == fighter_id,
+        #         self.model.oponent_id == fighter_id
+        #         ),
+        #         func.extract('year', self.model.fight_date) == year),
+        #         self.model.stage.in_(['Gold', 'Bronze']))
+        # return gold_place
+
     
     def get_fights_count(self, fighter_id: int, year: int, db: Session):
         response_obj = {
             "win": 0,
             "lose": 0,
-            "all_fights": 0
+            "all_fights": 0,
+            "win_rate": 0
 
         }
         all_fight_count = db.query(self.model,)\
@@ -88,5 +99,6 @@ class MedalDasgbordSerivices(Generic[ModelTypeVar]):
         response_obj['all_fights'] = all_fight_count
         response_obj['win'] = win_fight_count
         response_obj['lose'] = lose_fight_count
+        response_obj['win_rate'] = (win_fight_count // all_fight_count) * 100 
         return response_obj
 medal_dashbord_service = MedalDasgbordSerivices(FightInfo)
