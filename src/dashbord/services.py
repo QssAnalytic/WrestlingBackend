@@ -150,14 +150,15 @@ class MedalDashbordSerivices(Generic[ModelTypeVar]):
         ).filter(and_(
                 self.model.oponent_id == fighter_id),
                 func.extract('year', self.model.fight_date) == year).group_by(self.model.decision).all()
-        
-        for w_d in win_decision:
-            response_obj['win_decision'] = w_d
-        for l_d in lose_decision:
-            response_obj['lose_decision'] = l_d
+        response_obj['win_decision'] = win_decision
+        response_obj['lose_decision'] = lose_decision
+        # for w_d in win_decision:
+        #     response_obj['win_decision'] = w_d
+        # for l_d in lose_decision:
+        #     response_obj['lose_decision'] = l_d
         return response_obj
     
-    
+
 medal_dashbord_service = MedalDashbordSerivices(FightInfo)
 
 

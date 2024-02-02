@@ -1,5 +1,5 @@
 from datetime import date
-from pydantic import BaseModel, validator, root_validator, model_validator, Field
+from pydantic import BaseModel, validator, Field
 from typing import Optional, List, Union
 
 
@@ -7,17 +7,6 @@ class GoldBronzeMedalsPlaceOutPut(BaseModel):
     location: str
     stage: str
     fight_date: date
-    # @root_validator(pre=True)
-    # def transform_data(cls, values):
-        
-    #     if values['stage'] == "Gold":
-    #         values['GoldMedal'] = values['stage']
-    #         return values
-    #     elif values['stage'] == "Bronze":
-    #         values['BronzeMedal'] = values['stage']
-    #         return values
-    #     return values
-        
 
 
 class SilverMedalsPlaceOutPut(BaseModel):
@@ -41,14 +30,6 @@ class MedalsOutPut(BaseModel):
 
 
 
-# class MedalsOutPut(BaseModel):
-#     Gold: int
-#     Bronze: int
-#     Silver: int
-#     place: List[GoldBronzeMedalsPlaceOutPut]
-
-
-
 class FightCountsOutPut(BaseModel):
     win: int
     lose: int
@@ -61,8 +42,8 @@ class WinDecisionResult(BaseModel):
 
 
 class DecisionOutPut(BaseModel):
-    win_decision: Union[WinDecisionResult, dict] = Field(union_mode='left_to_right')
-    lose_decision: Union[WinDecisionResult, dict] = Field(union_mode='left_to_right')
+    win_decision: List[WinDecisionResult]
+    lose_decision: List[WinDecisionResult]
 
     class Config:
         from_attributes = True
