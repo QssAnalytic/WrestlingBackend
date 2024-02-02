@@ -76,7 +76,8 @@ class UpdateFightInfoAuthorStatusOrder(BaseModel):
             return None
         return check_author
         
-    
+    class Config:
+        from_attributes = True
 
 
 class AllFightInfoBase(CreateFighterInfo):

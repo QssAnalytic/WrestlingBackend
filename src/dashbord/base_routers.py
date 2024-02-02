@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from src.dashbord.routers import filter_routers, medal_routers, total_points_routers
+from src.dashbord.routers import filter_routers, section_right_routers, section_right_routers
 router = APIRouter()
 
 router.include_router(
@@ -8,8 +8,8 @@ router.include_router(
     tags=["dashbord-filters-board"]
 )
 router.include_router(
-    medal_routers.router,
-    prefix=("/sections"),
+    section_right_routers.router,
+    prefix=("/section-right"),
     tags=["dashbord-medal-board"]
 )
 
