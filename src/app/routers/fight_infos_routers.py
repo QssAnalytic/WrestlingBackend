@@ -91,9 +91,9 @@ def change_fight_info_status(status: str, fight_info_id: int, db: Session=Depend
     db.refresh(fight_info)
     return fight_info.status
 
-@router.put("/state{fight_info_id}/", response_model=UpdateFightInfoAuthorStatusOrder)
+@router.put("/state/{fight_info_id}/", response_model=UpdateFightInfoAuthorStatusOrder)
 def change_fight_info_athor_order(fight_info_id: int, data: UpdateFightInfoAuthorStatusOrder, db:Session = Depends(get_db)):
-    response = fight_info.update(id=fight_info_id, data=data, db=db) 
+    response = fight_info.update(id=fight_info_id, data=data, db=db)
     return response
 
 

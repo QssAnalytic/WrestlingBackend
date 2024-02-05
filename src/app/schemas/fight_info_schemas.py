@@ -104,7 +104,10 @@ class FightInfoOut(BaseModel):
 
 class FightInfoBase(CreateFighterInfo):
     id: int
+    order: Optional[OrderEnum]
     author: Optional[str]
+    status: Optional[StatusEnum]
+    check_author: Optional[str]
     fighter: Optional[FighterBase]
     oponent: Optional[FighterBase]
     winner: Optional[FighterBase]
