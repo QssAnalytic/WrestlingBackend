@@ -19,6 +19,7 @@ class CreateFightStatistic(BaseModel):
     technique_id: int
     fighter_id: int
     opponent_id: Optional[int]
+    flag: bool
     # video_second_begin: datetime
     # video_second_end: datetime
 
@@ -37,6 +38,7 @@ class StatisticOutPut(BaseModel):
     action_name_id: int
     technique_id: int
     fighter_id: int
+    flag: bool
     opponent_id: Optional[int]
 
 class FightStatisticOutPutBase(StatisticOutPut):
@@ -50,7 +52,7 @@ class FightStatisticOutPutBase(StatisticOutPut):
 
 class UpdateFightStatistic(CreateFightStatistic):
     # __annotations__ = {k: Optional[v] for k, v in CreateFightStatistic.__annotations__.items()}
-    flag: bool
+    pass
 
 class FightStatistic(BaseModel):
     action_time: Optional[str]
