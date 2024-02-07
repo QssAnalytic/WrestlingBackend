@@ -49,7 +49,8 @@ class FightStatisticOutPutBase(StatisticOutPut):
         from_attributes = True
 
 class UpdateFightStatistic(CreateFightStatistic):
-    __annotations__ = {k: Optional[v] for k, v in CreateFightStatistic.__annotations__.items()}
+    # __annotations__ = {k: Optional[v] for k, v in CreateFightStatistic.__annotations__.items()}
+    flag: bool
 
 class FightStatistic(BaseModel):
     action_time: Optional[str]
