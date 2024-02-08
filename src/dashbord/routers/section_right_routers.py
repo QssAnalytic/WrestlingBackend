@@ -90,8 +90,34 @@ def test(session = Depends(get_db)):
         .subquery()
     )
     
-    rank_column = func.row_number().over(partition_by=[ranked_data.c.fight_year, ranked_data.c.technique_id]).label('rank')
-    rank_values = session.query(ranked_data.c.fight_year, ranked_data.c.technique_id, rank_column).all()
+    # rank_column = func.row_number().over(partition_by=[ranked_data.c.fight_year, ranked_data.c.technique_id]).label('rank')
+    # rank_values = session.query(ranked_data.c.fight_year, ranked_data.c.technique_id, func.max(rank_column).over()).all()
+    # print(rank_values)
+
+    rank_column = func.row_number().over(
+    partition_by=[ranked_data.c.fight_year, ranked_data.c.technique_id]
+    ).label('rank')
+
+    # Subquery to calculate the ranks
+    subquery = (
+        session.query(
+            ranked_data,
+            rank_column
+        )
+        .subquery()
+    )
+
+    # Query to calculate the maximum rank within each partition
+    max_rank_column = func.max(subquery.c.rank).over(
+        partition_by=[subquery.c.fight_year, subquery.c.technique_id]
+    ).label('max_rank')
+
+    # Final query to retrieve the results
+    rank_values = session.query(
+        subquery.c.fight_year,
+        subquery.c.technique_id,
+        max_rank_column
+    ).all()
     print(rank_values)
 #     final_query = (
 #     session.query(

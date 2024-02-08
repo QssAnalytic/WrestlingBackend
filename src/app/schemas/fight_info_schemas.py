@@ -62,9 +62,6 @@ class UpdateFightInfoAuthorStatusOrder(BaseModel):
     author: Optional[str]
     status: Optional[StatusEnum]
     check_author: Optional[str]
-    submited_date: date
-    checked_date: date
-    created_date: date
 
     @validator("author")
     def check_author(cls, author):
