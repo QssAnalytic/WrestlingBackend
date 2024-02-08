@@ -48,3 +48,12 @@ class DecisionOutPut(BaseModel):
     class Config:
         from_attributes = True
 
+
+class TestOutPut(BaseModel):
+    fighter_id: int
+    fight_year: int
+    technique_id: int
+    successful_count: int
+    total_count: int
+    statistic: float
+

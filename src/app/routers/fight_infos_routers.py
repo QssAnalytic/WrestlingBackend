@@ -61,35 +61,35 @@ def change_fight_info(fight_info_id: int, data: UpdateFighterInfo, db: Session=D
     response = fight_info.update(id=fight_info_id, data=data ,db = db)
     return response
 
-@router.put("/status/")
-def change_fight_info_status(status: str, fight_info_id: int, db: Session=Depends(get_db)):
-    fight_info = db.query(FightInfo).filter(FightInfo.id == fight_info_id).first()
+# @router.put("/status/")
+# def change_fight_info_status(status: str, fight_info_id: int, db: Session=Depends(get_db)):
+#     fight_info = db.query(FightInfo).filter(FightInfo.id == fight_info_id).first()
     
-    current_date = get_currenct_date()
-    status_list = ["completed", "in progress", "not started", "checked"]
-    if fight_info == None:
-        return HTTPException(status_code=404, detail="content not found")
-    if status not in status_list:
-        return HTTPException(status_code=404, detail="wrong data")
-    if status == "completed":
-        if fight_info.submited_date is None:
-            fight_info.submited_date = current_date
-        fight_info.status = status
-        fight_info.is_submitted = False
-    elif status == "in progress":
-        fight_info.status = status
-        fight_info.is_submitted = False
-    elif status == "not started":
-        fight_info.status = status
-        fight_info.is_submitted = False
+#     current_date = get_currenct_date()
+#     status_list = ["completed", "in progress", "not started", "checked"]
+#     if fight_info == None:
+#         return HTTPException(status_code=404, detail="content not found")
+#     if status not in status_list:
+#         return HTTPException(status_code=404, detail="wrong data")
+#     if status == "completed":
+#         if fight_info.submited_date is None:
+#             fight_info.submited_date = current_date
+#         fight_info.status = status
+#         fight_info.is_submitted = False
+#     elif status == "in progress":
+#         fight_info.status = status
+#         fight_info.is_submitted = False
+#     elif status == "not started":
+#         fight_info.status = status
+#         fight_info.is_submitted = False
 
-    elif status == "checked":
-        fight_info.checked_date = current_date
-        fight_info.is_submitted = True
-        fight_info.status = "checked"
-    db.commit()
-    db.refresh(fight_info)
-    return fight_info.status
+#     elif status == "checked":
+#         fight_info.checked_date = current_date
+#         fight_info.is_submitted = True
+#         fight_info.status = "checked"
+#     db.commit()
+#     db.refresh(fight_info)
+#     return fight_info.status
 
 @router.put("/state/{fight_info_id}/", response_model=UpdateFightInfoAuthorStatusOrder)
 def change_fight_info_athor_order(fight_info_id: int, data: UpdateFightInfoAuthorStatusOrder, db:Session = Depends(get_db)):
