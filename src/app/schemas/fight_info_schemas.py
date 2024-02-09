@@ -83,6 +83,7 @@ class UpdateFightInfoAuthorStatusOrder(BaseModel):
 class AllFightInfoBase(CreateFighterInfo):
     id: int
     author: Optional[str]
+    check_author: Optional[str]
     submited_date: Optional[date]
     checked_date: Optional[date]
     created_date: Optional[date]
