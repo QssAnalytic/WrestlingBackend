@@ -1,12 +1,13 @@
 from typing import Optional, List
-
-from sqlalchemy import select
+from fastapi import HTTPException
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session, joinedload, selectinload
 from fastapi.encoders import jsonable_encoder
 from src.app.crud.base import CRUDBase
 from src.app.models import FightInfo, FightStatistic, Tournament, Fighter
 from src.app.schemas.fight_info_schemas import CreateFighterInfo, UpdateFighterInfo, CreateFighterInfoBase, UpdateFightInfoAuthorStatusOrder
 from src.app.helpers import FightInfoPagination
+from src.app.helpers import get_currenct_date
 
 class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfoBase, UpdateFighterInfo]):
 
@@ -72,6 +73,37 @@ class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfoBase, UpdateFighterInfo
         db.commit()
         db.refresh(fight_info_db)
         return fight_info_db
+    
+    def update_status(self, id:int, data: UpdateFightInfoAuthorStatusOrder, db: Session):
+        fight_info = self.get(id=id, db=db)
+        current_date = get_currenct_date()
+        
+        data_obj = jsonable_encoder(data)
+        status = data_obj['status']
+        if fight_info == None:
+            return HTTPException(status_code=404, detail="content not found")
+
+        if status == "completed":
+            if fight_info.submited_date is None:
+                fight_info.submited_date = current_date
+            fight_info.status = status
+            fight_info.is_submitted = False
+        elif status == "in progress":
+            fight_info.status = status
+            fight_info.is_submitted = False
+        elif status == "not started":
+            fight_info.status = status
+            fight_info.is_submitted = False
+
+        elif status == "checked":
+            fight_info.checked_date = current_date
+            fight_info.is_submitted = True
+            fight_info.status = "checked"
+            fight_info.check_author = data_obj['author']
+
+        db.commit()
+        db.refresh(fight_info)
+        return fight_info
     
 
 
