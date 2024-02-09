@@ -15,7 +15,7 @@ router = APIRouter()
 def fight_infos(tournament_id: int | None = None, place: str | None = None, wrestler_name: str | None = None,
                 author: str | None = None, is_submitted: bool | None = None, status: str | None = None,
                 weight_category: int | None = None, date: int | None = None, stage: str | None = None,
-                wrestling_type: str | None = None,
+                wrestling_type: str | None = None, check_author: str | None = None,
                 page: Optional[int]= Query(1, ge=0),limit:int=Query(100, ge=100),db: Session = Depends(get_db)):
     query = db.query(FightInfo)
     
@@ -39,9 +39,10 @@ def fight_infos(tournament_id: int | None = None, place: str | None = None, wres
         query = query.filter(FightInfo.status == status)
     if date is not None:
         query = query.filter(func.extract("year", FightInfo.fight_date) == date)
-
     if weight_category is not None:
-        query = query.filter(FightInfo.weight_category == weight_category)
+            query = query.filter(FightInfo.weight_category == weight_category)
+    if check_author is not None:
+        query = query.filter(FightInfo.check_author == check_author)
     response = fight_info.get_multi(db=db, page=page, limit=limit, data=query)
     return response
 
@@ -60,6 +61,17 @@ def get_fight_info(fight_info_id: int, db: Session=Depends(get_db)):
 def change_fight_info(fight_info_id: int, data: UpdateFighterInfo, db: Session=Depends(get_db)):
     response = fight_info.update(id=fight_info_id, data=data ,db = db)
     return response
+
+
+
+@router.put("/state/{fight_info_id}/", response_model=UpdateFightInfoAuthorStatusOrder)
+def change_fight_info_athor_order(fight_info_id: int, data: UpdateFightInfoAuthorStatusOrder, db:Session = Depends(get_db)):
+    response = fight_info.update_status(id=fight_info_id, data=data, db=db)
+    return response
+
+
+    
+
 
 # @router.put("/status/")
 # def change_fight_info_status(status: str, fight_info_id: int, db: Session=Depends(get_db)):
@@ -90,13 +102,3 @@ def change_fight_info(fight_info_id: int, data: UpdateFighterInfo, db: Session=D
 #     db.commit()
 #     db.refresh(fight_info)
 #     return fight_info.status
-
-@router.put("/state/{fight_info_id}/", response_model=UpdateFightInfoAuthorStatusOrder)
-def change_fight_info_athor_order(fight_info_id: int, data: UpdateFightInfoAuthorStatusOrder, db:Session = Depends(get_db)):
-    response = fight_info.update_status(id=fight_info_id, data=data, db=db)
-    return response
-
-
-    
-
-
