@@ -101,6 +101,7 @@ class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfoBase, UpdateFighterInfo
             fight_info.status = "checked"
             fight_info.check_author = data_obj['check_author']
         fight_info.author = data_obj['author']
+        fight_info.order = data_obj['order']
         db.commit()
         db.refresh(fight_info)
         return fight_info
