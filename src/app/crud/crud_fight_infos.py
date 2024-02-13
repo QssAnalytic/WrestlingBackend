@@ -99,8 +99,8 @@ class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfoBase, UpdateFighterInfo
             fight_info.checked_date = current_date
             fight_info.is_submitted = True
             fight_info.status = "checked"
-            fight_info.check_author = data_obj['author']
-
+            fight_info.check_author = data_obj['check_author']
+        fight_info.author = data_obj['author']
         db.commit()
         db.refresh(fight_info)
         return fight_info
