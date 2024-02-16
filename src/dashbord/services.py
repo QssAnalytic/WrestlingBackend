@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Generic, TypeVar, Type
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import Integer, desc, func, select, text, or_, and_, case, extract
@@ -14,24 +15,31 @@ class MedalDashbordSerivices(Generic[ModelTypeVar]):
         self.model = model
 
     
-    def get_medals_count(self, fighter_id: int, year: int, db: Session):
+    def get_medals_count(self, fighter_id: int, year: str, db: Session):
         result_obj = {
             "Gold": 0,
             "Bronze": 0,
             "Silver": 0
         }
+        years = list(map(int,year.split(",")))
+
+        
         gold_bronze_medal_count = db.query(self.model.stage, func.count().label('stage_count'))\
             .filter(self.model.stage.in_(['Gold', 'Bronze']))\
-            .filter(and_(or_(
-                self.model.fighter_id == fighter_id,
-                self.model.oponent_id == fighter_id
-                ),func.extract('year', self.model.fight_date) == year))\
-                .group_by(self.model.stage).all()
+            .filter(and_(
+                or_(
+                    self.model.fighter_id == fighter_id,
+                    self.model.oponent_id == fighter_id
+                ),
+                func.extract('year', self.model.fight_date).in_(years)
+            ))\
+            .group_by(self.model.stage).all()
+        silver_medal_count = []
         silver_medal_count = db.query(self.model.oponent_id, func.count())\
         .filter(and_(
             self.model.oponent_id == fighter_id,
             self.model.stage == 'Gold',
-            func.extract('year', self.model.fight_date) == year))\
+            func.extract('year', self.model.fight_date).in_(years)))\
                 .group_by(self.model.oponent_id).all()
         if silver_medal_count != []:
             for op_id, medal_count in silver_medal_count:
@@ -41,14 +49,15 @@ class MedalDashbordSerivices(Generic[ModelTypeVar]):
             result_obj[stage] = stage_count
         return result_obj
     
-    def get_medals_list(self, fighter_id: int, year: int, db: Session):
+    def get_medals_list(self, fighter_id: int, year: str, db: Session):
+        years = list(map(int,year.split(",")))
         gold_place = db.query(
             self.model
         ).filter(and_(or_(
                 self.model.fighter_id == fighter_id,
                 self.model.oponent_id == fighter_id
                 ),
-                func.extract('year', self.model.fight_date) == year),
+                func.extract('year', self.model.fight_date).in_(years)),
                 self.model.stage =='Gold')
                 
         bronze_place = db.query(
@@ -57,20 +66,21 @@ class MedalDashbordSerivices(Generic[ModelTypeVar]):
                 self.model.fighter_id == fighter_id,
                 self.model.oponent_id == fighter_id
                 ),
-                func.extract('year', self.model.fight_date) == year),
+                func.extract('year', self.model.fight_date).in_(years)),
                 self.model.stage =='Bronze')
         silver_place = db.query(
             self.model
             ).filter(and_(
                 self.model.oponent_id == fighter_id,
-                func.extract('year', self.model.fight_date) == year),
+                func.extract('year', self.model.fight_date).in_(years)),
                 self.model.stage == 'Gold').all()
     
         return gold_place, silver_place, bronze_place
 
 
     
-    def get_fights_count(self, fighter_id: int, year: int, db: Session):
+    def get_fights_count(self, fighter_id: int, year: str, db: Session):
+        years = list(map(int,year.split(",")))
         response_obj = {
             "win": 0,
             "lose": 0,
@@ -82,11 +92,11 @@ class MedalDashbordSerivices(Generic[ModelTypeVar]):
         .filter(and_(or_(
                 self.model.fighter_id == fighter_id,
                 self.model.oponent_id == fighter_id
-                )),func.extract('year', self.model.fight_date) == year).count()
+                )),func.extract('year', self.model.fight_date).in_(years)).count()
         win_fight_count = db.query(self.model,)\
         .filter(and_(or_(
                 self.model.fighter_id == fighter_id
-                )),func.extract('year', self.model.fight_date) == year).count()
+                )),func.extract('year', self.model.fight_date).in_(years)).count()
         lose_fight_count = all_fight_count - win_fight_count
         response_obj['all_fights'] = all_fight_count
         response_obj['win'] = win_fight_count
@@ -94,36 +104,37 @@ class MedalDashbordSerivices(Generic[ModelTypeVar]):
         response_obj['win_rate'] = round((win_fight_count / all_fight_count) * 100)
         return response_obj
     
-    def get_total_points(self, fighter_id: int, year: int, db: Session) -> dict:
+    def get_total_points(self, fighter_id: int, year: str, db: Session) -> dict:
+        years = list(map(int,year.split(",")))
         response_obj = {}
         gained_points = db.query(
             func.sum(
                 case(
                     (self.model.fighter_id == fighter_id, self.model.oponent1_point),
-                    (self.model.oponent_id == year, self.model.oponent2_point),
+                    (self.model.oponent_id == fighter_id, self.model.oponent2_point),
                     else_=0
                 )
             ).label("point1_total")
         ).filter(
-            extract('year', self.model.fight_date) == 2018
+            extract('year', self.model.fight_date).in_(years)
         ).scalar()
         skipped_points = db.query(
             func.sum(
                 case(
                     (self.model.fighter_id == fighter_id, self.model.oponent2_point),
-                    (self.model.oponent_id == year, self.model.oponent1_point),
+                    (self.model.oponent_id == fighter_id, self.model.oponent1_point),
                     else_=0
                 )
             ).label("point1_total")
         ).filter(
-            extract('year', self.model.fight_date) == 2018
+            extract('year', self.model.fight_date).in_(years)
         ).scalar()
         
         all_fight_count = db.query(self.model)\
         .filter(and_(or_(
                 self.model.fighter_id == fighter_id,
                 self.model.oponent_id == fighter_id
-                )),func.extract('year', self.model.fight_date) == year).count()
+                )),func.extract('year', self.model.fight_date).in_(years)).count()
         total_average = round(gained_points / all_fight_count, 1)
         average_skip = round(skipped_points / all_fight_count, 1)
 
@@ -134,7 +145,8 @@ class MedalDashbordSerivices(Generic[ModelTypeVar]):
         return response_obj
 
 
-    def get_decision_point(self, fighter_id: int, year: int, db: Session):
+    def get_decision_point(self, fighter_id: int, year: str, db: Session):
+        years = list(map(int,year.split(",")))
         response_obj = {
             'win_decision': {},
             'lose_decision':{}
@@ -144,12 +156,12 @@ class MedalDashbordSerivices(Generic[ModelTypeVar]):
             self.model.decision, func.count(self.model.decision).label("decision_count")
         ).filter(and_(
                 self.model.fighter_id == fighter_id),
-                func.extract('year', self.model.fight_date) == year).group_by(self.model.decision).all()
+                func.extract('year', self.model.fight_date).in_(years)).group_by(self.model.decision).all()
         lose_decision = db.query(
             self.model.decision, func.count(self.model.decision).label("decision_count")
         ).filter(and_(
                 self.model.oponent_id == fighter_id),
-                func.extract('year', self.model.fight_date) == year).group_by(self.model.decision).all()
+                func.extract('year', self.model.fight_date).in_(years)).group_by(self.model.decision).all()
         response_obj['win_decision'] = win_decision
         response_obj['lose_decision'] = lose_decision
         # for w_d in win_decision:

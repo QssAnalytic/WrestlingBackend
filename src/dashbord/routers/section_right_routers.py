@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 @router.get("/medal-filter/", response_model=MedalsOutPut)
-def filter_by_medal(fighter_id: int, year:int, db: Session = Depends(get_db)):
+def filter_by_medal(fighter_id: int, year: str, db: Session = Depends(get_db)):
     response = medal_dashbord_service.get_medals_count(fighter_id=fighter_id, year=year, db=db)
     gold_bronze_response, silver_response, bronze_response = medal_dashbord_service.get_medals_list(fighter_id=fighter_id, year=year, db=db)
     response_obj = response
@@ -24,18 +24,18 @@ def filter_by_medal(fighter_id: int, year:int, db: Session = Depends(get_db)):
     return response_obj
 
 @router.get("/get-fight-count/", response_model=FightCountsOutPut)
-def get_all_fight_count(fighter_id: int, year:int, db: Session = Depends(get_db)):
+def get_all_fight_count(fighter_id: int, year:str, db: Session = Depends(get_db)):
     response  = medal_dashbord_service.get_fights_count(fighter_id=fighter_id, year=year, db=db)
     return response
 
 @router.get("/get-total-point/")
-def get_total_fighter_point(fighter_id: int, year:int, db: Session = Depends(get_db)):
+def get_total_fighter_point(fighter_id: int, year:str, db: Session = Depends(get_db)):
     response  = medal_dashbord_service.get_total_points(fighter_id=fighter_id, year=year, db=db)
     return response
 
 
 @router.get("/get-decisions/", response_model=DecisionOutPut)
-def get_decision_average(fighter_id: int, year:int, db: Session = Depends(get_db)):
+def get_decision_average(fighter_id: int, year:str, db: Session = Depends(get_db)):
     response = medal_dashbord_service.get_decision_point(fighter_id=fighter_id, year=year, db=db)
     return response
 
