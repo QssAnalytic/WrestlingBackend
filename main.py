@@ -30,14 +30,14 @@ app.add_middleware(
 )
 
 
-app.include_router(
-    dashbord_router,
-    prefix="/dashboard",
-)
-app.include_router(
-    app_routre,
-    prefix="/app",
-)
+# app.include_router(
+#     dashbord_router,
+#     prefix="/dashboard",
+# )
+# app.include_router(
+#     app_routre,
+#     prefix="/app",
+# )
 
 
 

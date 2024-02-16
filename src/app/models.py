@@ -95,7 +95,8 @@ class FightStatistic(Base):
     action_number: Mapped[str]
     score: Mapped[int]
     successful: Mapped[bool]
-    flag: Mapped[bool] = mapped_column(server_default=text("false"))
+    author: Mapped[str] = mapped_column(String(100))
+    # fighter_number: Mapped[int] #delete this column
     video_second_begin = Column(TIMESTAMP, nullable=True)
     video_second_end = Column(TIMESTAMP, nullable=True)
     video_link: Mapped[str] = mapped_column(String(100), nullable=True)
