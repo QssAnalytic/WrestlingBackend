@@ -67,7 +67,8 @@ class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfoBase, UpdateFighterInfo
             fighter_id = opponent1.id,
             oponent_id = opponent2.id,
             winner_id = opponent1.id,
-            tournament_id = tournament.id
+            tournament_id = tournament.id,
+            created_date = get_currenct_date()
         )
         db.add(fight_info_db)
         db.commit()
