@@ -6,7 +6,7 @@ from sqlalchemy.sql import column, literal_column
 from sqlalchemy import func, cast, DECIMAL, Float, select
 
 from src.app.models import *
-from src.dashbord.services import medal_dashbord_service
+from src.dashbord.services.right_dashbord_services import medal_right_dashbord_service
 from src.dashbord.schemas.section_right_schemas import MedalsOutPut, FightCountsOutPut, DecisionOutPut, TestOutPut
 from database import get_db
 
@@ -15,8 +15,8 @@ router = APIRouter()
 
 @router.get("/medal-filter/", response_model=MedalsOutPut)
 def filter_by_medal(fighter_id: int, year: str, db: Session = Depends(get_db)):
-    response = medal_dashbord_service.get_medals_count(fighter_id=fighter_id, year=year, db=db)
-    gold_bronze_response, silver_response, bronze_response = medal_dashbord_service.get_medals_list(fighter_id=fighter_id, year=year, db=db)
+    response = medal_right_dashbord_service.get_medals_count(fighter_id=fighter_id, year=year, db=db)
+    gold_bronze_response, silver_response, bronze_response = medal_right_dashbord_service.get_medals_list(fighter_id=fighter_id, year=year, db=db)
     response_obj = response
     response_obj['gold_place'] = gold_bronze_response
     response_obj['silver_place'] = silver_response
@@ -25,18 +25,18 @@ def filter_by_medal(fighter_id: int, year: str, db: Session = Depends(get_db)):
 
 @router.get("/get-fight-count/", response_model=FightCountsOutPut)
 def get_all_fight_count(fighter_id: int, year:str, db: Session = Depends(get_db)):
-    response  = medal_dashbord_service.get_fights_count(fighter_id=fighter_id, year=year, db=db)
+    response  = medal_right_dashbord_service.get_fights_count(fighter_id=fighter_id, year=year, db=db)
     return response
 
 @router.get("/get-total-point/")
 def get_total_fighter_point(fighter_id: int, year:str, db: Session = Depends(get_db)):
-    response  = medal_dashbord_service.get_total_points(fighter_id=fighter_id, year=year, db=db)
+    response  = medal_right_dashbord_service.get_total_points(fighter_id=fighter_id, year=year, db=db)
     return response
 
 
 @router.get("/get-decisions/", response_model=DecisionOutPut)
 def get_decision_average(fighter_id: int, year:str, db: Session = Depends(get_db)):
-    response = medal_dashbord_service.get_decision_point(fighter_id=fighter_id, year=year, db=db)
+    response = medal_right_dashbord_service.get_decision_point(fighter_id=fighter_id, year=year, db=db)
     return response
 
 

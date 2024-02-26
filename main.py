@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Annotated
+from typing import Annotated, List
 from datetime import date
 from sqlalchemy.orm import Session
 from sqlalchemy import select, and_
@@ -38,9 +38,18 @@ app.include_router(
     app_routre,
     prefix="/app",
 )
+from pydantic import BaseModel
+class FighterSchema(BaseModel):
+    id: int
+    name: str
 
+    class Config:
+        orm_mode = True
 
-
+@app.get("/test", response_model=List[FighterSchema])
+async def get_fighters(db: Session = Depends(get_db)):
+    fighters = db.query(Fighter).all()
+    return fighters
 
 
 @app.post("/add-actions-and-techniques")

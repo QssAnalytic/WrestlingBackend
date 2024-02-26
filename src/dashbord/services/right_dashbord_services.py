@@ -10,7 +10,7 @@ ModelTypeVar = TypeVar("ModelTypeVar", bound=Base)
 
 
 
-class MedalDashbordSerivices(Generic[ModelTypeVar]):
+class MedalRightDashbordSerivices(Generic[ModelTypeVar]):
     def __init__(self, model: Type[ModelTypeVar]) -> None:
         self.model = model
 
@@ -106,7 +106,12 @@ class MedalDashbordSerivices(Generic[ModelTypeVar]):
     
     def get_total_points(self, fighter_id: int, year: str, db: Session) -> dict:
         years = list(map(int,year.split(",")))
-        response_obj = {}
+        response_obj = {
+            "gained":[],
+            "skipped": []
+            }
+        gained_obj = {}
+        skipped_obj = {}
         gained_points = db.query(
             func.sum(
                 case(
@@ -138,10 +143,12 @@ class MedalDashbordSerivices(Generic[ModelTypeVar]):
         total_average = round(gained_points / all_fight_count, 1)
         average_skip = round(skipped_points / all_fight_count, 1)
 
-        response_obj['total_gained_points'] = gained_points
-        response_obj['avg_gained_points'] = total_average
-        response_obj['total_skipped_points'] = skipped_points
-        response_obj['avg_skipped_points'] = average_skip
+        gained_obj['total_points'] = gained_points
+        gained_obj['avg_points'] = total_average
+        skipped_obj['total_points'] = skipped_points
+        skipped_obj['avg_points'] = average_skip
+        response_obj['gained'].append(gained_obj)
+        response_obj['skipped'].append(skipped_obj)
         return response_obj
 
 
@@ -171,6 +178,6 @@ class MedalDashbordSerivices(Generic[ModelTypeVar]):
         return response_obj
     
 
-medal_dashbord_service = MedalDashbordSerivices(FightInfo)
+medal_right_dashbord_service = MedalRightDashbordSerivices(FightInfo)
 
 
