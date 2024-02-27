@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 
 class ActionBase(BaseModel):
-    name: str
+    data: str
 
 class ActionoutPut(ActionBase):
     id: int

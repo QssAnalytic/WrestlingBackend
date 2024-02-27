@@ -19,7 +19,7 @@ def metrics_actions(db: Session = Depends(get_db)):
         ActionName.name == "Protection zone",
         ActionName.name == "Pin to parter"
     ))
-    return actions
+    return [ActionoutPut(id=d.id, data=d.name) for d in actions]
 
 @router.get("/metrics", response_model=List[MetricsOutPut])
 def metrics(fight_date: str, action_name_id: int, fighter_id: int, db: Session = Depends(get_db)):
