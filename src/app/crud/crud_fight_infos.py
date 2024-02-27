@@ -46,12 +46,16 @@ class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfoBase, UpdateFighterInfo
             opponent2 = Fighter(name=opponent2_id_or_name, natinality_name=data_dict['opponent2_nationality'])
             db.add(opponent2)
         
-        tournament = Tournament(name = data_dict['tournament_name'], date=data_dict['tournament_date'])
-        db.add(tournament)
-        db.commit()
-        db.refresh(tournament)
-        db.refresh(opponent1)
-        db.refresh(opponent2)
+        existing_tournament = db.query(Tournament).filter(Tournament.name == data_dict['tournament_name']).first()
+
+        if existing_tournament is None:
+            # Tournament does not exist, so add it
+            tournament = Tournament(name=data_dict['tournament_name'], date=data_dict['tournament_date'])
+            db.add(tournament)
+            db.commit()
+            db.refresh(tournament)
+        else:
+            tournament = existing_tournament
 
         fight_info_db = FightInfo(
             wrestling_type = data_dict['wrestling_type'],
