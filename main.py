@@ -88,6 +88,7 @@ def add_actions_data(file: Annotated[bytes, File()]):
                                 )
             fight_statistic_list.append(fight_statistic)
         session.bulk_save_objects(fight_statistic_list)
+        session.commit()
     return "asd"
 
 
