@@ -49,7 +49,7 @@ def get_years(wrestler_id: int, db: Session = Depends(get_db)):
     return [FilterOutPut(data=row) for row in response]
 
 
-@router.get("/metrics-actions", response_model=List[ActionoutPut])
+@router.get("/metrics-actions/", response_model=List[ActionoutPut])
 def metrics_actions(db: Session = Depends(get_db)):
     actions = db.query(ActionName).filter(or_(
         ActionName.name == "Takedown",
