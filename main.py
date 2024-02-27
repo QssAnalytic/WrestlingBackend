@@ -61,10 +61,8 @@ def add_actions_data(file: Annotated[bytes, File()]):
         session.commit()
         for i in range(len(df)):
             db_id = int(df['DB ID'][i])
-            print(db_id)
             if db_id != figh:
                 figh = db_id
-                print(True)
                 f_id = session.query(FightInfo).filter(FightInfo.id == figh).first()
                 f_id.status = df['Status'][i]
                 f_id.author = df['Author'][i]
@@ -73,8 +71,9 @@ def add_actions_data(file: Annotated[bytes, File()]):
             fighter = session.query(Fighter).filter(Fighter.name == df['Wrestler'][i]).first()
             opponent = session.query(Fighter).filter(Fighter.name == df['Opponent'][i]).first()
             action = session.query(ActionName).filter(ActionName.name == df['Action'][i]).first()
-            technique = session.query(Technique).filter(Technique.name == df['Technique'][i]).first()
-
+            technique = session.query(Technique).filter(Technique.name == "Lateral drop throw").first()
+            print(i)
+            print(df['Second'][i])
             fight_statistic = FightStatistic(action_number = generate_unique_uuid(), score = df['Score'][i],
                                 successful = df['Successful'][i], 
                                 flag = bool(df['Flag'][i]),
