@@ -6,20 +6,11 @@ from sqlalchemy.orm import Session
 
 from src.dashbord.services.left_dashbord_services import medal_left_dashbord_service
 from src.dashbord.schemas.section_left_schemas import MetricsOutPut
-from src.dashbord.schemas.actions_schemas import ActionoutPut
-from src.app.models import ActionName
+
 from database import get_db
 router = APIRouter()
 
-@router.get("/metrics-actions", response_model=List[ActionoutPut])
-def metrics_actions(db: Session = Depends(get_db)):
-    actions = db.query(ActionName).filter(or_(
-        ActionName.name == "Takedown",
-        ActionName.name == "Roll",
-        ActionName.name == "Protection zone",
-        ActionName.name == "Pin to parter"
-    ))
-    return [ActionoutPut(id=d.id, data=d.name) for d in actions]
+
 
 @router.get("/metrics", response_model=List[MetricsOutPut])
 def metrics(fight_date: str, action_name_id: int, fighter_id: int, db: Session = Depends(get_db)):

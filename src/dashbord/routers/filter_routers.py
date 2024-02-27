@@ -3,8 +3,9 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import Integer, func, select, text, or_
 from src.dashbord.schemas.countries_schemas import FilterOutPut
+from src.dashbord.schemas.actions_schemas import ActionoutPut
 
-from src.app.models import Fighter, FightInfo
+from src.app.models import Fighter, FightInfo, ActionName
 from database import get_db
 router = APIRouter()
 
@@ -46,3 +47,14 @@ def get_years(wrestler_id: int, db: Session = Depends(get_db)):
         )
     ).scalars().all()
     return [FilterOutPut(data=row) for row in response]
+
+
+@router.get("/metrics-actions", response_model=List[ActionoutPut])
+def metrics_actions(db: Session = Depends(get_db)):
+    actions = db.query(ActionName).filter(or_(
+        ActionName.name == "Takedown",
+        ActionName.name == "Roll",
+        ActionName.name == "Protection zone",
+        ActionName.name == "Pin to parter"
+    ))
+    return [ActionoutPut(id=d.id, data=d.name) for d in actions]
