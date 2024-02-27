@@ -5,4 +5,4 @@ from decimal import Decimal
 
 class MetricsOutPut(BaseModel):
     metrics: str
-    score: Decimal
+    score: float

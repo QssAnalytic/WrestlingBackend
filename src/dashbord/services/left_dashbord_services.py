@@ -5,6 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from src.app.models import FightInfo, Technique
+from src.dashbord.utils.takedown_utils import *
 from database import Base, engine
 
 ModelTypeVar = TypeVar("ModelTypeVar", bound=Base)

@@ -1,4 +1,4 @@
-import pandas as pd
+import pandas as pd, numpy as np
 from typing import Annotated, List
 from datetime import date
 from sqlalchemy.orm import Session
@@ -15,7 +15,14 @@ from src.dashbord.base_routers import router as dashbord_router
 from database import engine, Base, session_factory, get_db
 
 
+import uuid
 
+def generate_unique_uuid():
+    return str(uuid.uuid4())
+
+def time_to_seconds(time_str):
+    hours, minutes = map(int, time_str.split(":"))
+    return hours * 3600 + minutes * 60
 
 app = FastAPI()
 
@@ -38,18 +45,50 @@ app.include_router(
     app_routre,
     prefix="/app",
 )
-from pydantic import BaseModel
-class FighterSchema(BaseModel):
-    id: int
-    name: str
 
-    class Config:
-        orm_mode = True
+@app.post("/add-actions-data/")
+def add_actions_data(file: Annotated[bytes, File()]):
+    df = pd.read_excel(file)
+    df['Flag'].fillna(value=0, inplace=True)
+    fight_statistic_list = []
 
-@app.get("/test", response_model=List[FighterSchema])
-async def get_fighters(db: Session = Depends(get_db)):
-    fighters = db.query(Fighter).all()
-    return fighters
+    with session_factory() as session:
+        change = 0
+        figh = int(df['DB ID'][0])
+        f_id = session.query(FightInfo).filter(FightInfo.id == figh).first()
+        f_id.status = df['Status'][0]
+        f_id.author = df['Author'][0]
+        session.commit()
+        for i in range(len(df)):
+            db_id = int(df['DB ID'][i])
+            print(db_id)
+            if db_id != figh:
+                figh = db_id
+                print(True)
+                f_id = session.query(FightInfo).filter(FightInfo.id == figh).first()
+                f_id.status = df['Status'][i]
+                f_id.author = df['Author'][i]
+                session.commit()
+
+            fighter = session.query(Fighter).filter(Fighter.name == df['Wrestler'][i]).first()
+            opponent = session.query(Fighter).filter(Fighter.name == df['Opponent'][i]).first()
+            action = session.query(ActionName).filter(ActionName.name == df['Action'][i]).first()
+            technique = session.query(Technique).filter(Technique.name == df['Technique'][i]).first()
+
+            fight_statistic = FightStatistic(action_number = generate_unique_uuid(), score = df['Score'][i],
+                                successful = df['Successful'][i], 
+                                flag = bool(df['Flag'][i]),
+                                defense_reason = df['Defense'][i], 
+                                fight_id=df['DB ID'], 
+                                fighter_id = fighter.id,
+                                opponent_id = opponent.id, 
+                                action_name_id = action.id, 
+                                technique_id = technique.id,
+                                action_time_second = time_to_seconds(df['Second'][i]), 
+                                )
+            fight_statistic_list.append(fight_statistic)
+        session.bulk_save_objects(fight_statistic_list)
+    return "asd"
 
 
 @app.post("/add-actions-and-techniques")
