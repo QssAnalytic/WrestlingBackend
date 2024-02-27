@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 
-@router.get("/metrics", response_model=List[MetricsOutPut])
+@router.get("/metrics/", response_model=List[MetricsOutPut])
 def metrics(fight_date: str, action_name_id: int, fighter_id: int, db: Session = Depends(get_db)):
     response_list = []
     fight_date = tuple(list(map(int, fight_date.split(","))))
