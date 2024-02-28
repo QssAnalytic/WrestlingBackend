@@ -21,8 +21,8 @@ def generate_unique_uuid():
     return str(uuid.uuid4())
 
 def time_to_seconds(time_str):
-    hours, minutes = map(int, time_str.split(":"))
-    return hours * 3600 + minutes * 60
+    minutes, seconds = map(int, time_str.split(":"))
+    return minutes * 60 + seconds
 
 app = FastAPI()
 
@@ -78,7 +78,7 @@ def add_actions_data(file: Annotated[bytes, File()]):
                                 successful = df['Successful'][i], 
                                 flag = bool(df['Flag'][i]),
                                 defense_reason = df['Defense'][i], 
-                                fight_id=df['DB ID'], 
+                                fight_id=int(df['DB ID'][0]), 
                                 fighter_id = fighter.id,
                                 opponent_id = opponent.id, 
                                 action_name_id = action.id, 
@@ -88,6 +88,7 @@ def add_actions_data(file: Annotated[bytes, File()]):
                                 )
             fight_statistic_list.append(fight_statistic)
             if i % 500 == 0:
+
                 session.bulk_save_objects(fight_statistic_list)
                 session.commit()
                 fight_statistic_list = []
