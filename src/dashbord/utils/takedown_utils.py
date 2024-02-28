@@ -1,7 +1,10 @@
+from typing import TypeVar
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+from database import Base
 
-def takedown_success_rate(engine, params: dict):
+ModelTypeVar = TypeVar("ModelTypeVar", bound=Base)
+def takedown_success_rate_utils(engine, params: dict):
     statement = text("""
     with total as (
         select f.fighter_id, count(*) as total_count from fightstatistics f
@@ -23,7 +26,7 @@ def takedown_success_rate(engine, params: dict):
         takedown_count = conn.execute(statement, params)
     return takedown_count.fetchone()
 
-def takedown_per_match(engine, params: dict):
+def takedown_per_match_utils(engine, params: dict):
     statement = text("""
         with fighter_matches as (
         select s.fighter_id, array_agg(distinct fight_id) fighter_array from fightstatistics s
@@ -53,7 +56,7 @@ def takedown_per_match(engine, params: dict):
         takedown_per_match = conn.execute(statement, params)
     return takedown_per_match.fetchone()
 
-def takedown_average_points_per_fight(engine, params: dict):
+def takedown_average_points_per_fight_utils(engine, params: dict):
     statement = text("""
         with fighter_matches as (
         select s.fighter_id, array_agg(distinct fight_id) fighter_array from fightstatistics s
@@ -83,7 +86,7 @@ def takedown_average_points_per_fight(engine, params: dict):
         takedown_average_points_per_fight = conn.execute(statement, params)
     return takedown_average_points_per_fight.fetchone()
     
-def takedown_count(engine, params: dict):
+def takedown_count_utils(engine, params: dict):
     statement = text("""
         select f.fighter_id, count(*) as successful_count from fightstatistics f
         inner join fightinfos f2 on f.fight_id = f2.id
@@ -94,8 +97,8 @@ def takedown_count(engine, params: dict):
         takedown_count = conn.execute(statement, params)
     return takedown_count.fetchone()
 
-def single_leg_takedown_success_rate(engine, params:dict, db: Session):
-    technique = db.query(engine.model).filter(engine.model.name == "Single leg takedown").first()   
+def single_leg_takedown_success_rate_utils(engine, params:dict, model: ModelTypeVar, db: Session):
+    technique = db.query(model).filter(model.name == "Single leg takedown").first()   
     params['technique_id'] = technique.id
     statement = text("""
         with total as (
@@ -117,8 +120,8 @@ def single_leg_takedown_success_rate(engine, params:dict, db: Session):
         single_leg_takedown_success_rate = conn.execute(statement, params)
     return single_leg_takedown_success_rate.fetchone()
 
-def single_leg_takedown_count(engine, params:dict, db: Session):
-    technique = db.query(engine.model).filter(engine.model.name == "Single leg takedown").first()
+def single_leg_takedown_count_utils(engine, params:dict, model: ModelTypeVar, db: Session):
+    technique = db.query(model).filter(model.name == "Single leg takedown").first()
     params['technique_id'] = technique.id
     statement = text("""
         select f.fighter_id, count(*) as successful_count from fightstatistics f
@@ -130,8 +133,8 @@ def single_leg_takedown_count(engine, params:dict, db: Session):
         single_leg_takedown_count = conn.execute(statement, params)
     return single_leg_takedown_count.fetchone()
 
-def double_leg_takedown_count(engine, params:dict, db: Session):
-    technique = db.query(engine.model).filter(engine.model.name == "Double leg takedown").first()
+def double_leg_takedown_count_utils(engine, params:dict, model: ModelTypeVar, db: Session):
+    technique = db.query(model).filter(model.name == "Double leg takedown").first()
     
     params['technique_id'] = technique.id
     statement = text("""
@@ -145,8 +148,8 @@ def double_leg_takedown_count(engine, params:dict, db: Session):
     return double_leg_takedown_count.fetchone()
 
 
-def double_leg_takedown_success_rate(engine, params:dict, db: Session):
-    technique = db.query(engine.model).filter(engine.model.name == "Double leg takedown").first()   
+def double_leg_takedown_success_rate_utils(engine, params:dict, model: ModelTypeVar, db: Session):
+    technique = db.query(model).filter(model.name == "Double leg takedown").first()   
     params['technique_id'] = technique.id
     statement = text("""
         with total as (

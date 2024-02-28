@@ -59,40 +59,43 @@ def add_actions_data(file: Annotated[bytes, File()]):
         f_id.status = df['Status'][0]
         f_id.author = df['Author'][0]
         session.commit()
-        for i in range(len(df)):
-            db_id = int(df['DB ID'][i])
-            if db_id != figh:
-                figh = db_id
-                f_id = session.query(FightInfo).filter(FightInfo.id == figh).first()
-                f_id.status = df['Status'][i]
-                f_id.author = df['Author'][i]
-                session.commit()
+        try:
+            for i in range(len(df)):
+                db_id = int(df['DB ID'][i])
+                if db_id != figh:
+                    figh = db_id
+                    f_id = session.query(FightInfo).filter(FightInfo.id == figh).first()
+                    f_id.status = df['Status'][i]
+                    f_id.author = df['Author'][i]
+                    session.commit()
 
-            fighter = session.query(Fighter).filter(Fighter.name == df['Wrestler'][i]).first()
-            opponent = session.query(Fighter).filter(Fighter.name == df['Opponent'][i]).first()
-            action = session.query(ActionName).filter(ActionName.name == df['Action'][i]).first()
-            technique = session.query(Technique).filter(Technique.name == "Lateral drop throw").first()
-            print(i)
-            print(df['Second'][i])
-            fight_statistic = FightStatistic(action_number = generate_unique_uuid(), score = df['Score'][i],
-                                successful = df['Successful'][i], 
-                                flag = bool(df['Flag'][i]),
-                                defense_reason = df['Defense'][i], 
-                                fight_id=int(df['DB ID'][0]), 
-                                fighter_id = fighter.id,
-                                opponent_id = opponent.id, 
-                                action_name_id = action.id, 
-                                technique_id = technique.id,
-                                action_time_second = time_to_seconds(df['Second'][i]),
-                                video_link = "swagger"
-                                )
-            fight_statistic_list.append(fight_statistic)
-            if i % 500 == 0:
+                fighter = session.query(Fighter).filter(Fighter.name == df['Wrestler'][i]).first()
+                opponent = session.query(Fighter).filter(Fighter.name == df['Opponent'][i]).first()
+                action = session.query(ActionName).filter(ActionName.name == df['Action'][i]).first()
+                technique = session.query(Technique).filter(Technique.name == "Lateral drop throw").first()
+                print(i)
+                print(df['Second'][i])
+                fight_statistic = FightStatistic(action_number = generate_unique_uuid(), score = df['Score'][i],
+                                    successful = df['Successful'][i], 
+                                    flag = bool(df['Flag'][i]),
+                                    defense_reason = df['Defense'][i], 
+                                    fight_id=int(df['DB ID'][i]), 
+                                    fighter_id = fighter.id,
+                                    opponent_id = opponent.id, 
+                                    action_name_id = action.id, 
+                                    technique_id = technique.id,
+                                    action_time_second = time_to_seconds(df['Second'][i]),
+                                    video_link = "swagger"
+                                    )
+                fight_statistic_list.append(fight_statistic)
+                if i % 500 == 0:
 
-                session.bulk_save_objects(fight_statistic_list)
-                session.commit()
-                fight_statistic_list = []
-    return "asd"
+                    session.bulk_save_objects(fight_statistic_list)
+                    session.commit()
+                    fight_statistic_list = []
+        except Exception as e:
+
+            return str(e)
 
 
 @app.post("/add-actions-and-techniques")
