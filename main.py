@@ -65,7 +65,7 @@ def add_actions_data(file: Annotated[bytes, File()]):
         f_id.author = df['Author'][0]
         session.commit()
         try:
-            for i in range(9040, len(df)):
+            for i in range(len(df)):
                 db_id = int(df['DB ID'][i])
                 if db_id != figh:
                     figh = db_id
