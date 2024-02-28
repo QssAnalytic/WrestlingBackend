@@ -77,7 +77,8 @@ def add_actions_data(file: Annotated[bytes, File()]):
                 fighter = session.query(Fighter).filter(Fighter.name == df['Wrestler'][i]).first()
                 opponent = session.query(Fighter).filter(Fighter.name == df['Opponent'][i]).first()
                 action = session.query(ActionName).filter(ActionName.name == df['Action'][i]).first()
-                technique = session.query(Technique).filter(Technique.name == "Lateral drop throw").first()
+                technique = session.query(Technique).filter(Technique.name == df['Technique'][i]).first()
+                print(df['Wrestler'][i], df['Opponent'][i], df['Action'][i], df['Technique'][i])
                 print(fighter, opponent, action, technique)
                 # print(df['Second'][i])
                 fight_statistic = FightStatistic(action_number = generate_unique_uuid(), score = int(df['Score'][i]),
