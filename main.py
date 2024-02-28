@@ -50,11 +50,7 @@ app.include_router(
 def add_actions_data(file: Annotated[bytes, File()]):
     df = pd.read_excel(file)
     df['Flag'].fillna(value=0, inplace=True)
-    l = []
     a = df['DB ID'].unique()
-    print(len(a))
-    for i in a:
-        l.append(i)
     fight_statistic_list = []
 
     with session_factory() as session:
@@ -72,12 +68,13 @@ def add_actions_data(file: Annotated[bytes, File()]):
                     f_id = session.query(FightInfo).filter(FightInfo.id == figh).first()
                     f_id.status = df['Status'][i]
                     f_id.author = df['Author'][i]
-                    session.commit()
+                    # session.commit()
 
                 fighter = session.query(Fighter).filter(Fighter.name == df['Wrestler'][i]).first()
                 opponent = session.query(Fighter).filter(Fighter.name == df['Opponent'][i]).first()
                 action = session.query(ActionName).filter(ActionName.name == df['Action'][i]).first()
                 technique = session.query(Technique).filter(Technique.name == df['Technique'][i]).first()
+                print(i)
                 print(df['Wrestler'][i], df['Opponent'][i], df['Action'][i], df['Technique'][i])
                 print(fighter, opponent, action, technique)
                 # print(df['Second'][i])
