@@ -50,6 +50,11 @@ app.include_router(
 def add_actions_data(file: Annotated[bytes, File()]):
     df = pd.read_excel(file)
     df['Flag'].fillna(value=0, inplace=True)
+    l = []
+    a = df['DB ID'].unique()
+    print(len(a))
+    for i in a:
+        l.append(i)
     fight_statistic_list = []
 
     with session_factory() as session:
@@ -73,12 +78,12 @@ def add_actions_data(file: Annotated[bytes, File()]):
                 opponent = session.query(Fighter).filter(Fighter.name == df['Opponent'][i]).first()
                 action = session.query(ActionName).filter(ActionName.name == df['Action'][i]).first()
                 technique = session.query(Technique).filter(Technique.name == "Lateral drop throw").first()
-                print(i)
-                print(df['Second'][i])
-                fight_statistic = FightStatistic(action_number = generate_unique_uuid(), score = df['Score'][i],
-                                    successful = df['Successful'][i], 
+                # print(i)
+                # print(df['Second'][i])
+                fight_statistic = FightStatistic(action_number = generate_unique_uuid(), score = int(df['Score'][i]),
+                                    successful = bool(df['Successful'][i]), 
                                     flag = bool(df['Flag'][i]),
-                                    defense_reason = df['Defense'][i], 
+                                    defense_reason = bool(df['Defense'][i]), 
                                     fight_id=int(df['DB ID'][i]), 
                                     fighter_id = fighter.id,
                                     opponent_id = opponent.id, 
@@ -88,14 +93,15 @@ def add_actions_data(file: Annotated[bytes, File()]):
                                     video_link = "swagger"
                                     )
                 fight_statistic_list.append(fight_statistic)
-                if i % 500 == 0:
-
+                if i % 100 == 0:
+                    print(i)
                     session.bulk_save_objects(fight_statistic_list)
                     session.commit()
                     fight_statistic_list = []
         except Exception as e:
 
             return str(e) + "setr="+ str(i) + "db_id=" +str(int(df['DB ID'][i]))
+    return "das"
 
 
 @app.post("/add-actions-and-techniques")
