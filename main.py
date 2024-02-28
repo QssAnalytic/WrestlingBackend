@@ -95,7 +95,7 @@ def add_actions_data(file: Annotated[bytes, File()]):
                     fight_statistic_list = []
         except Exception as e:
 
-            return str(e)
+            return str(e) + str(i)
 
 
 @app.post("/add-actions-and-techniques")
