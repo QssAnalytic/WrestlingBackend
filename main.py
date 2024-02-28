@@ -84,11 +84,13 @@ def add_actions_data(file: Annotated[bytes, File()]):
                                 action_name_id = action.id, 
                                 technique_id = technique.id,
                                 action_time_second = time_to_seconds(df['Second'][i]),
-                                video_link = "https://railway.app/project/08ae5d6f-7e84-4490-8fcd-c649e579b534"
+                                video_link = "swagger"
                                 )
             fight_statistic_list.append(fight_statistic)
-        session.bulk_save_objects(fight_statistic_list)
-        session.commit()
+            if i % 500 == 0:
+                session.bulk_save_objects(fight_statistic_list)
+                session.commit()
+                fight_statistic_list = []
     return "asd"
 
 
