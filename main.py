@@ -68,7 +68,7 @@ def add_actions_data(file: Annotated[bytes, File()]):
                     f_id = session.query(FightInfo).filter(FightInfo.id == figh).first()
                     f_id.status = df['Status'][i]
                     f_id.author = df['Author'][i]
-                    # session.commit()
+                    session.commit()
 
                 fighter = session.query(Fighter).filter(Fighter.name == df['Wrestler'][i]).first()
                 opponent = session.query(Fighter).filter(Fighter.name == df['Opponent'][i]).first()
