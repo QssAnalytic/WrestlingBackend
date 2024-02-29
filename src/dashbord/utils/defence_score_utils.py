@@ -28,7 +28,7 @@ def pin_to_parter_escape_rate_utils(engine, params: dict, obj:dict, db: Session)
                         ),
             
         calculation as (
-        select t.opponent_id,round(coalesce(cast(successful_escape as decimal) / cast(total_count as decimal), 0), 2) action_escape_rate
+        select t.opponent_id,round(coalesce(cast(successful_escape as decimal) / cast(total_count as decimal), 1), 2) action_escape_rate
             from total t left join success s on s.opponent_id = t.opponent_id)  
 
         select * from (select opponent_id, action_escape_rate,
