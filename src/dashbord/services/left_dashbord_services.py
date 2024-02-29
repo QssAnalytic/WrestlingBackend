@@ -4,7 +4,7 @@ from typing import Generic, TypeVar, Type
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from src.app.models import FightInfo, Technique
+from src.app.models import FightInfo, Technique, ActionName
 from src.dashbord.utils.takedown_utils import *
 from database import Base, engine, get_db
 
@@ -17,7 +17,13 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         self.model = model
         self.engine = engine
 
+
+    
+
     def takedown_statistic(self, params: dict, db: Session):
+        action = db.query(ActionName).filter(ActionName.name == "Takedown").first()
+        obj = {}
+        params['action_name_id'] = action.id
         response_list = []
         take_down_sum = 0
         takedown_success_rate = takedown_success_rate_utils(engine=self.engine, params=params)
@@ -68,8 +74,10 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
             response_list.append({"metrics":"Single leg takedown count","score": single_leg_takedown_count[-1]})
             take_down_sum+=float(single_leg_takedown_count[-1])
         else: response_list.append({"metrics":"Single leg takedown count","score": 0})
-
-        return response_list, round(take_down_sum/float(len(response_list)),2)*100
+        obj["name"] = "Takedown"
+        obj["metrics"] = response_list
+        obj["avg"] = round(take_down_sum/float(len(response_list)),2)*100
+        return obj
 
     
 medal_left_dashbord_service = MedalLeftDashbordSerivices(Technique, engine)
