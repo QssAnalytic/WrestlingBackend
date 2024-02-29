@@ -18,6 +18,15 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         self.model = model
         self.engine = engine
 
+    def offense_score_statistic(self, params:dict, db: Session):
+        obj = {"metrics": "",
+            "score": 0,
+            "successful_count":0,
+            "total_count":0,
+            "bar_pct": 0}
+        response_list = []
+        response = {}
+        response["name"] = "Offense score"
 
     def defence_score_statistic(self, params:dict, db: Session):
         obj = {"metrics": "",
