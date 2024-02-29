@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from database import Base
 from src.app.models import ActionName
 
-def action_success_rate(engine, params: dict, obj:dict, db: Session):
+def offence_action_success_rate_utils(engine, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     """"""
     statement = text("""
@@ -26,7 +26,7 @@ def action_success_rate(engine, params: dict, obj:dict, db: Session):
             select fighter_id, takedown_success_rate, successful_count, total_count,round((takedown_success_rate- 0) /(max(takedown_success_rate) over() - 0), 2) bar_pct from 
                 (select t.fighter_id, coalesce(successful_count, 0) successful_count, total_count, round(coalesce(cast(successful_count as decimal) / cast(total_count as decimal), 1), 2) takedown_success_rate
                 from success s right join total t on s.fighter_id = t.fighter_id))
-            where fighter_id = 22638
+            where fighter_id = :fighter_id
         """)
     with engine.connect() as conn:
         action_success_rate = conn.execute(statement, params)
