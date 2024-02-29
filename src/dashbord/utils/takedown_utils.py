@@ -4,13 +4,9 @@ from sqlalchemy.orm import Session
 from database import Base
 
 ModelTypeVar = TypeVar("ModelTypeVar", bound=Base)
-def takedown_success_rate_utils(engine, params: dict):
+def takedown_success_rate_utils(engine, params: dict, obj: dict):
     takedown_success_rate_string = "Takedown Success rate"
-    obj = {"metrics": "",
-            "score": 0,
-            "successful_count":0,
-            "total_count":0,
-            "bar_pct": 0}
+    obj_copy = obj.copy()
     statement = text("""
         with total as (
                 select f.fighter_id, count(*) as total_count from fightstatistics f
@@ -26,7 +22,7 @@ def takedown_success_rate_utils(engine, params: dict):
                 group by f.fighter_id
                 )
             select * from (    
-            select fighter_id, takedown_success_rate, successful_count, total_count,round((takedown_success_rate - min(takedown_success_rate) over()) /(max(takedown_success_rate) over() - min(takedown_success_rate) over()), 2) bar_pct from 
+            select fighter_id, takedown_success_rate, successful_count, total_count,round((takedown_success_rate - 0) /(max(takedown_success_rate) over() - 0), 2) bar_pct from 
                 (select t.fighter_id, coalesce(successful_count, 0) successful_count, total_count, round(coalesce(cast(successful_count as decimal) / cast(total_count as decimal), 0), 2) takedown_success_rate
                 from success s right join total t on s.fighter_id = t.fighter_id))
                 where fighter_id = :fighter_id
@@ -34,16 +30,18 @@ def takedown_success_rate_utils(engine, params: dict):
     with engine.connect() as conn:
         takedown_count = conn.execute(statement, params)
     takedown_success_rate = takedown_count.fetchone()
-    print(takedown_success_rate)
+    obj_copy["metrics"] = takedown_success_rate_string
     if takedown_success_rate is not None:
-        obj["metrics"] = takedown_success_rate_string
-        obj["score"] = float(takedown_success_rate[1])
-        obj["successful_count"] = takedown_success_rate[2]
-        obj["total_count"] = takedown_success_rate[3]
-        obj["bar_pct"] = float(takedown_success_rate[4])
-    return obj
+        
+        obj_copy["score"] = float(takedown_success_rate[1])
+        obj_copy["successful_count"] = takedown_success_rate[2]
+        obj_copy["total_count"] = takedown_success_rate[3]
+        obj_copy["bar_pct"] = float(takedown_success_rate[4])
+    return obj_copy
 
-def takedown_per_match_utils(engine, params: dict):
+def takedown_per_match_utils(engine, params: dict, obj:dict):
+    
+    obj_copy = obj.copy()
     statement = text("""
         with fighter_matches as (
         select s.fighter_id, array_agg(distinct fight_id) fighter_array from fightstatistics s
@@ -65,16 +63,28 @@ def takedown_per_match_utils(engine, params: dict):
         inner join fightinfos f2 on f.fight_id = f2.id
         inner join actions a on f.action_name_id = a.id
         where extract(year from f2.fight_date) in :fight_date and f.action_name_id = :action_name_id and f.successful = true 
-        group by f.fighter_id)
+        group by f.fighter_id),
+        total as(
         select fighter, coalesce(round(cast(successful_count as decimal)/cast(unique_matches as decimal), 2), 0) as tkd_per_match 
-        from com c left join takedowns_count t on c.fighter = t.fighter_id where fighter= :fighter_id
+        from com c left join takedowns_count t on c.fighter = t.fighter_id)
+        select * from (
+        select *, round((tkd_per_match - 0) /(max(tkd_per_match) over() - 0), 2) bar_pct from total t) 
+        where fighter = :fighter_id
         """)
     with engine.connect() as conn:
         takedown_per_match = conn.execute(statement, params)
-    return takedown_per_match.fetchone()
+    takedown_per_match_fetch = takedown_per_match.fetchone()
+    obj_copy["metrics"] = "Takedown per fight total"
+    if takedown_per_match is not None:
+        
+        obj_copy["score"] = float(takedown_per_match_fetch[1])
+        obj_copy["bar_pct"] = float(takedown_per_match_fetch[2])
+    return obj_copy
 
-def takedown_average_points_per_fight_utils(engine, params: dict):
+def takedown_average_points_per_fight_utils(engine, params: dict, obj: dict):
+    obj_copy = obj.copy()
     statement = text("""
+        --takedown average points per fight
         with fighter_matches as (
         select s.fighter_id, array_agg(distinct fight_id) fighter_array from fightstatistics s
             inner join fightinfos i on s.fight_id = i.id
@@ -95,95 +105,163 @@ def takedown_average_points_per_fight_utils(engine, params: dict):
         inner join fightinfos f2 on f.fight_id = f2.id
         inner join actions a on f.action_name_id = a.id
         where extract(year from f2.fight_date) in :fight_date and f.action_name_id = :action_name_id and f.successful = true 
-        group by f.fighter_id)
-        select fighter, coalesce(round(cast(successful_count as decimal)/cast(unique_matches as decimal), 2), 0) as tkd_per_match 
-        from com c left join takedowns_count t on c.fighter = t.fighter_id where c.fighter = :fighter_id
+        group by f.fighter_id),
+        calculation as (
+        select fighter, coalesce(round(cast(successful_count as decimal)/cast(unique_matches as decimal), 2), 0) as tkd_per_match
+        from com c left join takedowns_count t on c.fighter = t.fighter_id)
+        select * from (select fighter, tkd_per_match,
+                    round(cast((tkd_per_match - 0) as decimal) / cast((max(tkd_per_match) over() - 0) as decimal), 2) bar_pct
+                    from calculation)
+        where fighter = :fighter_id
         """)
     with engine.connect() as conn:
         takedown_average_points_per_fight = conn.execute(statement, params)
-    return takedown_average_points_per_fight.fetchone()
+    fetch = takedown_average_points_per_fight.fetchone()
+    obj_copy["metrics"] = "Average takedown points per fight"
+    if fetch is not None:
+        
+        obj_copy["score"] = float(fetch[1])
+        obj_copy["bar_pct"] = float(fetch[2])
+    return obj_copy
+
     
-def takedown_count_utils(engine, params: dict):
+def takedown_count_utils(engine, params: dict, obj: dict):
+    obj_copy = obj.copy()
     statement = text("""
-        select f.fighter_id, count(*) as successful_count from fightstatistics f
-        inner join fightinfos f2 on f.fight_id = f2.id
-        where extract(year from f2.fight_date) in :fight_date and f.action_name_id = :action_name_id and f.successful = true and f2.fighter_id = :fighter_id  
-        group by f.fighter_id
+        with success as (select f.fighter_id, count(*) as successful_count from fightstatistics f
+            inner join fightinfos f2 on f.fight_id = f2.id
+            where extract(year from f2.fight_date) in :fight_date and f.action_name_id = :action_name_id and f.successful = true 
+            group by f.fighter_id)
+            select * from (
+            select *, round(cast((successful_count - 0) as Decimal) /cast((max(successful_count) over() - 0) as Decimal), 2) bar_pct 
+            from success) where fighter_id = :fighter_id
         """)
     with engine.connect() as conn:
         takedown_count = conn.execute(statement, params)
-    return takedown_count.fetchone()
+    fetch = takedown_count.fetchone()
+    obj_copy["metrics"] = "Takedown Count"
+    if fetch is not None:
+        
+        obj_copy["score"] = float(fetch[1])
+        obj_copy["bar_pct"] = float(fetch[2])
+    return obj_copy
 
-def single_leg_takedown_success_rate_utils(engine, params:dict, model: ModelTypeVar, db: Session):
+
+def single_leg_takedown_success_rate_utils(engine, params:dict, model: ModelTypeVar, obj:dict, db: Session):
     technique = db.query(model).filter(model.name == "Single leg takedown").first()   
     params['technique_id'] = technique.id
+    obj_copy = obj.copy()
     statement = text("""
+        --single_leg_takedown_success_rate
         with total as (
-        select f.fighter_id, count(*) as total_count from fightstatistics f
-        inner join fightinfos f2 on f.fight_id = f2.id
-        where extract(year from f2.fight_date) in :fight_date and f.technique_id = :technique_id --action_filter
-        group by f.fighter_id 
-        ),
-        success as (
-        select f.fighter_id, count(*) as successful_count from fightstatistics f
-        inner join fightinfos f2 on f.fight_id = f2.id
-        where extract(year from f2.fight_date) in :fight_date and f.technique_id = :technique_id and f.successful = true 
-        group by f.fighter_id 
-        )
-        select s.fighter_id,round(coalesce(cast(successful_count as decimal) / cast(total_count as decimal), 0), 2) single_leg_success_rate
-        from success s left join total t on s.fighter_id = t.fighter_id where s.fighter_id = :fighter_id
+                select f.fighter_id, count(*) as total_count from fightstatistics f
+                inner join fightinfos f2 on f.fight_id = f2.id
+                where extract(year from f2.fight_date) in :fight_date and f.technique_id = :technique_id
+                group by f.fighter_id
+                ),
+                success as (
+                select f.fighter_id, count(*) as successful_count from fightstatistics f
+                inner join fightinfos f2 on f.fight_id = f2.id
+                where extract(year from f2.fight_date) in :fight_date and f.technique_id = :technique_id and f.successful = true 
+                group by f.fighter_id
+                )
+            select * from (    
+            select fighter_id, single_leg_takedown_success_rate, successful_count, total_count,round(cast((single_leg_takedown_success_rate - 0) as decimal) / cast((max(single_leg_takedown_success_rate) over() - 0) as decimal), 2) bar_pct from 
+                (select t.fighter_id, coalesce(successful_count, 0) successful_count, total_count, round(coalesce(cast(successful_count as decimal) / cast(total_count as decimal), 0), 2) single_leg_takedown_success_rate 
+                from success s right join total t on s.fighter_id = t.fighter_id))
+                where fighter_id = :fighter_id
         """)
     with engine.connect() as conn:
         single_leg_takedown_success_rate = conn.execute(statement, params)
-    return single_leg_takedown_success_rate.fetchone()
+    fetch = single_leg_takedown_success_rate.fetchone()
+    obj_copy["metrics"] = "Singe Leg takedown Success Rate"
+    if fetch is not None:
+        obj_copy["successful_count"] = fetch[2]
+        obj_copy["score"] = float(fetch[1])
+        obj_copy["successful_count"] = fetch[2]
+        obj_copy["total_count"] = fetch[3]
+        obj_copy["bar_pct"] = float(fetch[4])
+    return obj_copy
 
-def single_leg_takedown_count_utils(engine, params:dict, model: ModelTypeVar, db: Session):
+
+def single_leg_takedown_count_utils(engine, params:dict, model: ModelTypeVar, obj:dict, db: Session):
     technique = db.query(model).filter(model.name == "Single leg takedown").first()
+    obj_copy = obj.copy()
     params['technique_id'] = technique.id
     statement = text("""
-        select f.fighter_id, count(*) as successful_count from fightstatistics f
-        inner join fightinfos f2 on f.fight_id = f2.id
-        where extract(year from f2.fight_date) in :fight_date and f.technique_id = :technique_id and f.successful = true and f.fighter_id = :fighter_id
-        group by f.fighter_id
+        with success as (select f.fighter_id, count(*) as successful_count from fightstatistics f
+            inner join fightinfos f2 on f.fight_id = f2.id
+            where extract(year from f2.fight_date) in :fight_date and f.technique_id = :technique_id and f.successful = true 
+            group by f.fighter_id)
+            select * from (
+            select *, round(cast((successful_count - 0) as Decimal) /cast((max(successful_count) over() - 0) as Decimal), 2) bar_pct 
+            from success) where fighter_id = :fighter_id
         """)
     with engine.connect() as conn:
         single_leg_takedown_count = conn.execute(statement, params)
-    return single_leg_takedown_count.fetchone()
 
-def double_leg_takedown_count_utils(engine, params:dict, model: ModelTypeVar, db: Session):
+    fetch = single_leg_takedown_count.fetchone()
+    obj_copy["metrics"] = "Single leg takedown count"
+    if fetch is not None:
+        obj_copy["score"] = float(fetch[1])
+        obj_copy["bar_pct"] = float(fetch[2])
+    return obj_copy
+
+def double_leg_takedown_count_utils(engine, params:dict, model: ModelTypeVar, obj:dict, db: Session):
     technique = db.query(model).filter(model.name == "Double leg takedown").first()
-    
+    obj_copy = obj.copy()
     params['technique_id'] = technique.id
     statement = text("""
-        select f.fighter_id, count(*) as successful_count from fightstatistics f
-        inner join fightinfos f2 on f.fight_id = f2.id
-        where extract(year from f2.fight_date) in :fight_date and f.technique_id = :technique_id and f.successful = true and f.fighter_id = :fighter_id
-        group by f.fighter_id
+        with success as (select f.fighter_id, count(*) as successful_count from fightstatistics f
+            inner join fightinfos f2 on f.fight_id = f2.id
+            where extract(year from f2.fight_date) in :fight_date and f.technique_id = :technique_id and f.successful = true 
+            group by f.fighter_id)
+            select * from (
+            select *, round(cast((successful_count - 0) as Decimal) /cast((max(successful_count) over() - 0) as Decimal), 2) bar_pct 
+            from success) where fighter_id = :fighter_id
         """)
     with engine.connect() as conn:
         double_leg_takedown_count = conn.execute(statement, params)
-    return double_leg_takedown_count.fetchone()
+    fetch = double_leg_takedown_count.fetchone()
+    obj_copy["metrics"] = "Double leg takedown counts"
+    if fetch is not None:
+        obj_copy["score"] = float(fetch[1])
+        obj_copy["bar_pct"] = float(fetch[2])
+    return obj_copy
 
 
-def double_leg_takedown_success_rate_utils(engine, params:dict, model: ModelTypeVar, db: Session):
+def double_leg_takedown_success_rate_utils(engine, params:dict, model: ModelTypeVar, obj:dict, db: Session):
+    obj_copy = obj.copy()
     technique = db.query(model).filter(model.name == "Double leg takedown").first()   
     params['technique_id'] = technique.id
     statement = text("""
         with total as (
-        select f.fighter_id, count(*) as total_count from fightstatistics f
-        inner join fightinfos f2 on f.fight_id = f2.id
-        where extract(year from f2.fight_date) in :fight_date and f.technique_id = :technique_id --action_filter
-        group by f.fighter_id 
-        ),
-        success as (
-        select f.fighter_id, count(*) as successful_count from fightstatistics f
-        inner join fightinfos f2 on f.fight_id = f2.id
-        where extract(year from f2.fight_date) in :fight_date and f.technique_id = :technique_id and f.successful = true 
-        group by f.fighter_id 
-        )
-        select s.fighter_id,round(coalesce(cast(successful_count as decimal) / cast(total_count as decimal), 0), 2) single_leg_success_rate
-        from success s left join total t on s.fighter_id = t.fighter_id where s.fighter_id = :fighter_id
+                select f.fighter_id, count(*) as total_count from fightstatistics f
+                inner join fightinfos f2 on f.fight_id = f2.id
+                where extract(year from f2.fight_date) in :fight_date and f.technique_id = :technique_id
+                group by f.fighter_id
+                ),
+                success as (
+                select f.fighter_id, count(*) as successful_count from fightstatistics f
+                inner join fightinfos f2 on f.fight_id = f2.id
+                where extract(year from f2.fight_date) in :fight_date and f.technique_id = :technique_id and f.successful = true 
+                group by f.fighter_id
+                )
+            select * from (    
+            select fighter_id, single_leg_takedown_success_rate, successful_count, total_count,round(cast((single_leg_takedown_success_rate - 0) as decimal) / cast((max(single_leg_takedown_success_rate) over() - 0) as decimal), 2) bar_pct from 
+                (select t.fighter_id, coalesce(successful_count, 0) successful_count, total_count, round(coalesce(cast(successful_count as decimal) / cast(total_count as decimal), 0), 2) single_leg_takedown_success_rate 
+                from success s right join total t on s.fighter_id = t.fighter_id))
+                where fighter_id = :fighter_id
         """)
     with engine.connect() as conn:
         double_leg_takedown_success_rate = conn.execute(statement, params)
-    return double_leg_takedown_success_rate.fetchone()
+
+    fetch = double_leg_takedown_success_rate.fetchone()
+    obj_copy["metrics"] = "Double Leg takedown Success Rate"
+    if fetch is not None:
+        obj_copy["successful_count"] = fetch[2]
+        obj_copy["score"] = float(fetch[1])
+        obj_copy["successful_count"] = fetch[2]
+        obj_copy["total_count"] = fetch[3]
+        obj_copy["bar_pct"] = float(fetch[4])
+    return obj_copy
