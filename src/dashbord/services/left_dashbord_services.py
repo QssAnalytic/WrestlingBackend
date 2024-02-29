@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from src.app.models import FightInfo, Technique, ActionName
 from src.dashbord.utils.takedown_utils import *
+from src.dashbord.utils.defence_score_utils import *
 from database import Base, engine, get_db
 
 ModelTypeVar = TypeVar("ModelTypeVar", bound=Base)
@@ -18,7 +19,31 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         self.engine = engine
 
 
-    
+    def defence_score_statistic(self, params:dict, db: Session):
+        action = db.query(ActionName).filter(ActionName.name == "Pin to parter").first()
+        obj = {}
+        params['action_name_id'] = action.id
+        response_list = []
+        defence_score_sum = 0
+        pin_to_parter_escape_rate_string = "Pin to parter escape rate"
+        takedown_escape_rate_string = "Takedown escape rate"
+        pin_to_parter_escape_rate = pin_to_parter_escape_rate_utils(engine=self.engine, params=params)
+        takedown_escape_rate = takedown_escape_rate_utils(engine=self.engine, params=params)
+
+        if takedown_escape_rate is not None:
+            response_list.append({"metrics": takedown_escape_rate_string,"score": takedown_escape_rate[-1]})
+        else: response_list.append({"metrics": takedown_escape_rate_string,"score": 0})
+
+
+        if pin_to_parter_escape_rate is not None:
+            response_list.append({"metrics": pin_to_parter_escape_rate_string,"score": pin_to_parter_escape_rate[-1]})
+            defence_score_sum+=float(pin_to_parter_escape_rate[-1])
+        else: response_list.append({"metrics": pin_to_parter_escape_rate_string,"score": 0})
+
+        obj["name"] = "Defence Score"
+        obj["metrics"] = response_list
+        obj["avg"] = round(defence_score_sum/float(len(response_list)),2)*100
+        return obj
 
     def takedown_statistic(self, params: dict, db: Session):
         action = db.query(ActionName).filter(ActionName.name == "Takedown").first()
@@ -35,46 +60,56 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         single_leg_takedown_count = single_leg_takedown_count_utils(engine=self.engine, params=params, model=self.model, db=db)
         double_leg_takedown_success_rate = double_leg_takedown_success_rate_utils(engine=self.engine, params=params, model=self.model, db=db)
 
+        takedown_success_rate_string = "Takedown Success rate"
+        takedown_per_match_string = "Takedown per fight total"
+        takedown_average_points_per_fight_string  = "Average takedown points per fight"
+        takedown_count_string = "Takedown Count"
+        single_leg_takedown_count_string = "Single leg takedown count"
+        single_leg_takedown_success_rate_string = "Singe Leg takedown Success Rate"
+        double_leg_takedown_count_string = "Double leg takedown counts"
+        double_leg_takedown_success_rate_string = "Double leg takedown"
+
+
         if takedown_success_rate is not None:
-            response_list.append({"metrics":"Takedown success rate","score": takedown_success_rate[-1]})
+            response_list.append({"metrics": takedown_success_rate_string,"score": takedown_success_rate[-1]})
             take_down_sum+=float(takedown_success_rate[-1])
-        else: response_list.append({"metrics":"Takedown success rate","score": 0})
+        else: response_list.append({"metrics": takedown_success_rate_string,"score": 0})
 
         if takedown_per_match is not None:
-            response_list.append({"metrics":"Takedown per match","score": takedown_per_match[-1]})
+            response_list.append({"metrics": takedown_per_match_string,"score": takedown_per_match[-1]})
             take_down_sum+=float(takedown_per_match[-1])
-        else: response_list.append({"metrics":"Takedown per match","score": 0})
+        else: response_list.append({"metrics": takedown_per_match_string,"score": 0})
 
         if takedown_average_points_per_fight is  not None:
-            response_list.append({"metrics":"Takedown average points per fight","score": takedown_average_points_per_fight[-1]})
+            response_list.append({"metrics": takedown_average_points_per_fight_string,"score": takedown_average_points_per_fight[-1]})
             take_down_sum+=float(takedown_average_points_per_fight[-1])
-        else: response_list.append({"metrics":"Takedown average points per fight","score": 0})
+        else: response_list.append({"metrics": takedown_average_points_per_fight_string,"score": 0})
 
         if takedown_count is not None:
-            response_list.append({"metrics":"Takedown count","score": takedown_count[-1]})
+            response_list.append({"metrics": takedown_count_string,"score": takedown_count[-1]})
             take_down_sum+=float(takedown_count[-1])
-        else: response_list.append({"metrics":"Takedown count","score": 0})
+        else: response_list.append({"metrics": takedown_count_string,"score": 0})
 
         if double_leg_takedown_count is not None:
-            response_list.append({"metrics":"Double leg takedown count","score": double_leg_takedown_count[-1]})
+            response_list.append({"metrics":double_leg_takedown_count_string,"score": double_leg_takedown_count[-1]})
             take_down_sum+=float(double_leg_takedown_count[-1])
-        else: response_list.append({"metrics":"Double leg takedown count","score": 0})
+        else: response_list.append({"metrics":double_leg_takedown_count_string,"score": 0})
 
         if double_leg_takedown_success_rate is not None:
-            response_list.append({"metrics":"Double leg takedown success rate","score": double_leg_takedown_success_rate[-1]})
+            response_list.append({"metrics":double_leg_takedown_success_rate_string,"score": double_leg_takedown_success_rate[-1]})
             take_down_sum+=float(double_leg_takedown_success_rate[-1])
-        else: response_list.append({"metrics":"Double leg takedown success rate","score": 0})
+        else: response_list.append({"metrics":double_leg_takedown_success_rate_string,"score": 0})
 
         if single_leg_takedown_success_rate is not None:
-            response_list.append({"metrics":"Single leg takedown success rate","score": single_leg_takedown_success_rate[-1]})
+            response_list.append({"metrics":single_leg_takedown_success_rate_string,"score": single_leg_takedown_success_rate[-1]})
             take_down_sum+=float(single_leg_takedown_success_rate[-1])
-        else: response_list.append({"metrics":"Single leg takedown success rate","score": 0})
+        else: response_list.append({"metrics":single_leg_takedown_success_rate_string,"score": 0})
         
         if single_leg_takedown_count is not None:
-            response_list.append({"metrics":"Single leg takedown count","score": single_leg_takedown_count[-1]})
+            response_list.append({"metrics":single_leg_takedown_count_string,"score": single_leg_takedown_count[-1]})
             take_down_sum+=float(single_leg_takedown_count[-1])
-        else: response_list.append({"metrics":"Single leg takedown count","score": 0})
-        obj["name"] = "Takedown"
+        else: response_list.append({"metrics":single_leg_takedown_count_string,"score": 0})
+        obj["name"] = "Takedown Score"
         obj["metrics"] = response_list
         obj["avg"] = round(take_down_sum/float(len(response_list)),2)*100
         return obj
