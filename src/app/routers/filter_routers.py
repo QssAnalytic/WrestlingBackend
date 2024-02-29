@@ -28,7 +28,6 @@ def get_dates(db: Session = Depends(get_db)):
 @router.get("/tournaments/", response_model=List[TournamentBaseInfos])
 def get_all_tournament(date: Optional[int] = None, db: Session = Depends(get_db)):
     if date != None:
-
         response = filter.get_multi(date=date,db=db)
     if date == None:
         response = filter.fech_multi(db=db)
@@ -43,16 +42,12 @@ def get_weight_list(tournament_id: Optional[int] = None, wrestling_type: Optiona
 
 @router.get("/style/", response_model=List[WrestlingStyleOutPutBase])
 def get_weight_type(tournament_id: Optional[int] = None, db: Session = Depends(get_db)):
-    if tournament_id !=None:
-        response = filter.get_wrestling_type(tournament_id=tournament_id, db=db)
-    else: response = filter.fech_multi(db=db)
+    response = filter.get_wrestling_type(tournament_id=tournament_id, db=db)
     return response
 
 
 @router.get("/stages/", response_model=List[StageOutPutBase])
 def get_stage_list(weight: Optional[int] = None, db: Session = Depends(get_db)):
-    if weight != None:
-        response = filter.get_stages(weight=weight, db=db)
-    else: response = filter.fech_multi(db=db)
+    response = filter.get_stages(weight=weight, db=db)
     return response
 

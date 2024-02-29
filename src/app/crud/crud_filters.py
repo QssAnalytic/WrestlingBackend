@@ -1,3 +1,4 @@
+from typing import Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import select, extract, cast, func, Integer, and_
 from src.app.crud.base import CRUDBase
@@ -6,7 +7,7 @@ from src.app.schemas.tournament_schemas import TournamentBaseInfos
 
 class CRUDTournament(CRUDBase[Tournament,TournamentBaseInfos, TournamentBaseInfos]):
     
-    def get_weights(self, tournament_id: int, wrestling_type: str, db: Session):
+    def get_weights(self, tournament_id: Optional[int], wrestling_type: Optional[str], db: Session):
         query = select(FightInfo)
 
         if tournament_id is not None:
@@ -21,11 +22,11 @@ class CRUDTournament(CRUDBase[Tournament,TournamentBaseInfos, TournamentBaseInfo
         ).scalars().all()
         return data
     
-    def get_wrestling_type(self, tournament_id: int, db: Session):
-
-        data = db.execute(
-            select(FightInfo).filter(FightInfo.tournament_id == tournament_id)\
-                .distinct(FightInfo.wrestling_type)
+    def get_wrestling_type(self, tournament_id: Optional[int], db: Session):
+        query = select(FightInfo)
+        if tournament_id != None:
+            query = query.filter(FightInfo.tournament_id == tournament_id)
+        data = db.execute(query.distinct(FightInfo.wrestling_type)
         ).scalars().all()
         return data
 
@@ -35,10 +36,11 @@ class CRUDTournament(CRUDBase[Tournament,TournamentBaseInfos, TournamentBaseInfo
         ).scalars().all()
         return data
     
-    def get_stages(self, weight: int, db: Session):
-        data = db.execute(
-            select(FightInfo).filter(FightInfo.weight_category == weight)\
-                .distinct(FightInfo.stage)
+    def get_stages(self, weight: Optional[int], db: Session):
+        query = select(FightInfo)
+        if weight !=None:
+            query = query.filter(FightInfo.weight_category == weight)
+        data = db.execute(query.distinct(FightInfo.stage)
         ).scalars().all()
         return data
     

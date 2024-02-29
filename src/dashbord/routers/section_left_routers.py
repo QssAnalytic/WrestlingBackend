@@ -22,15 +22,15 @@ def metrics(fight_date: str, action_name_id: int, fighter_id: int, db: Session =
     return response_list
 
 
-# @router.get("/metrics/")
-# def metrics(fight_date: str, action_name_id: int, fighter_id: int, db: Session = Depends(get_db)):
-#     fight_date = tuple(list(map(int, fight_date.split(","))))
-#     params = {"fight_date": fight_date, "action_name_id": action_name_id, "fighter_id": fighter_id}
-#     response_list = []
-#     res_obj = {}
-#     res_obj["name"] = "Takedown"
-#     res_obj["metrics"], res_obj["avg"] = medal_left_dashbord_service.takedown_statistic(params=params, db=db)
-#     response_list.append(res_obj.copy())
+@router.get("/metrics/")
+def metrics(fight_date: str, action_name_id: int, fighter_id: int, db: Session = Depends(get_db)):
+    fight_date = tuple(list(map(int, fight_date.split(","))))
+    params = {"fight_date": fight_date, "action_name_id": action_name_id, "fighter_id": fighter_id}
+    response_list = []
+    res_obj = {}
+    res_obj["name"] = "Takedown"
+    res_obj["metrics"], res_obj["avg"] = medal_left_dashbord_service.takedown_statistic(params=params, db=db)
+    response_list.append(res_obj.copy())
     
 
-#     return response_list
+    return response_list
