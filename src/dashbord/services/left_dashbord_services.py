@@ -67,21 +67,21 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response_list = []
         takedown_success_rate_obj = takedown_success_rate_utils(engine=self.engine, params=params, obj = obj)
         takedown_per_match_obj = takedown_per_match_utils(engine=self.engine, params=params, obj = obj)
-        takedown_average_points_per_fight_obj = takedown_average_points_per_fight_utils(engine=self.engine, params=params, obj = obj)
-        takedown_count_obj = takedown_count_utils(engine=self.engine, params=params, obj = obj)
-        double_leg_takedown_count_obj = double_leg_takedown_count_utils(engine=self.engine, params=params,model=self.model,obj = obj, db=db)
-        single_leg_takedown_success_obj = single_leg_takedown_success_rate_utils(engine=self.engine, params=params, model=self.model, obj=obj, db=db)
-        single_leg_takedown_count_obj = single_leg_takedown_count_utils(engine=self.engine, params=params, model=self.model,obj=obj, db=db)
-        double_leg_takedown_success_rate_obj = double_leg_takedown_success_rate_utils(engine=self.engine, params=params, model=self.model,obj=obj, db=db)
+        # takedown_average_points_per_fight_obj = takedown_average_points_per_fight_utils(engine=self.engine, params=params, obj = obj)
+        # takedown_count_obj = takedown_count_utils(engine=self.engine, params=params, obj = obj)
+        # double_leg_takedown_count_obj = double_leg_takedown_count_utils(engine=self.engine, params=params,model=self.model,obj = obj, db=db)
+        # single_leg_takedown_success_obj = single_leg_takedown_success_rate_utils(engine=self.engine, params=params, model=self.model, obj=obj, db=db)
+        # single_leg_takedown_count_obj = single_leg_takedown_count_utils(engine=self.engine, params=params, model=self.model,obj=obj, db=db)
+        # double_leg_takedown_success_rate_obj = double_leg_takedown_success_rate_utils(engine=self.engine, params=params, model=self.model,obj=obj, db=db)
 
         response_list.append(takedown_success_rate_obj)
         response_list.append(takedown_per_match_obj)
-        response_list.append(takedown_count_obj)
-        response_list.append(single_leg_takedown_success_obj)
-        response_list.append(single_leg_takedown_count_obj)
-        response_list.append(takedown_average_points_per_fight_obj)
-        response_list.append(double_leg_takedown_count_obj)
-        response_list.append(double_leg_takedown_success_rate_obj)
+        # response_list.append(takedown_count_obj)
+        # response_list.append(single_leg_takedown_success_obj)
+        # response_list.append(single_leg_takedown_count_obj)
+        # response_list.append(takedown_average_points_per_fight_obj)
+        # response_list.append(double_leg_takedown_count_obj)
+        # response_list.append(double_leg_takedown_success_rate_obj)
         response["metrics_list"] = response_list
         return response
     
