@@ -61,7 +61,7 @@ def add_actions_data(file: Annotated[bytes, File()]):
         f_id.author = df['Author'][0]
         session.commit()
         try:
-            for i in range(len(df)):
+            for i in range(13901, len(df)):
                 db_id = int(df['DB ID'][i])
                 if db_id != figh:
                     figh = db_id
@@ -74,7 +74,7 @@ def add_actions_data(file: Annotated[bytes, File()]):
                 opponent = session.query(Fighter).filter(Fighter.name == df['Opponent'][i]).first()
                 action = session.query(ActionName).filter(ActionName.name == df['Action'][i]).first()
                 technique = session.query(Technique).filter(Technique.name == df['Technique'][i]).first()
-                print(i)
+                print(int(df['DB ID'][i]))
                 print(df['Wrestler'][i], df['Opponent'][i], df['Action'][i], df['Technique'][i])
                 print(fighter, opponent, action, technique)
                 # print(df['Second'][i])
@@ -88,14 +88,12 @@ def add_actions_data(file: Annotated[bytes, File()]):
                                     action_name_id = action.id, 
                                     technique_id = technique.id,
                                     action_time_second = time_to_seconds(df['Second'][i]),
-                                    video_link = "swagger"
+                                    video_link = "https://www.youtube.com/"
                                     )
                 fight_statistic_list.append(fight_statistic)
-                if i % 100 == 0:
-                    print(i)
-                    session.bulk_save_objects(fight_statistic_list)
-                    session.commit()
-                    fight_statistic_list = []
+            session.bulk_save_objects(fight_statistic_list)
+            session.commit()
+
         except Exception as e:
 
             return str(e) + "setr="+ str(i) + "db_id=" +str(int(df['DB ID'][i]))

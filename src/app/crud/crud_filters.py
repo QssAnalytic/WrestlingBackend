@@ -7,11 +7,17 @@ from src.app.schemas.tournament_schemas import TournamentBaseInfos
 class CRUDTournament(CRUDBase[Tournament,TournamentBaseInfos, TournamentBaseInfos]):
     
     def get_weights(self, tournament_id: int, wrestling_type: str, db: Session):
+        query = select(FightInfo)
+
+        if tournament_id is not None:
+            query = query.filter(FightInfo.tournament_id == tournament_id)
+
+        if wrestling_type is not None:
+            query = query.filter(FightInfo.wrestling_type == wrestling_type)
 
         data = db.execute(
-            select(FightInfo).filter(and_(FightInfo.tournament_id == tournament_id, FightInfo.wrestling_type == wrestling_type))\
-                .distinct(FightInfo.weight_category)\
-                    .order_by(FightInfo.weight_category)
+            query.distinct(FightInfo.weight_category)
+                .order_by(FightInfo.weight_category)
         ).scalars().all()
         return data
     

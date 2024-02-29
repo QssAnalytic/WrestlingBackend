@@ -19,6 +19,7 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
 
     def takedown_statistic(self, params: dict, db: Session):
         response_list = []
+        take_down_sum = 0
         takedown_success_rate = takedown_success_rate_utils(engine=self.engine, params=params)
         takedown_per_match = takedown_per_match_utils(engine=self.engine, params=params)
         takedown_average_points_per_fight = takedown_average_points_per_fight_utils(engine=self.engine, params=params)
@@ -30,37 +31,45 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
 
         if takedown_success_rate is not None:
             response_list.append({"metrics":"Takedown success rate","score": takedown_success_rate[-1]})
+            take_down_sum+=float(takedown_success_rate[-1])
         else: response_list.append({"metrics":"Takedown success rate","score": 0})
 
         if takedown_per_match is not None:
             response_list.append({"metrics":"Takedown per match","score": takedown_per_match[-1]})
+            take_down_sum+=float(takedown_per_match[-1])
         else: response_list.append({"metrics":"Takedown per match","score": 0})
 
         if takedown_average_points_per_fight is  not None:
             response_list.append({"metrics":"Takedown average points per fight","score": takedown_average_points_per_fight[-1]})
+            take_down_sum+=float(takedown_average_points_per_fight[-1])
         else: response_list.append({"metrics":"Takedown average points per fight","score": 0})
 
         if takedown_count is not None:
             response_list.append({"metrics":"Takedown count","score": takedown_count[-1]})
+            take_down_sum+=float(takedown_count[-1])
         else: response_list.append({"metrics":"Takedown count","score": 0})
 
         if double_leg_takedown_count is not None:
             response_list.append({"metrics":"Double leg takedown count","score": double_leg_takedown_count[-1]})
+            take_down_sum+=float(double_leg_takedown_count[-1])
         else: response_list.append({"metrics":"Double leg takedown count","score": 0})
 
         if double_leg_takedown_success_rate is not None:
             response_list.append({"metrics":"Double leg takedown success rate","score": double_leg_takedown_success_rate[-1]})
+            take_down_sum+=float(double_leg_takedown_success_rate[-1])
         else: response_list.append({"metrics":"Double leg takedown success rate","score": 0})
 
         if single_leg_takedown_success_rate is not None:
             response_list.append({"metrics":"Single leg takedown success rate","score": single_leg_takedown_success_rate[-1]})
+            take_down_sum+=float(single_leg_takedown_success_rate[-1])
         else: response_list.append({"metrics":"Single leg takedown success rate","score": 0})
         
         if single_leg_takedown_count is not None:
             response_list.append({"metrics":"Single leg takedown count","score": single_leg_takedown_count[-1]})
+            take_down_sum+=float(single_leg_takedown_count[-1])
         else: response_list.append({"metrics":"Single leg takedown count","score": 0})
 
-        return response_list
+        return response_list, round(take_down_sum/float(len(response_list)),2)*100
 
     
 medal_left_dashbord_service = MedalLeftDashbordSerivices(Technique, engine)

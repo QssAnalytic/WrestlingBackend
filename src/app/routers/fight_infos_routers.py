@@ -29,7 +29,7 @@ def fight_infos(tournament_id: int | None = None, place: str | None = None, wres
     if place is not None:
         query = query.filter(FightInfo.location == place)
     if wrestler_name is not None:
-        fighter_ids=db.query(Fighter.id).filter(func.upper(Fighter.name) == func.upper(wrestler_name))
+        fighter_ids = db.query(Fighter.id).filter(func.lower(Fighter.name).like(func.lower(f"{wrestler_name}%")))
         query = query.filter(or_(FightInfo.fighter_id.in_(fighter_ids), FightInfo.oponent_id.in_(fighter_ids)))
     if author is not None:
         query = query.filter(func.upper(FightInfo.author) == func.upper((author)))
