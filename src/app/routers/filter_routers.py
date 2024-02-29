@@ -16,15 +16,6 @@ def get_dates(db: Session = Depends(get_db)):
     return response_data
 
 
-
-
-# @router.get("/tournaments/{date}/", response_model=List[TournamentBaseInfos])
-# def get_all_tournament(date: Optional[int] = None, db: Session = Depends(get_db)):
-#     data = filter.get_multi(date=date,db=db)
-
-#     return data
-
-
 @router.get("/tournaments/", response_model=List[TournamentBaseInfos])
 def get_all_tournament(date: Optional[int] = None, db: Session = Depends(get_db)):
     if date != None:
@@ -35,7 +26,7 @@ def get_all_tournament(date: Optional[int] = None, db: Session = Depends(get_db)
     return response
 
 @router.get("/weights/", response_model=List[WeightOutPutBase])
-def get_weight_list(tournament_id: Optional[int] = None, wrestling_type: Optional[int] = None, db: Session = Depends(get_db)):
+def get_weight_list(tournament_id: Optional[int] = None, wrestling_type: Optional[str] = None, db: Session = Depends(get_db)):
     response = filter.get_weights(tournament_id=tournament_id, wrestling_type=wrestling_type, db=db)
     return response
 
