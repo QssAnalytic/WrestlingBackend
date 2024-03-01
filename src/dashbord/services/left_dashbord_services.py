@@ -9,6 +9,7 @@ from src.dashbord.utils.takedown_utils import *
 from src.dashbord.utils.defence_score_utils import *
 from src.dashbord.utils.offence_score_utils import *
 from src.dashbord.utils.stats_takedown_utils import *
+from src.dashbord.utils.durability_score_utils import *
 from database import Base, engine, get_db
 
 ModelTypeVar = TypeVar("ModelTypeVar", bound=Base)
@@ -19,6 +20,8 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
     def __init__(self, model: Type[ModelTypeVar], engine) -> None:
         self.model = model
         self.engine = engine
+
+
     def stats_score_statistic(self, params: dict, db: Session):
         obj = {"metrics": "",
             "score": 0,
@@ -32,8 +35,30 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response_list.append(stats_defence_obj)
         response_list.append(stats_takedown_obj)
         response_list.append(stats_offence_obj)
+        response_list.append({"metrics": "Durability Score",
+            "score": 0,
+            "successful_count":0,
+            "total_count":0,
+            "bar_pct": 0})
         return response_list
     
+
+    def durability_score_statistic(self, params: dict, db: Session):
+        obj = {"metrics": "",
+            "score": 0,
+            "successful_count":0,
+            "total_count":0,
+            "bar_pct": 0}
+        response = {}
+        response = {}
+        response["name"] = "Durability Score"
+        takedown_durability_score_obj = takedown_durability_score(engine=self.engine, params=params, obj=obj, db=db)
+        response_list = []
+        response_list.append(takedown_durability_score_obj)
+        response["metrics_list"] = response_list
+        return response
+    
+
     def offense_score_statistic(self, params:dict, db: Session):
         obj = {"metrics": "",
             "score": 0,
