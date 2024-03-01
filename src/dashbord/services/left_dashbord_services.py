@@ -29,7 +29,15 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response = {}
         response["name"] = "Offense score"
         action_success_rate_obj = offence_action_success_rate_utils(engine=self.engine, params=params, obj=obj, db=db)
+        action_count_per_fight_obj = offence_action_count_per_fight(engine=self.engine, params=params, obj=obj, db=db)
+        offence_action_point_per_fight_obj = offence_action_point_per_fight(engine=self.engine, params=params, obj=obj, db=db)
+        offence_protection_zone_success_rate_obj = offence_protection_zone_success_rate(engine=self.engine, params=params, obj=obj, db=db)
+        offence_protection_count_per_fight_obj = offence_protection_count_per_fight(engine=self.engine, params=params, obj=obj, db=db)
+        response_list.append(offence_protection_count_per_fight_obj)
+        response_list.append(offence_action_point_per_fight_obj)
+        response_list.append(action_count_per_fight_obj)
         response_list.append(action_success_rate_obj)
+        response_list.append(offence_protection_zone_success_rate_obj)
         response["metrics_list"] = response_list
         return response
 
