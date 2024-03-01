@@ -5,7 +5,7 @@ from database import Base
 from src.app.models import ActionName
 
 
-def offence_protection_count_per_fight(engine, params: dict, obj:dict, db: Session):
+def stats_protection_count_per_fight(engine, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     statement = text("""
 
