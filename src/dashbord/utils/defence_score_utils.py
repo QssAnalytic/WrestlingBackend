@@ -6,6 +6,48 @@ from src.app.models import ActionName
 
 ModelTypeVar = TypeVar("ModelTypeVar", bound=Base)
 
+def action_skipped_points_per_fight_utils(engine, params: dict, obj:dict, model, db: Session):
+    obj_copy = obj.copy()
+    statement = text("""
+        --Action skipped points per fight
+                with fighter_matches as (
+                select s.fighter_id, array_agg(distinct fight_id) fighter_array from fightstatistics s
+                    inner join fightinfos i on s.fight_id = i.id
+                    where extract(year from i.fight_date) in :fight_date
+                    group by s.fighter_id 
+                ),
+                opponent_matches as (
+                select s.opponent_id, array_agg(distinct fight_id) opponent_array from fightstatistics s
+                    inner join fightinfos i on s.fight_id = i.id
+                    where extract(year from i.fight_date) in :fight_date
+                    group by s.opponent_id 
+                ),
+                com as (select fighter, cardinality(array(select distinct unnest_array from unnest(combine_array) as unnest_array)) unique_matches from (
+                select coalesce(fighter_id, opponent_id) fighter, (fighter_array || opponent_array) as combine_array 
+                from fighter_matches fi full outer join opponent_matches op on fi.fighter_id = opponent_id
+                )),
+                total_points as (select f.opponent_id, sum(score) as total_points from fightstatistics f
+                inner join fightinfos f2 on f.fight_id = f2.id
+                inner join actions a on f.action_name_id = a.id
+                where extract(year from f2.fight_date) in :fight_date and f.successful = true
+                group by f.opponent_id),
+                calculation as(
+                select fighter, coalesce(round(cast(total_points as decimal)/cast(unique_matches as decimal), 2), 0) as avg_points_per_match
+                from com c left join total_points t on c.fighter = t.opponent_id)
+        select * from (
+        select *, round(cast(avg_points_per_match as decimal)/ cast(max(avg_points_per_match) over() as decimal), 2) from calculation
+    ) where fighter = :fighter_id
+""")
+    with engine.connect() as conn:
+        action_skipped_points_per_fight_rate = conn.execute(statement, params)
+    fetch = action_skipped_points_per_fight_rate.fetchone()
+    obj_copy["metrics"] = "Action skipped points per fight"
+    if fetch is not None:
+        obj_copy["score"] = float(fetch[1])
+        obj_copy["bar_pct"] = float(fetch[-1])
+    return obj_copy
+
+
 def pin_to_parter_escape_rate_utils(engine, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     action = db.query(ActionName).filter(ActionName.name == "Pin to parter").first()

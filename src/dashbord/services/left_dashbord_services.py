@@ -98,13 +98,14 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         roll_escape_rate_obj= roll_escape_rate_utils(engine=self.engine, params=params,obj=obj, db=db)
         protection_zone_escape_rate_obj = protection_zone_escape_rate_utils(engine=self.engine, params=params,obj=obj, db=db)
         parterre_escape_rate_obj = parterre_escape_rate_utils(engine=self.engine, params=params, obj=obj, model=self.model,db=db)
-
+        action_skipped_points_per_fight_obj = action_skipped_points_per_fight_utils(engine=self.engine, params=params, obj=obj, model=self.model,db=db)
         response_list.append(action_escape_rate_obj)
         response_list.append(takedown_escape_rate_obj)
         response_list.append(pin_to_parter_escape_rate_obj)
         response_list.append(roll_escape_rate_obj)
         response_list.append(protection_zone_escape_rate_obj)
         response_list.append(parterre_escape_rate_obj)
+        response_list.append(action_skipped_points_per_fight_obj)
         response["metrics_list"] = response_list
         return response
 
