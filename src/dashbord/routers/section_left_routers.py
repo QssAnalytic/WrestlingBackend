@@ -32,3 +32,5 @@ def metrics(fight_date: str, fighter_id: int, db: Session = Depends(get_db)):
 def metrics(fight_date: str, fighter_id: int, db: Session = Depends(get_db)):
     fight_date = tuple(list(map(int, fight_date.split(","))))
     params = {"fight_date": fight_date,  "fighter_id": fighter_id}
+    response = medal_left_dashbord_service.stats_protection_count_per_fight(params=params, db=db)
+    return response

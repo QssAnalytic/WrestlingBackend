@@ -8,6 +8,7 @@ from src.app.models import FightInfo, Technique, ActionName
 from src.dashbord.utils.takedown_utils import *
 from src.dashbord.utils.defence_score_utils import *
 from src.dashbord.utils.offence_score_utils import *
+from src.dashbord.utils.stats_takedown_utils import *
 from database import Base, engine, get_db
 
 ModelTypeVar = TypeVar("ModelTypeVar", bound=Base)
@@ -18,7 +19,18 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
     def __init__(self, model: Type[ModelTypeVar], engine) -> None:
         self.model = model
         self.engine = engine
-
+    def stats_protection_count_per_fight(self, params: dict, db: Session):
+        obj = {"metrics": "",
+            "score": 0,
+            "successful_count":0,
+            "total_count":0,
+            "bar_pct": 0}
+        response_list = []
+        stats_takedown_obj = stats_takedown(engine=self.engine, params=params, obj=obj, db=db)
+        stats_defence_obj = stats_defence(engine=self.engine, params=params, obj=obj, db=db)
+        response_list.append(stats_defence_obj)
+        response_list.append(stats_takedown_obj)
+        return response_list
     def offense_score_statistic(self, params:dict, db: Session):
         obj = {"metrics": "",
             "score": 0,
@@ -98,5 +110,7 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response_list.append(double_leg_takedown_success_rate_obj)
         response["metrics_list"] = response_list
         return response
+    
+
     
 medal_left_dashbord_service = MedalLeftDashbordSerivices(Technique, engine)
