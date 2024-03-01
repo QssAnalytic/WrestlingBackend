@@ -52,9 +52,13 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response = {}
         response = {}
         response["name"] = "Durability Score"
-        takedown_durability_score_obj = takedown_durability_score(engine=self.engine, params=params, obj=obj, db=db)
+        takedown_durability_score_obj = takedown_durability_score_utils(engine=self.engine, params=params, obj=obj, db=db)
+        defence_durability_score_obj = defence_durability_score_utils(engine=self.engine, params=params, obj=obj, db=db)
+        offence_durability_score_obj = offence_durability_score_utils(engine=self.engine, params=params, obj=obj, db=db)
         response_list = []
         response_list.append(takedown_durability_score_obj)
+        response_list.append(defence_durability_score_obj)
+        response_list.append(offence_durability_score_obj)
         response["metrics_list"] = response_list
         return response
     
@@ -73,11 +77,17 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         offence_action_point_per_fight_obj = offence_action_point_per_fight(engine=self.engine, params=params, obj=obj, db=db)
         offence_protection_zone_success_rate_obj = offence_protection_zone_success_rate(engine=self.engine, params=params, obj=obj, db=db)
         offence_protection_count_per_fight_obj = offence_protection_count_per_fight(engine=self.engine, params=params, obj=obj, db=db)
+        protection_zone_points_per_fight_obj = protection_zone_points_per_fight_utils(engine=self.engine, params=params, obj=obj, db=db)
+        roll_success_rate_obj = roll_success_rate_utils(engine=self.engine, params=params, obj=obj, db=db)
+        roll_count_per_fight_obj = roll_points_per_fight_utils(engine=self.engine, params=params, obj=obj, db=db)
         response_list.append(offence_protection_count_per_fight_obj)
         response_list.append(offence_action_point_per_fight_obj)
         response_list.append(action_count_per_fight_obj)
         response_list.append(action_success_rate_obj)
         response_list.append(offence_protection_zone_success_rate_obj)
+        response_list.append(protection_zone_points_per_fight_obj)
+        response_list.append(roll_success_rate_obj)
+        response_list.append(roll_count_per_fight_obj)
         response["metrics_list"] = response_list
         return response
 
