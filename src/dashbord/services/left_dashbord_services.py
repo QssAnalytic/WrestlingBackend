@@ -27,7 +27,7 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
             "bar_pct": 0}
         response_list = []
         response = {}
-        response["name"] = "Offense score"
+        response["name"] = "Offense Score"
         action_success_rate_obj = offence_action_success_rate_utils(engine=self.engine, params=params, obj=obj, db=db)
         action_count_per_fight_obj = offence_action_count_per_fight(engine=self.engine, params=params, obj=obj, db=db)
         offence_action_point_per_fight_obj = offence_action_point_per_fight(engine=self.engine, params=params, obj=obj, db=db)
