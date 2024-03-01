@@ -80,6 +80,7 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         protection_zone_points_per_fight_obj = protection_zone_points_per_fight_utils(engine=self.engine, params=params, obj=obj, db=db)
         roll_success_rate_obj = roll_success_rate_utils(engine=self.engine, params=params, obj=obj, db=db)
         roll_count_per_fight_obj = roll_points_per_fight_utils(engine=self.engine, params=params, obj=obj, db=db)
+        parterre_success_rate_obj = parterre_success_rate_utils(engine=self.engine, params=params, obj=obj, db=db)
         response_list.append(offence_protection_count_per_fight_obj)
         response_list.append(offence_action_point_per_fight_obj)
         response_list.append(action_count_per_fight_obj)
@@ -88,6 +89,7 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response_list.append(protection_zone_points_per_fight_obj)
         response_list.append(roll_success_rate_obj)
         response_list.append(roll_count_per_fight_obj)
+        response_list.append(parterre_success_rate_obj)
         response["metrics_list"] = response_list
         return response
 
