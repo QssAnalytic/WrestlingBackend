@@ -19,7 +19,7 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
     def __init__(self, model: Type[ModelTypeVar], engine) -> None:
         self.model = model
         self.engine = engine
-    def stats_protection_count_per_fight(self, params: dict, db: Session):
+    def stats_score_statistic(self, params: dict, db: Session):
         obj = {"metrics": "",
             "score": 0,
             "successful_count":0,
@@ -28,9 +28,12 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response_list = []
         stats_takedown_obj = stats_takedown(engine=self.engine, params=params, obj=obj, db=db)
         stats_defence_obj = stats_defence(engine=self.engine, params=params, obj=obj, db=db)
+        stats_offence_obj = stats_offence(engine=self.engine, params=params, obj=obj, db=db)
         response_list.append(stats_defence_obj)
         response_list.append(stats_takedown_obj)
+        response_list.append(stats_offence_obj)
         return response_list
+    
     def offense_score_statistic(self, params:dict, db: Session):
         obj = {"metrics": "",
             "score": 0,

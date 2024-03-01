@@ -148,3 +148,222 @@ def stats_defence(engine, params: dict, obj:dict, db: Session):
     if fetch is not None:
         obj_copy["score"] = float(fetch[-1])
     return obj_copy
+
+
+def stats_offence(engine, params: dict, obj:dict, db: Session):
+    obj_copy = obj.copy()
+    statement = text("""
+        --offense_score
+        with action_success_rate as(
+        with total as (
+                select f.fighter_id, count(*) as total_count from fightstatistics f
+                inner join fightinfos f2 on f.fight_id = f2.id
+                
+                where extract(year from f2.fight_date) in :fight_date
+                group by f.fighter_id
+                ),
+                success as (
+                select f.fighter_id, count(*) as successful_count from fightstatistics f
+                inner join fightinfos f2 on f.fight_id = f2.id
+                where extract(year from f2.fight_date) in :fight_date and f.successful = true 
+                group by f.fighter_id
+                )
+            select * from (    
+            select fighter_id, takedown_success_rate, successful_count, total_count,round((takedown_success_rate- 0) /(max(takedown_success_rate) over() - 0), 2) bar_pct from 
+                (select t.fighter_id, coalesce(successful_count, 0) successful_count, total_count, round(coalesce(cast(successful_count as decimal) / cast(total_count as decimal), 0), 2) takedown_success_rate
+                from success s right join total t on s.fighter_id = t.fighter_id))
+            
+        ),
+        --Action counts per fight
+        action_count_per_fight as(
+        with fighter_matches as (
+        select s.fighter_id, array_agg(distinct fight_id) fighter_array from fightstatistics s
+            inner join fightinfos i on s.fight_id = i.id
+            where extract(year from i.fight_date) in :fight_date
+            group by s.fighter_id 
+        ),
+        opponent_matches as (
+        select s.opponent_id, array_agg(distinct fight_id) opponent_array from fightstatistics s
+            inner join fightinfos i on s.fight_id = i.id
+            where extract(year from i.fight_date) in :fight_date
+            group by s.opponent_id 
+        ),
+        com as (select fighter, cardinality(array(select distinct unnest_array from unnest(combine_array) as unnest_array)) unique_matches from (
+        select coalesce(fighter_id, opponent_id) fighter, (fighter_array || opponent_array) as combine_array 
+        from fighter_matches fi full outer join opponent_matches op on fi.fighter_id = opponent_id
+        )),
+        successful_action_attempts as (select f.fighter_id, count(*) as successful_attempts from fightstatistics f
+        inner join fightinfos f2 on f.fight_id = f2.id
+        inner join actions a on f.action_name_id = a.id
+        where extract(year from f2.fight_date) in :fight_date  and f.successful = true 
+        group by f.fighter_id),
+        total_action_attempts as (select f.fighter_id, count(*) as total_count from fightstatistics f
+        inner join fightinfos f2 on f.fight_id = f2.id
+        inner join actions a on f.action_name_id = a.id
+        where extract(year from f2.fight_date) in :fight_date
+        group by f.fighter_id),
+
+        calculation as(
+        select fighter, coalesce(round(cast(successful_attempts as decimal)/cast(unique_matches as decimal), 2), 0) as successful_attempts_per_match,
+        coalesce(round(cast(total_count as decimal)/cast(unique_matches as decimal), 2), 1) as total_attempts_per_match
+        from com c left join successful_action_attempts t on c.fighter = t.fighter_id
+                left join total_action_attempts tc on c.fighter = tc.fighter_id
+        )
+        select *, round(cast(successful_attempts_per_match as decimal)/ cast(max(successful_attempts_per_match) over() as decimal), 2) count_pct from calculation),
+
+        avg_points_per_fight as(
+                with fighter_matches as (
+                    select s.fighter_id, array_agg(distinct fight_id) fighter_array from fightstatistics s
+                        inner join fightinfos i on s.fight_id = i.id
+                        where extract(year from i.fight_date) in :fight_date
+                        group by s.fighter_id 
+                    ),
+                    opponent_matches as (
+                    select s.opponent_id, array_agg(distinct fight_id) opponent_array from fightstatistics s
+                        inner join fightinfos i on s.fight_id = i.id
+                        where extract(year from i.fight_date) in :fight_date
+                        group by s.opponent_id 
+                    ),
+                    com as (select fighter, cardinality(array(select distinct unnest_array from unnest(combine_array) as unnest_array)) unique_matches from (
+                    select coalesce(fighter_id, opponent_id) fighter, (fighter_array || opponent_array) as combine_array 
+                    from fighter_matches fi full outer join opponent_matches op on fi.fighter_id = opponent_id
+                    )),
+                    total_points as (select f.fighter_id, sum(score) as total_points from fightstatistics f
+                    inner join fightinfos f2 on f.fight_id = f2.id
+                    inner join actions a on f.action_name_id = a.id
+                    where extract(year from f2.fight_date) in :fight_date  and f.successful = true
+                    group by f.fighter_id),
+                    calculation as(
+                    select fighter, coalesce(round(cast(total_points as decimal)/cast(unique_matches as decimal), 2), 0) as avg_points_per_match
+                    from com c left join total_points t on c.fighter = t.fighter_id)
+            select * from (
+            select *, round(cast(avg_points_per_match as decimal)/ cast(max(avg_points_per_match) over() as decimal), 2) point_pct from calculation
+        ))
+        select * from (
+            select fighter_id, round(1 - cast(offense_rank as decimal) / cast(max(offense_rank) over() as decimal), 2) offense_score from(
+            select *, rank() over(order by offense_pct desc) offense_rank from(
+                select fighter_id, (bar_pct + count_pct + point_pct) /3 offense_pct
+        from action_success_rate a 
+        left join action_count_per_fight c
+        on a.fighter_id = c.fighter
+        left join avg_points_per_fight p
+        on a.fighter_id = p.fighter
+            ))) where fighter_id = :fighter_id
+""")
+    with engine.connect() as conn:
+        stats_defence = conn.execute(statement, params)
+    fetch = stats_defence.fetchone()
+
+    obj_copy["metrics"] = "Offence Score"
+    if fetch is not None:
+        obj_copy["score"] = float(fetch[-1])
+    return obj_copy
+
+def stats_durability(engine, params: dict, obj:dict, db: Session):
+    obj_copy = obj.copy()
+    statement = text("""
+        --offense_score
+        with action_success_rate as(
+        with total as (
+                select f.fighter_id, count(*) as total_count from fightstatistics f
+                inner join fightinfos f2 on f.fight_id = f2.id
+                
+                where extract(year from f2.fight_date) in :fight_date
+                group by f.fighter_id
+                ),
+                success as (
+                select f.fighter_id, count(*) as successful_count from fightstatistics f
+                inner join fightinfos f2 on f.fight_id = f2.id
+                where extract(year from f2.fight_date) in :fight_date and f.successful = true 
+                group by f.fighter_id
+                )
+            select * from (    
+            select fighter_id, takedown_success_rate, successful_count, total_count,round((takedown_success_rate- 0) /(max(takedown_success_rate) over() - 0), 2) bar_pct from 
+                (select t.fighter_id, coalesce(successful_count, 0) successful_count, total_count, round(coalesce(cast(successful_count as decimal) / cast(total_count as decimal), 0), 2) takedown_success_rate
+                from success s right join total t on s.fighter_id = t.fighter_id))
+            
+        ),
+        --Action counts per fight
+        action_count_per_fight as(
+        with fighter_matches as (
+        select s.fighter_id, array_agg(distinct fight_id) fighter_array from fightstatistics s
+            inner join fightinfos i on s.fight_id = i.id
+            where extract(year from i.fight_date) in :fight_date
+            group by s.fighter_id 
+        ),
+        opponent_matches as (
+        select s.opponent_id, array_agg(distinct fight_id) opponent_array from fightstatistics s
+            inner join fightinfos i on s.fight_id = i.id
+            where extract(year from i.fight_date) in :fight_date
+            group by s.opponent_id 
+        ),
+        com as (select fighter, cardinality(array(select distinct unnest_array from unnest(combine_array) as unnest_array)) unique_matches from (
+        select coalesce(fighter_id, opponent_id) fighter, (fighter_array || opponent_array) as combine_array 
+        from fighter_matches fi full outer join opponent_matches op on fi.fighter_id = opponent_id
+        )),
+        successful_action_attempts as (select f.fighter_id, count(*) as successful_attempts from fightstatistics f
+        inner join fightinfos f2 on f.fight_id = f2.id
+        inner join actions a on f.action_name_id = a.id
+        where extract(year from f2.fight_date) in :fight_date  and f.successful = true 
+        group by f.fighter_id),
+        total_action_attempts as (select f.fighter_id, count(*) as total_count from fightstatistics f
+        inner join fightinfos f2 on f.fight_id = f2.id
+        inner join actions a on f.action_name_id = a.id
+        where extract(year from f2.fight_date) in :fight_date
+        group by f.fighter_id),
+
+        calculation as(
+        select fighter, coalesce(round(cast(successful_attempts as decimal)/cast(unique_matches as decimal), 2), 0) as successful_attempts_per_match,
+        coalesce(round(cast(total_count as decimal)/cast(unique_matches as decimal), 2), 1) as total_attempts_per_match
+        from com c left join successful_action_attempts t on c.fighter = t.fighter_id
+                left join total_action_attempts tc on c.fighter = tc.fighter_id
+        )
+        select *, round(cast(successful_attempts_per_match as decimal)/ cast(max(successful_attempts_per_match) over() as decimal), 2) count_pct from calculation),
+
+        avg_points_per_fight as(
+                with fighter_matches as (
+                    select s.fighter_id, array_agg(distinct fight_id) fighter_array from fightstatistics s
+                        inner join fightinfos i on s.fight_id = i.id
+                        where extract(year from i.fight_date) in :fight_date
+                        group by s.fighter_id 
+                    ),
+                    opponent_matches as (
+                    select s.opponent_id, array_agg(distinct fight_id) opponent_array from fightstatistics s
+                        inner join fightinfos i on s.fight_id = i.id
+                        where extract(year from i.fight_date) in :fight_date
+                        group by s.opponent_id 
+                    ),
+                    com as (select fighter, cardinality(array(select distinct unnest_array from unnest(combine_array) as unnest_array)) unique_matches from (
+                    select coalesce(fighter_id, opponent_id) fighter, (fighter_array || opponent_array) as combine_array 
+                    from fighter_matches fi full outer join opponent_matches op on fi.fighter_id = opponent_id
+                    )),
+                    total_points as (select f.fighter_id, sum(score) as total_points from fightstatistics f
+                    inner join fightinfos f2 on f.fight_id = f2.id
+                    inner join actions a on f.action_name_id = a.id
+                    where extract(year from f2.fight_date) in :fight_date  and f.successful = true
+                    group by f.fighter_id),
+                    calculation as(
+                    select fighter, coalesce(round(cast(total_points as decimal)/cast(unique_matches as decimal), 2), 0) as avg_points_per_match
+                    from com c left join total_points t on c.fighter = t.fighter_id)
+            select * from (
+            select *, round(cast(avg_points_per_match as decimal)/ cast(max(avg_points_per_match) over() as decimal), 2) point_pct from calculation
+        ))
+        select * from (
+            select fighter_id, round(1 - cast(offense_rank as decimal) / cast(max(offense_rank) over() as decimal), 2) offense_score from(
+            select *, rank() over(order by offense_pct desc) offense_rank from(
+                select fighter_id, (bar_pct + count_pct + point_pct) /3 offense_pct
+        from action_success_rate a 
+        left join action_count_per_fight c
+        on a.fighter_id = c.fighter
+        left join avg_points_per_fight p
+        on a.fighter_id = p.fighter
+            ))) where fighter_id = :fighter_id
+""")
+    with engine.connect() as conn:
+        stats_defence = conn.execute(statement, params)
+    fetch = stats_defence.fetchone()
+
+    obj_copy["metrics"] = "Offence Score"
+    if fetch is not None:
+        obj_copy["score"] = float(fetch[-1])
+    return obj_copy
