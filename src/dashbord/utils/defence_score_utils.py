@@ -6,7 +6,7 @@ from src.app.models import ActionName
 
 ModelTypeVar = TypeVar("ModelTypeVar", bound=Base)
 
-def action_skipped_points_per_fight_utils(engine, params: dict, obj:dict, model, db: Session):
+def action_skipped_points_per_fight_utils(session_factory, params: dict, obj:dict, model, db: Session):
     obj_copy = obj.copy()
     statement = text("""
         --Action skipped points per fight
@@ -38,9 +38,9 @@ def action_skipped_points_per_fight_utils(engine, params: dict, obj:dict, model,
         select *, round(cast(avg_points_per_match as decimal)/ cast(max(avg_points_per_match) over() as decimal), 2) from calculation
     ) where fighter = :fighter_id
 """)
-    with engine.connect() as conn:
-        action_skipped_points_per_fight_rate = conn.execute(statement, params)
-    fetch = action_skipped_points_per_fight_rate.fetchone()
+    with session_factory() as session:
+        action_skipped_points_per_fight_rate = session.execute(statement, params)
+        fetch = action_skipped_points_per_fight_rate.fetchone()
     obj_copy["metrics"] = "Action skipped points per fight"
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
@@ -48,7 +48,7 @@ def action_skipped_points_per_fight_utils(engine, params: dict, obj:dict, model,
     return obj_copy
 
 
-def pin_to_parter_escape_rate_utils(engine, params: dict, obj:dict, db: Session):
+def pin_to_parter_escape_rate_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     action = db.query(ActionName).filter(ActionName.name == "Pin to parter").first()
     params['action_name_id'] = action.id
@@ -77,9 +77,9 @@ def pin_to_parter_escape_rate_utils(engine, params: dict, obj:dict, db: Session)
                     round((action_escape_rate) /(max(action_escape_rate) over()), 2) bar_pct
                     from calculation)  where opponent_id = :fighter_id
         """)
-    with engine.connect() as conn:
-        pin_to_parter_escape_rate = conn.execute(statement, params)
-    fetch = pin_to_parter_escape_rate.fetchone()
+    with session_factory() as session:
+        pin_to_parter_escape_rate = session.execute(statement, params)
+        fetch = pin_to_parter_escape_rate.fetchone()
     obj_copy["metrics"] = "Pin to parter escape rate"
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
@@ -88,7 +88,7 @@ def pin_to_parter_escape_rate_utils(engine, params: dict, obj:dict, db: Session)
 
 
 
-def takedown_escape_rate_utils(engine, params: dict, obj: dict, db:Session):
+def takedown_escape_rate_utils(session_factory, params: dict, obj: dict, db:Session):
     obj_copy = obj.copy()
     action = db.query(ActionName).filter(ActionName.name == "Takedown").first()
     params['action_name_id'] = action.id
@@ -117,9 +117,9 @@ def takedown_escape_rate_utils(engine, params: dict, obj: dict, db:Session):
                     from calculation)
         where opponent_id = :fighter_id
         """)
-    with engine.connect() as conn:
-        takedown_escape_rate = conn.execute(statement, params)
-    fetch = takedown_escape_rate.fetchone()
+    with session_factory() as session:
+        takedown_escape_rate = session.execute(statement, params)
+        fetch = takedown_escape_rate.fetchone()
     obj_copy["metrics"] = "Takedown escape rate"
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
@@ -127,7 +127,7 @@ def takedown_escape_rate_utils(engine, params: dict, obj: dict, db:Session):
     return obj_copy
 
 
-def roll_escape_rate_utils(engine, params: dict, obj:dict, db: Session):
+def roll_escape_rate_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     action = db.query(ActionName).filter(ActionName.name == "Roll").first()
     params['action_name_id'] = action.id
@@ -154,9 +154,9 @@ def roll_escape_rate_utils(engine, params: dict, obj:dict, db: Session):
                     round(action_escape_rate /(max(action_escape_rate) over()), 2) bar_pct
                     from calculation) where opponent_id = :fighter_id
         """)
-    with engine.connect() as conn:
-        roll_escape_rate = conn.execute(statement, params)
-    fetch = roll_escape_rate.fetchone()
+    with session_factory() as session:
+        roll_escape_rate = session.execute(statement, params)
+        fetch = roll_escape_rate.fetchone()
     obj_copy["metrics"] = "Roll escape rate"
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
@@ -166,7 +166,7 @@ def roll_escape_rate_utils(engine, params: dict, obj:dict, db: Session):
 
 
 
-def action_escape_rate_utils(engine, params: dict, obj:dict, db: Session):
+def action_escape_rate_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     # action = db.query(ActionName).filter(ActionName.name == "Roll").first()
     # params['action_name_id'] = action.id
@@ -192,16 +192,16 @@ def action_escape_rate_utils(engine, params: dict, obj:dict, db: Session):
                     from calculation)
             where opponent_id = :fighter_id
         """)
-    with engine.connect() as conn:
-        action_escape_rate = conn.execute(statement, params)
-    fetch = action_escape_rate.fetchone()
+    with session_factory() as session:
+        action_escape_rate = session.execute(statement, params)
+        fetch = action_escape_rate.fetchone()
     obj_copy["metrics"] = "Action escape rate"
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[2])
     return obj_copy
 
-def protection_zone_escape_rate_utils(engine, params: dict,obj:dict, db: Session):
+def protection_zone_escape_rate_utils(session_factory, params: dict,obj:dict, db: Session):
     obj_copy = obj.copy()
     action = db.query(ActionName).filter(ActionName.name == "Protection zone").first()
     params['action_name_id'] = action.id
@@ -228,9 +228,9 @@ def protection_zone_escape_rate_utils(engine, params: dict,obj:dict, db: Session
                     round(action_escape_rate /(max(action_escape_rate) over()), 2) bar_pct
                     from calculation) where opponent_id = :fighter_id
         """)
-    with engine.connect() as conn:
-        protection_zone_escape_rate = conn.execute(statement, params)
-    fetch = protection_zone_escape_rate.fetchone()
+    with session_factory() as session:
+        protection_zone_escape_rate = session.execute(statement, params)
+        fetch = protection_zone_escape_rate.fetchone()
     obj_copy["metrics"] = "Protection zone escape rate"
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
@@ -238,7 +238,7 @@ def protection_zone_escape_rate_utils(engine, params: dict,obj:dict, db: Session
     return obj_copy
 
 
-def parterre_escape_rate_utils(engine, params: dict, model: ModelTypeVar, obj:dict,db: Session):
+def parterre_escape_rate_utils(session_factory, params: dict, model: ModelTypeVar, obj:dict,db: Session):
     technique_names = ['Leg lace', 'Roll from parter', 'Arm-lock roll on parter', 'Gator roll', 'Pin to parter']
     obj_copy = obj.copy()
     result = db.query(model.id).filter(model.name.in_(technique_names)).all()
@@ -269,10 +269,10 @@ def parterre_escape_rate_utils(engine, params: dict, model: ModelTypeVar, obj:di
                     round(action_escape_rate /(max(action_escape_rate) over()), 2) bar_pct
                     from calculation) where opponent_id = :fighter_id
         """)
-    with engine.connect() as conn:
-        parterre_escape_rate = conn.execute(statement, params)
+    with session_factory() as session:
+        parterre_escape_rate = session.execute(statement, params)
 
-    fetch = parterre_escape_rate.fetchone()
+        fetch = parterre_escape_rate.fetchone()
 
     obj_copy["metrics"] = "Parterre escape rate"
     if fetch is not None:

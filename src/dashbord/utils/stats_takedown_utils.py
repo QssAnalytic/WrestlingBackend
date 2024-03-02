@@ -5,7 +5,7 @@ from database import Base
 from src.app.models import ActionName
 
 
-def stats_takedown(engine, params: dict, obj:dict, db: Session):
+def stats_takedown(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     statement = text("""
         --takedown_score stats
@@ -96,9 +96,9 @@ def stats_takedown(engine, params: dict, obj:dict, db: Session):
         ))) where fighter_id = :fighter_id
 
 """)
-    with engine.connect() as conn:
-        stats_takedown = conn.execute(statement, params)
-    fetch = stats_takedown.fetchone()
+    with session_factory() as session:
+        stats_takedown = session.execute(statement, params)
+        fetch = stats_takedown.fetchone()
 
     obj_copy["metrics"] = "Takedown Score"
     if fetch is not None:
@@ -106,7 +106,7 @@ def stats_takedown(engine, params: dict, obj:dict, db: Session):
     return obj_copy
 
 
-def stats_defence(engine, params: dict, obj:dict, db: Session):
+def stats_defence(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     statement = text("""
         --defense_score
@@ -140,9 +140,9 @@ def stats_defence(engine, params: dict, obj:dict, db: Session):
         select opponent_id, bar_pct from action_escape_rate))) where opponent_id = :fighter_id
 
 """)
-    with engine.connect() as conn:
-        stats_defence = conn.execute(statement, params)
-    fetch = stats_defence.fetchone()
+    with session_factory() as session:
+        stats_defence = session.execute(statement, params)
+        fetch = stats_defence.fetchone()
 
     obj_copy["metrics"] = "Defence Score"
     if fetch is not None:
@@ -150,7 +150,7 @@ def stats_defence(engine, params: dict, obj:dict, db: Session):
     return obj_copy
 
 
-def stats_offence(engine, params: dict, obj:dict, db: Session):
+def stats_offence(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     statement = text("""
         --offense_score
@@ -250,16 +250,16 @@ def stats_offence(engine, params: dict, obj:dict, db: Session):
         on a.fighter_id = p.fighter
             ))) where fighter_id = :fighter_id
 """)
-    with engine.connect() as conn:
+    with session_factory() as conn:
         stats_defence = conn.execute(statement, params)
-    fetch = stats_defence.fetchone()
+        fetch = stats_defence.fetchone()
 
     obj_copy["metrics"] = "Offence Score"
     if fetch is not None:
         obj_copy["score"] = float(fetch[-1])
     return obj_copy
 
-def stats_durability(engine, params: dict, obj:dict, db: Session):
+def stats_durability(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     statement = text("""
         --offense_score
@@ -359,9 +359,9 @@ def stats_durability(engine, params: dict, obj:dict, db: Session):
         on a.fighter_id = p.fighter
             ))) where fighter_id = :fighter_id
 """)
-    with engine.connect() as conn:
-        stats_defence = conn.execute(statement, params)
-    fetch = stats_defence.fetchone()
+    with session_factory() as session:
+        stats_defence = session.execute(statement, params)
+        fetch = stats_defence.fetchone()
 
     obj_copy["metrics"] = "Offence Score"
     if fetch is not None:

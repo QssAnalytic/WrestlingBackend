@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from database import Base
 from src.app.models import ActionName
 
-def offence_durability_score_utils(engine, params: dict, obj:dict, db: Session):
+def offence_durability_score_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     statement = text("""
         --offense_score_durability
@@ -106,9 +106,9 @@ def offence_durability_score_utils(engine, params: dict, obj:dict, db: Session):
         on a.fighter_id = p.fighter
             ))) where fighter_id = :fighter_id
         """)
-    with engine.connect() as conn:
-        offence_durability_score = conn.execute(statement, params)
-    fetch = offence_durability_score.fetchone()
+    with session_factory() as session:
+        offence_durability_score = session.execute(statement, params)
+        fetch = offence_durability_score.fetchone()
 
     obj_copy["metrics"] = "Offence Score"
     if fetch is not None:  
@@ -116,7 +116,7 @@ def offence_durability_score_utils(engine, params: dict, obj:dict, db: Session):
     return obj_copy
 
 
-def defence_durability_score_utils(engine, params: dict, obj:dict, db: Session):
+def defence_durability_score_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     statement = text("""
         --defense_score_durability
@@ -156,9 +156,9 @@ def defence_durability_score_utils(engine, params: dict, obj:dict, db: Session):
         select *, rank() over(order by bar_pct desc) defense_rank from(
         select opponent_id, bar_pct from action_escape_rate))) where opponent_id = :fighter_id
         """)
-    with engine.connect() as conn:
-        defence_durability_score = conn.execute(statement, params)
-    fetch = defence_durability_score.fetchone()
+    with session_factory() as session:
+        defence_durability_score = session.execute(statement, params)
+        fetch = defence_durability_score.fetchone()
 
     obj_copy["metrics"] = "Defence score"
     if fetch is not None:  
@@ -168,7 +168,7 @@ def defence_durability_score_utils(engine, params: dict, obj:dict, db: Session):
 
 
 
-def takedown_durability_score_utils(engine, params: dict, obj:dict, db: Session):
+def takedown_durability_score_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     statement = text("""
         --takedown_durability_score
@@ -275,10 +275,9 @@ def takedown_durability_score_utils(engine, params: dict, obj:dict, db: Session)
             on t.fighter_id = f.fighter
         ))) where fighter_id = :fighter_id
         """)
-    with engine.connect() as conn:
-        takedown_durability_score = conn.execute(statement, params)
-    fetch = takedown_durability_score.fetchone()
-    print(fetch)
+    with session_factory() as session:
+        takedown_durability_score = session.execute(statement, params)
+        fetch = takedown_durability_score.fetchone()
     obj_copy["metrics"] = "Takedown score"
     if fetch is not None:  
         obj_copy["score"] = float(fetch[-1])

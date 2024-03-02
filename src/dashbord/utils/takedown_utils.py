@@ -1,10 +1,10 @@
 from typing import TypeVar
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from database import Base
+from database import Base, session_factory
 
 ModelTypeVar = TypeVar("ModelTypeVar", bound=Base)
-def takedown_success_rate_utils(engine, params: dict, obj: dict):
+def takedown_success_rate_utils(session_factory, params: dict, obj: dict):
     takedown_success_rate_string = "Takedown Success rate"
     obj_copy = obj.copy()
     statement = text("""
@@ -27,9 +27,9 @@ def takedown_success_rate_utils(engine, params: dict, obj: dict):
                 from success s right join total t on s.fighter_id = t.fighter_id))
                 where fighter_id = :fighter_id
         """)
-    with engine.connect() as conn:
-        takedown_count = conn.execute(statement, params)
-    takedown_success_rate = takedown_count.fetchone()
+    with session_factory() as session:
+        takedown_count = session.execute(statement, params)
+        takedown_success_rate = takedown_count.fetchone()
     obj_copy["metrics"] = takedown_success_rate_string
     if takedown_success_rate is not None:
         
@@ -39,7 +39,7 @@ def takedown_success_rate_utils(engine, params: dict, obj: dict):
         obj_copy["bar_pct"] = float(takedown_success_rate[4])
     return obj_copy
 
-def takedown_per_match_utils(engine, params: dict, obj:dict):
+def takedown_per_match_utils(session_factory, params: dict, obj:dict):
     
     obj_copy = obj.copy()
     statement = text("""
@@ -71,9 +71,9 @@ def takedown_per_match_utils(engine, params: dict, obj:dict):
         select *, round((tkd_per_match - 0) /(max(tkd_per_match) over() - 0), 2) bar_pct from total t) 
         where fighter = :fighter_id
         """)
-    with engine.connect() as conn:
-        takedown_per_match = conn.execute(statement, params)
-    takedown_per_match_fetch = takedown_per_match.fetchone()
+    with session_factory() as session:
+        takedown_per_match = session.execute(statement, params)
+        takedown_per_match_fetch = takedown_per_match.fetchone()
     obj_copy["metrics"] = "Takedown per fight total"
     if takedown_per_match is not None:
         
@@ -81,7 +81,7 @@ def takedown_per_match_utils(engine, params: dict, obj:dict):
         obj_copy["bar_pct"] = float(takedown_per_match_fetch[2])
     return obj_copy
 
-def takedown_average_points_per_fight_utils(engine, params: dict, obj: dict):
+def takedown_average_points_per_fight_utils(session_factory, params: dict, obj: dict):
     obj_copy = obj.copy()
     statement = text("""
         --takedown average points per fight
@@ -114,9 +114,9 @@ def takedown_average_points_per_fight_utils(engine, params: dict, obj: dict):
                     from calculation)
         where fighter = :fighter_id
         """)
-    with engine.connect() as conn:
-        takedown_average_points_per_fight = conn.execute(statement, params)
-    fetch = takedown_average_points_per_fight.fetchone()
+    with session_factory() as session:
+        takedown_average_points_per_fight = session.execute(statement, params)
+        fetch = takedown_average_points_per_fight.fetchone()
     obj_copy["metrics"] = "Average takedown points per fight"
     if fetch is not None:
         
@@ -125,7 +125,7 @@ def takedown_average_points_per_fight_utils(engine, params: dict, obj: dict):
     return obj_copy
 
     
-def takedown_count_utils(engine, params: dict, obj: dict):
+def takedown_count_utils(session_factory, params: dict, obj: dict):
     obj_copy = obj.copy()
     statement = text("""
         with success as (select f.fighter_id, count(*) as successful_count from fightstatistics f
@@ -136,9 +136,9 @@ def takedown_count_utils(engine, params: dict, obj: dict):
             select *, round(cast((successful_count - 0) as Decimal) /cast((max(successful_count) over() - 0) as Decimal), 2) bar_pct 
             from success) where fighter_id = :fighter_id
         """)
-    with engine.connect() as conn:
-        takedown_count = conn.execute(statement, params)
-    fetch = takedown_count.fetchone()
+    with session_factory() as session:
+        takedown_count = session.execute(statement, params)
+        fetch = takedown_count.fetchone()
     obj_copy["metrics"] = "Takedown Count"
     if fetch is not None:
         
@@ -147,7 +147,7 @@ def takedown_count_utils(engine, params: dict, obj: dict):
     return obj_copy
 
 
-def single_leg_takedown_success_rate_utils(engine, params:dict, model: ModelTypeVar, obj:dict, db: Session):
+def single_leg_takedown_success_rate_utils(session_factory, params:dict, model: ModelTypeVar, obj:dict, db: Session):
     technique = db.query(model).filter(model.name == "Single leg takedown").first()   
     params['technique_id'] = technique.id
     obj_copy = obj.copy()
@@ -171,9 +171,9 @@ def single_leg_takedown_success_rate_utils(engine, params:dict, model: ModelType
                 from success s right join total t on s.fighter_id = t.fighter_id))
                 where fighter_id = :fighter_id
         """)
-    with engine.connect() as conn:
-        single_leg_takedown_success_rate = conn.execute(statement, params)
-    fetch = single_leg_takedown_success_rate.fetchone()
+    with session_factory() as session:
+        single_leg_takedown_success_rate = session.execute(statement, params)
+        fetch = single_leg_takedown_success_rate.fetchone()
     obj_copy["metrics"] = "Singe Leg takedown Success Rate"
     if fetch is not None:
         obj_copy["successful_count"] = fetch[2]
@@ -184,7 +184,7 @@ def single_leg_takedown_success_rate_utils(engine, params:dict, model: ModelType
     return obj_copy
 
 
-def single_leg_takedown_count_utils(engine, params:dict, model: ModelTypeVar, obj:dict, db: Session):
+def single_leg_takedown_count_utils(session_factory, params:dict, model: ModelTypeVar, obj:dict, db: Session):
     technique = db.query(model).filter(model.name == "Single leg takedown").first()
     obj_copy = obj.copy()
     params['technique_id'] = technique.id
@@ -197,17 +197,17 @@ def single_leg_takedown_count_utils(engine, params:dict, model: ModelTypeVar, ob
             select *, round(cast((successful_count - 0) as Decimal) /cast((max(successful_count) over() - 0) as Decimal), 2) bar_pct 
             from success) where fighter_id = :fighter_id
         """)
-    with engine.connect() as conn:
-        single_leg_takedown_count = conn.execute(statement, params)
+    with session_factory() as session:
+        single_leg_takedown_count = session.execute(statement, params)
+        fetch = single_leg_takedown_count.fetchone()
 
-    fetch = single_leg_takedown_count.fetchone()
     obj_copy["metrics"] = "Single leg takedown count"
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[2])
     return obj_copy
 
-def double_leg_takedown_count_utils(engine, params:dict, model: ModelTypeVar, obj:dict, db: Session):
+def double_leg_takedown_count_utils(session_factory, params:dict, model: ModelTypeVar, obj:dict, db: Session):
     technique = db.query(model).filter(model.name == "Double leg takedown").first()
     obj_copy = obj.copy()
     params['technique_id'] = technique.id
@@ -220,9 +220,9 @@ def double_leg_takedown_count_utils(engine, params:dict, model: ModelTypeVar, ob
             select *, round(cast((successful_count - 0) as Decimal) /cast((max(successful_count) over() - 0) as Decimal), 2) bar_pct 
             from success) where fighter_id = :fighter_id
         """)
-    with engine.connect() as conn:
-        double_leg_takedown_count = conn.execute(statement, params)
-    fetch = double_leg_takedown_count.fetchone()
+    with session_factory() as session:
+        double_leg_takedown_count = session.execute(statement, params)
+        fetch = double_leg_takedown_count.fetchone()
     obj_copy["metrics"] = "Double leg takedown counts"
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
@@ -230,7 +230,7 @@ def double_leg_takedown_count_utils(engine, params:dict, model: ModelTypeVar, ob
     return obj_copy
 
 
-def double_leg_takedown_success_rate_utils(engine, params:dict, model: ModelTypeVar, obj:dict, db: Session):
+def double_leg_takedown_success_rate_utils(session_factory, params:dict, model: ModelTypeVar, obj:dict, db: Session):
     obj_copy = obj.copy()
     technique = db.query(model).filter(model.name == "Double leg takedown").first()   
     params['technique_id'] = technique.id
@@ -253,10 +253,10 @@ def double_leg_takedown_success_rate_utils(engine, params:dict, model: ModelType
                 from success s right join total t on s.fighter_id = t.fighter_id))
                 where fighter_id = :fighter_id
         """)
-    with engine.connect() as conn:
-        double_leg_takedown_success_rate = conn.execute(statement, params)
+    with session_factory() as session:
+        double_leg_takedown_success_rate = session.execute(statement, params)
 
-    fetch = double_leg_takedown_success_rate.fetchone()
+        fetch = double_leg_takedown_success_rate.fetchone()
     obj_copy["metrics"] = "Double Leg takedown Success Rate"
     if fetch is not None:
         obj_copy["successful_count"] = fetch[2]

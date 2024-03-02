@@ -5,7 +5,7 @@ from database import Base
 from src.app.models import ActionName
 
 
-def parterre_success_rate_utils(engine, params: dict, obj:dict, db: Session):
+def parterre_success_rate_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     """"""
     statement = text("""
@@ -28,9 +28,9 @@ def parterre_success_rate_utils(engine, params: dict, obj:dict, db: Session):
 			(select t.fighter_id, coalesce(successful_count, 0) successful_count, total_count, round(coalesce(cast(successful_count as decimal) / cast(total_count as decimal), 0), 2) takedown_success_rate
 			from success s right join total t on s.fighter_id = t.fighter_id)) where fighter_id = :fighter_id
         """)
-    with engine.connect() as conn:
-        parterre_success_rate_utils = conn.execute(statement, params)
-    fetch = parterre_success_rate_utils.fetchone()
+    with session_factory() as session:
+        parterre_success_rate_utils = session.execute(statement, params)
+        fetch = parterre_success_rate_utils.fetchone()
 
     obj_copy["metrics"] = "Parterre success rate"
     if fetch is not None:
@@ -39,7 +39,7 @@ def parterre_success_rate_utils(engine, params: dict, obj:dict, db: Session):
     return obj_copy
 
 
-def roll_points_per_fight_utils(engine, params: dict, obj:dict, db: Session):
+def roll_points_per_fight_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     """"""
     statement = text("""
@@ -72,9 +72,9 @@ def roll_points_per_fight_utils(engine, params: dict, obj:dict, db: Session):
 		select *, round(cast(avg_points_per_match as decimal)/ cast(max(avg_points_per_match) over() as decimal), 2) from calculation
 	) where fighter = :fighter_id
         """)
-    with engine.connect() as conn:
-        roll_count_per_fight_rate = conn.execute(statement, params)
-    fetch = roll_count_per_fight_rate.fetchone()
+    with session_factory() as session:
+        roll_count_per_fight_rate = session.execute(statement, params)
+        fetch = roll_count_per_fight_rate.fetchone()
 
     obj_copy["metrics"] = "Roll points per fight"
     if fetch is not None:
@@ -84,7 +84,7 @@ def roll_points_per_fight_utils(engine, params: dict, obj:dict, db: Session):
 
 
 
-def roll_count_per_fight_utils(engine, params: dict, obj:dict, db: Session):
+def roll_count_per_fight_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     """"""
     statement = text("""
@@ -127,9 +127,9 @@ def roll_count_per_fight_utils(engine, params: dict, obj:dict, db: Session):
         ) where fighter = :fighter_id
 
         """)
-    with engine.connect() as conn:
-        roll_count_per_fight = conn.execute(statement, params)
-    fetch = roll_count_per_fight.fetchone()
+    with session_factory as session:
+        roll_count_per_fight = session.execute(statement, params)
+        fetch = roll_count_per_fight.fetchone()
 
     obj_copy["metrics"] = "Roll count per fight"
     if fetch is not None:
@@ -137,7 +137,7 @@ def roll_count_per_fight_utils(engine, params: dict, obj:dict, db: Session):
         obj_copy["bar_pct"] = float(fetch[-1])
     return obj_copy
 
-def roll_success_rate_utils(engine, params: dict, obj:dict, db: Session):
+def roll_success_rate_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     """"""
     statement = text("""
@@ -160,9 +160,9 @@ with total as (
         from success s right join total t on s.fighter_id = t.fighter_id)) where fighter_id = :fighter_id
 
         """)
-    with engine.connect() as conn:
-        roll_success_rate = conn.execute(statement, params)
-    fetch = roll_success_rate.fetchone()
+    with session_factory() as session:
+        roll_success_rate = session.execute(statement, params)
+        fetch = roll_success_rate.fetchone()
 
     obj_copy["metrics"] = "Roll success rate"
     if fetch is not None:
@@ -170,7 +170,7 @@ with total as (
         obj_copy["bar_pct"] = float(fetch[-1])
     return obj_copy
 
-def protection_zone_points_per_fight_utils(engine, params: dict, obj:dict, db: Session):
+def protection_zone_points_per_fight_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     """"""
     statement = text("""
@@ -203,9 +203,9 @@ def protection_zone_points_per_fight_utils(engine, params: dict, obj:dict, db: S
 	) where fighter = :fighter_id
 
         """)
-    with engine.connect() as conn:
-        protection_zone_points_per_fight = conn.execute(statement, params)
-    fetch = protection_zone_points_per_fight.fetchone()
+    with session_factory() as session:
+        protection_zone_points_per_fight = session.execute(statement, params)
+        fetch = protection_zone_points_per_fight.fetchone()
 
     obj_copy["metrics"] = "Protection zone points per fight"
     if fetch is not None:
@@ -213,7 +213,7 @@ def protection_zone_points_per_fight_utils(engine, params: dict, obj:dict, db: S
         obj_copy["bar_pct"] = float(fetch[-1])
     return obj_copy
 
-def offence_protection_count_per_fight(engine, params: dict, obj:dict, db: Session):
+def offence_protection_count_per_fight(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     """"""
     statement = text("""
@@ -256,9 +256,9 @@ def offence_protection_count_per_fight(engine, params: dict, obj:dict, db: Sessi
         ) where fighter = :fighter_id
 
         """)
-    with engine.connect() as conn:
-        offence_protection_count_per_fight = conn.execute(statement, params)
-    fetch = offence_protection_count_per_fight.fetchone()
+    with session_factory() as session:
+        offence_protection_count_per_fight = session.execute(statement, params)
+        fetch = offence_protection_count_per_fight.fetchone()
 
     obj_copy["metrics"] = "Protection zone count per fight"
     if fetch is not None:
@@ -266,7 +266,7 @@ def offence_protection_count_per_fight(engine, params: dict, obj:dict, db: Sessi
         obj_copy["bar_pct"] = float(fetch[-1])
     return obj_copy
 
-def offence_protection_zone_success_rate(engine, params: dict, obj:dict, db: Session):
+def offence_protection_zone_success_rate(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     """"""
     statement = text("""
@@ -290,9 +290,9 @@ def offence_protection_zone_success_rate(engine, params: dict, obj:dict, db: Ses
             from success s right join total t on s.fighter_id = t.fighter_id)) where fighter_id = :fighter_id
 
         """)
-    with engine.connect() as conn:
-        offence_protection_zone_success_rate = conn.execute(statement, params)
-    fetch = offence_protection_zone_success_rate.fetchone()
+    with session_factory() as session:
+        offence_protection_zone_success_rate = session.execute(statement, params)
+        fetch = offence_protection_zone_success_rate.fetchone()
 
     obj_copy["metrics"] = "Protection zone success rate"
     if fetch is not None:
@@ -301,7 +301,7 @@ def offence_protection_zone_success_rate(engine, params: dict, obj:dict, db: Ses
     return obj_copy
 
 
-def offence_action_success_rate_utils(engine, params: dict, obj:dict, db: Session):
+def offence_action_success_rate_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     """"""
     statement = text("""
@@ -325,9 +325,9 @@ def offence_action_success_rate_utils(engine, params: dict, obj:dict, db: Sessio
                 from success s right join total t on s.fighter_id = t.fighter_id))
             where fighter_id = :fighter_id
         """)
-    with engine.connect() as conn:
-        action_success_rate = conn.execute(statement, params)
-    fetch = action_success_rate.fetchone()
+    with session_factory() as session:
+        action_success_rate = session.execute(statement, params)
+        fetch = action_success_rate.fetchone()
 
     obj_copy["metrics"] = "Action Success rate"
     if fetch is not None:
@@ -336,7 +336,7 @@ def offence_action_success_rate_utils(engine, params: dict, obj:dict, db: Sessio
     return obj_copy
 
 
-def offence_action_point_per_fight(engine, params: dict, obj:dict, db: Session):
+def offence_action_point_per_fight(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     """"""
     statement = text("""
@@ -369,9 +369,9 @@ def offence_action_point_per_fight(engine, params: dict, obj:dict, db: Session):
             select *, round(cast(avg_points_per_match as decimal)/ cast(max(avg_points_per_match) over() as decimal), 2) from calculation
         ) where fighter = :fighter_id
         """)
-    with engine.connect() as conn:
-        offence_action_point_per_fight = conn.execute(statement, params)
-    fetch = offence_action_point_per_fight.fetchone()
+    with session_factory() as session:
+        offence_action_point_per_fight = session.execute(statement, params)
+        fetch = offence_action_point_per_fight.fetchone()
     obj_copy["metrics"] = "Action points per fight"
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
@@ -380,7 +380,7 @@ def offence_action_point_per_fight(engine, params: dict, obj:dict, db: Session):
     return obj_copy
 
 
-def offence_action_count_per_fight(engine, params: dict, obj:dict, db: Session):
+def offence_action_count_per_fight(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     """"""
     statement = text("""
@@ -419,9 +419,9 @@ def offence_action_count_per_fight(engine, params: dict, obj:dict, db: Session):
         )
         select * from (select *, round(cast(successful_attempts_per_match as decimal)/ cast(max(successful_attempts_per_match) over() as decimal), 2) from calculation) where fighter = :fighter_id
         """)
-    with engine.connect() as conn:
-        action_count_per_fight = conn.execute(statement, params)
-    fetch = action_count_per_fight.fetchone()
+    with session_factory() as session:
+        action_count_per_fight = session.execute(statement, params)
+        fetch = action_count_per_fight.fetchone()
     obj_copy["metrics"] = "Action count per fight"
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
