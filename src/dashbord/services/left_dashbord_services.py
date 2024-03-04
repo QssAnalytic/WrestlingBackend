@@ -17,9 +17,9 @@ ModelTypeVar = TypeVar("ModelTypeVar", bound=Base)
 
 
 class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
-    def __init__(self, model: Type[ModelTypeVar], ses_factory: Session) -> None:
+    def __init__(self, model: Type[ModelTypeVar]) -> None:
         self.model = model
-        self.session_factory = ses_factory
+        # session_factory = ses_factory
 
     def stats_score_statistic(self, params: dict, db: Session):
         obj = {"metrics": "",
@@ -28,9 +28,9 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
             "total_count":0,
             "bar_pct": 0}
         response_list = []
-        stats_takedown_obj = stats_takedown(session_factory=self.session_factory, params=params, obj=obj, db=db)
-        stats_defence_obj = stats_defence(session_factory=self.session_factory, params=params, obj=obj, db=db)
-        stats_offence_obj = stats_offence(session_factory=self.session_factory, params=params, obj=obj, db=db)
+        stats_takedown_obj = stats_takedown(session_factory=session_factory, params=params, obj=obj, db=db)
+        stats_defence_obj = stats_defence(session_factory=session_factory, params=params, obj=obj, db=db)
+        stats_offence_obj = stats_offence(session_factory=session_factory, params=params, obj=obj, db=db)
         response_list.append(stats_defence_obj)
         response_list.append(stats_takedown_obj)
         response_list.append(stats_offence_obj)
@@ -51,9 +51,9 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response = {}
         response = {}
         response["name"] = "Durability Score"
-        takedown_durability_score_obj = takedown_durability_score_utils(session_factory=self.session_factory, params=params, obj=obj, db=db)
-        defence_durability_score_obj = defence_durability_score_utils(session_factory=self.session_factory, params=params, obj=obj, db=db)
-        offence_durability_score_obj = offence_durability_score_utils(session_factory=self.session_factory, params=params, obj=obj, db=db)
+        takedown_durability_score_obj = takedown_durability_score_utils(session_factory=session_factory, params=params, obj=obj, db=db)
+        defence_durability_score_obj = defence_durability_score_utils(session_factory=session_factory, params=params, obj=obj, db=db)
+        offence_durability_score_obj = offence_durability_score_utils(session_factory=session_factory, params=params, obj=obj, db=db)
         response_list = []
         response_list.append(takedown_durability_score_obj)
         response_list.append(defence_durability_score_obj)
@@ -71,15 +71,15 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response_list = []
         response = {}
         response["name"] = "Offense Score"
-        action_success_rate_obj = offence_action_success_rate_utils(session_factory=self.session_factory, params=params, obj=obj, db=db)
-        action_count_per_fight_obj = offence_action_count_per_fight(session_factory=self.session_factory, params=params, obj=obj, db=db)
-        offence_action_point_per_fight_obj = offence_action_point_per_fight(session_factory=self.session_factory, params=params, obj=obj, db=db)
-        offence_protection_zone_success_rate_obj = offence_protection_zone_success_rate(session_factory=self.session_factory, params=params, obj=obj, db=db)
-        offence_protection_count_per_fight_obj = offence_protection_count_per_fight(session_factory=self.session_factory, params=params, obj=obj, db=db)
-        protection_zone_points_per_fight_obj = protection_zone_points_per_fight_utils(session_factory=self.session_factory, params=params, obj=obj, db=db)
-        roll_success_rate_obj = roll_success_rate_utils(session_factory=self.session_factory, params=params, obj=obj, db=db)
-        roll_count_per_fight_obj = roll_points_per_fight_utils(session_factory=self.session_factory, params=params, obj=obj, db=db)
-        parterre_success_rate_obj = parterre_success_rate_utils(session_factory=self.session_factory, params=params, obj=obj, db=db)
+        action_success_rate_obj = offence_action_success_rate_utils(session_factory=session_factory, params=params, obj=obj, db=db)
+        action_count_per_fight_obj = offence_action_count_per_fight(session_factory=session_factory, params=params, obj=obj, db=db)
+        offence_action_point_per_fight_obj = offence_action_point_per_fight(session_factory=session_factory, params=params, obj=obj, db=db)
+        offence_protection_zone_success_rate_obj = offence_protection_zone_success_rate(session_factory=session_factory, params=params, obj=obj, db=db)
+        offence_protection_count_per_fight_obj = offence_protection_count_per_fight(session_factory=session_factory, params=params, obj=obj, db=db)
+        protection_zone_points_per_fight_obj = protection_zone_points_per_fight_utils(session_factory=session_factory, params=params, obj=obj, db=db)
+        roll_success_rate_obj = roll_success_rate_utils(session_factory=session_factory, params=params, obj=obj, db=db)
+        roll_count_per_fight_obj = roll_points_per_fight_utils(session_factory=session_factory, params=params, obj=obj, db=db)
+        parterre_success_rate_obj = parterre_success_rate_utils(session_factory=session_factory, params=params, obj=obj, db=db)
         response_list.append(offence_protection_count_per_fight_obj)
         response_list.append(offence_action_point_per_fight_obj)
         response_list.append(action_count_per_fight_obj)
@@ -103,13 +103,13 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response["name"] = "Defence Score"
     
 
-        action_escape_rate_obj = action_escape_rate_utils(session_factory=self.session_factory, params=params, obj = obj, db=db)
-        pin_to_parter_escape_rate_obj = pin_to_parter_escape_rate_utils(session_factory=self.session_factory, params=params,obj=obj, db=db)
-        takedown_escape_rate_obj = takedown_escape_rate_utils(session_factory=self.session_factory, params=params,obj = obj, db=db)
-        roll_escape_rate_obj= roll_escape_rate_utils(session_factory=self.session_factory, params=params,obj=obj, db=db)
-        protection_zone_escape_rate_obj = protection_zone_escape_rate_utils(session_factory=self.session_factory, params=params,obj=obj, db=db)
-        parterre_escape_rate_obj = parterre_escape_rate_utils(session_factory=self.session_factory, params=params, obj=obj, model=self.model,db=db)
-        action_skipped_points_per_fight_obj = action_skipped_points_per_fight_utils(session_factory=self.session_factory, params=params, obj=obj, model=self.model,db=db)
+        action_escape_rate_obj = action_escape_rate_utils(session_factory=session_factory, params=params, obj = obj, db=db)
+        pin_to_parter_escape_rate_obj = pin_to_parter_escape_rate_utils(session_factory=session_factory, params=params,obj=obj, db=db)
+        takedown_escape_rate_obj = takedown_escape_rate_utils(session_factory=session_factory, params=params,obj = obj, db=db)
+        roll_escape_rate_obj= roll_escape_rate_utils(session_factory=session_factory, params=params,obj=obj, db=db)
+        protection_zone_escape_rate_obj = protection_zone_escape_rate_utils(session_factory=session_factory, params=params,obj=obj, db=db)
+        parterre_escape_rate_obj = parterre_escape_rate_utils(session_factory=session_factory, params=params, obj=obj, model=self.model,db=db)
+        action_skipped_points_per_fight_obj = action_skipped_points_per_fight_utils(session_factory=session_factory, params=params, obj=obj, model=self.model,db=db)
         response_list.append(action_escape_rate_obj)
         response_list.append(takedown_escape_rate_obj)
         response_list.append(pin_to_parter_escape_rate_obj)
@@ -131,14 +131,14 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response = {}
         response["name"] = "Takedown Score"
         response_list = []
-        takedown_success_rate_obj = takedown_success_rate_utils(params=params, obj = obj, session_factory=self.session_factory)
-        takedown_per_match_obj = takedown_per_match_utils(session_factory=self.session_factory, params=params, obj = obj)
-        takedown_average_points_per_fight_obj = takedown_average_points_per_fight_utils(session_factory=self.session_factory, params=params, obj = obj)
-        takedown_count_obj = takedown_count_utils(session_factory=self.session_factory, params=params, obj = obj)
-        double_leg_takedown_count_obj = double_leg_takedown_count_utils(session_factory=self.session_factory, params=params,model=self.model,obj = obj, db=db)
-        single_leg_takedown_success_obj = single_leg_takedown_success_rate_utils(session_factory=self.session_factory, params=params, model=self.model, obj=obj, db=db)
-        single_leg_takedown_count_obj = single_leg_takedown_count_utils(session_factory=self.session_factory, params=params, model=self.model,obj=obj, db=db)
-        double_leg_takedown_success_rate_obj = double_leg_takedown_success_rate_utils(session_factory=self.session_factory, params=params, model=self.model,obj=obj, db=db)
+        takedown_success_rate_obj = takedown_success_rate_utils(params=params, obj = obj, session_factory=session_factory)
+        takedown_per_match_obj = takedown_per_match_utils(session_factory=session_factory, params=params, obj = obj)
+        takedown_average_points_per_fight_obj = takedown_average_points_per_fight_utils(session_factory=session_factory, params=params, obj = obj)
+        takedown_count_obj = takedown_count_utils(session_factory=session_factory, params=params, obj = obj)
+        double_leg_takedown_count_obj = double_leg_takedown_count_utils(session_factory=session_factory, params=params,model=self.model,obj = obj, db=db)
+        single_leg_takedown_success_obj = single_leg_takedown_success_rate_utils(session_factory=session_factory, params=params, model=self.model, obj=obj, db=db)
+        single_leg_takedown_count_obj = single_leg_takedown_count_utils(session_factory=session_factory, params=params, model=self.model,obj=obj, db=db)
+        double_leg_takedown_success_rate_obj = double_leg_takedown_success_rate_utils(session_factory=session_factory, params=params, model=self.model,obj=obj, db=db)
 
         response_list.append(takedown_success_rate_obj)
         response_list.append(takedown_per_match_obj)
@@ -153,4 +153,4 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
     
 
     
-medal_left_dashbord_service = MedalLeftDashbordSerivices(Technique,session_factory)
+medal_left_dashbord_service = MedalLeftDashbordSerivices(Technique)

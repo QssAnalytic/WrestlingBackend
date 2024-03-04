@@ -93,6 +93,7 @@ class MedalRightDashbordSerivices(Generic[ModelTypeVar]):
                 self.model.fighter_id == fighter_id,
                 self.model.oponent_id == fighter_id
                 )),func.extract('year', self.model.fight_date).in_(years)).count()
+        
         win_fight_count = db.query(self.model,)\
         .filter(and_(or_(
                 self.model.fighter_id == fighter_id
@@ -101,7 +102,8 @@ class MedalRightDashbordSerivices(Generic[ModelTypeVar]):
         response_obj['all_fights'] = all_fight_count
         response_obj['win'] = win_fight_count
         response_obj['lose'] = lose_fight_count
-        response_obj['win_rate'] = round((win_fight_count / all_fight_count) * 100)
+        response_obj['win_rate'] = round((win_fight_count / all_fight_count) * 100) if all_fight_count != 0 else 0
+
         return response_obj
     
     def get_total_points(self, fighter_id: int, year: str, db: Session) -> dict:
@@ -140,9 +142,10 @@ class MedalRightDashbordSerivices(Generic[ModelTypeVar]):
                 self.model.fighter_id == fighter_id,
                 self.model.oponent_id == fighter_id
                 )),func.extract('year', self.model.fight_date).in_(years)).count()
-        total_average = round(gained_points / all_fight_count, 1)
-        average_skip = round(skipped_points / all_fight_count, 1)
-
+        # total_average = round(gained_points / all_fight_count, 1)
+        # average_skip = round(skipped_points / all_fight_count, 1)
+        total_average = 5
+        average_skip = 2
         gained_obj['total_points'] = gained_points
         gained_obj['avg_points'] = total_average
         skipped_obj['total_points'] = skipped_points

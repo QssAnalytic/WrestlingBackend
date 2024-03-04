@@ -29,14 +29,14 @@ def takedown_success_rate_utils(session_factory, params: dict, obj: dict):
         """)
     with session_factory() as session:
         takedown_count = session.execute(statement, params)
-        takedown_success_rate = takedown_count.fetchone()
+        fetch = takedown_count.fetchone()
     obj_copy["metrics"] = takedown_success_rate_string
-    if takedown_success_rate is not None:
+    if fetch is not None:
         
-        obj_copy["score"] = float(takedown_success_rate[1])
-        obj_copy["successful_count"] = takedown_success_rate[2]
-        obj_copy["total_count"] = takedown_success_rate[3]
-        obj_copy["bar_pct"] = float(takedown_success_rate[4])
+        obj_copy["score"] = float(fetch[1])
+        obj_copy["successful_count"] = fetch[2]
+        obj_copy["total_count"] = fetch[3]
+        obj_copy["bar_pct"] = float(fetch[4])
     return obj_copy
 
 def takedown_per_match_utils(session_factory, params: dict, obj:dict):
@@ -73,12 +73,11 @@ def takedown_per_match_utils(session_factory, params: dict, obj:dict):
         """)
     with session_factory() as session:
         takedown_per_match = session.execute(statement, params)
-        takedown_per_match_fetch = takedown_per_match.fetchone()
+        fetch = takedown_per_match.fetchone()
+    if fetch != None:
+        obj_copy["score"] = float(fetch[1])
+        obj_copy["bar_pct"] = float(fetch[2])
     obj_copy["metrics"] = "Takedown per fight total"
-    if takedown_per_match is not None:
-        
-        obj_copy["score"] = float(takedown_per_match_fetch[1])
-        obj_copy["bar_pct"] = float(takedown_per_match_fetch[2])
     return obj_copy
 
 def takedown_average_points_per_fight_utils(session_factory, params: dict, obj: dict):

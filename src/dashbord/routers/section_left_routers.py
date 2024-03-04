@@ -17,18 +17,23 @@ def metrics(fight_date: str, fighter_id: int, db: Session = Depends(get_db)):
     params = {"fight_date": fight_date,  "fighter_id": fighter_id}
     response_list = []
     takedown_obj = medal_left_dashbord_service.takedown_statistic(params=params, db=db)
-    defence_reason_obj = medal_left_dashbord_service.defence_score_statistic(params=params, db=db)
-    offense_score_obj = medal_left_dashbord_service.offense_score_statistic(params=params, db=db)
-    durability_score_obj = medal_left_dashbord_service.durability_score_statistic(params=params, db=db)
+    # defence_reason_obj = medal_left_dashbord_service.defence_score_statistic(params=params, db=db)
+    # offense_score_obj = medal_left_dashbord_service.offense_score_statistic(params=params, db=db)
+    # durability_score_obj = medal_left_dashbord_service.durability_score_statistic(params=params, db=db)
     response_list.append(takedown_obj)
-    response_list.append(defence_reason_obj)
-    response_list.append(offense_score_obj)
-    response_list.append(durability_score_obj)
+    # response_list.append(defence_reason_obj)
+    # response_list.append(offense_score_obj)
+    # response_list.append(durability_score_obj)
     return response_list
 
 @router.get("/stats/")
 def metrics(fight_date: str, fighter_id: int, db: Session = Depends(get_db)):
     fight_date = tuple(list(map(int, fight_date.split(","))))
     params = {"fight_date": fight_date,  "fighter_id": fighter_id}
+    # return {"metrics": "",
+    #         "score": 0,
+    #         "successful_count":0,
+    #         "total_count":0,
+    #         "bar_pct": 0}
     response = medal_left_dashbord_service.stats_score_statistic(params=params, db=db)
     return response
