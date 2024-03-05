@@ -5,7 +5,7 @@ from src.app.crud.base import CRUDBase
 from src.app.models import Tournament, FightInfo, Fighter
 from src.app.schemas.tournament_schemas import TournamentBaseInfos
 
-class CRUDTournament(CRUDBase[Tournament,TournamentBaseInfos, TournamentBaseInfos]):
+class CRUDFilter(CRUDBase[Tournament,TournamentBaseInfos, TournamentBaseInfos]):
     
     def get_weights(self, tournament_id: Optional[int], wrestling_type: Optional[str], db: Session):
         query = select(FightInfo)
@@ -53,4 +53,4 @@ class CRUDTournament(CRUDBase[Tournament,TournamentBaseInfos, TournamentBaseInfo
         return data
     
 
-filter = CRUDTournament(Tournament)
+filter = CRUDFilter(Tournament)

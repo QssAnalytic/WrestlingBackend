@@ -1,4 +1,5 @@
 from datetime import date
+from fastapi import Query
 from pydantic import BaseModel, Field, ValidationError, validator
 from typing import Optional, List
 from src.app.schemas.fight_statistic_schemas import FightStatisticOutPutBase
@@ -118,3 +119,25 @@ class FightInfoBase(CreateFighterInfo):
         from_attributes = True
 
 
+class FilterFightInfoBase(BaseModel):
+    tournament_id: Optional[int] = Field(None)
+    place: Optional[str] = Field(None)
+    wrestler_name: Optional[str] = Field(None)
+    author: Optional[str] = Field(None)
+    is_submitted: Optional[bool] = Field(None)
+    status: Optional[str] = Field(None)
+    weight_category: Optional[str] = Field(None)
+    date: Optional[int] = Field(None)
+    stage: Optional[str] = Field(None)
+    wrestling_type: Optional[str] = Field(None)
+    check_author: Optional[str] = Field(Query(None))
+    page: Optional[int] = Field(Query(1, ge=0))
+    limit:int=Field(Query(100, ge=100))
+
+
+
+# tournament_id: int | None = None, place: str | None = None, wrestler_name: str | None = None,
+#                 author: str | None = None, is_submitted: bool | None = None, status: str | None = None,
+#                 weight_category: int | None = None, date: int | None = None, stage: str | None = None,
+#                 wrestling_type: str | None = None, check_author: str | None = None,
+#                 page: int = Query(1, ge=0),limit:int=Query(100, ge=100)
