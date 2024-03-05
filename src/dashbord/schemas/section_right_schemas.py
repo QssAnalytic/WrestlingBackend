@@ -36,6 +36,7 @@ class FightCountsOutPut(BaseModel):
     all_fights: int
     win_rate: int
     score_by_weight: float
+    score_by_style: float
 
 class WinDecisionResult(BaseModel):
     decision: str

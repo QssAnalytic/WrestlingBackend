@@ -136,8 +136,3 @@ class FilterFightInfoBase(BaseModel):
 
 
 
-# tournament_id: int | None = None, place: str | None = None, wrestler_name: str | None = None,
-#                 author: str | None = None, is_submitted: bool | None = None, status: str | None = None,
-#                 weight_category: int | None = None, date: int | None = None, stage: str | None = None,
-#                 wrestling_type: str | None = None, check_author: str | None = None,
-#                 page: int = Query(1, ge=0),limit:int=Query(100, ge=100)

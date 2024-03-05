@@ -87,7 +87,8 @@ class MedalRightDashbordSerivices(Generic[ModelTypeVar]):
             "lose": 0,
             "all_fights": 0,
             "win_rate": 0,
-            "score_by_weight": 0
+            "score_by_weight": 0,
+            "score_by_style": 0
 
         }
         all_fight_count = db.query(self.model)\
@@ -140,17 +141,41 @@ class MedalRightDashbordSerivices(Generic[ModelTypeVar]):
         #         2
         #     ).label('percentage')
         # ).all()
-        query = db.query(distinct(FightInfo.weight_category)).filter((FightInfo.fighter_id == fighter_id) | (FightInfo.oponent_id == fighter_id))
-        unique_weight_categories = tuple([result[0] for result in query.all()])
-        params = {"fighter_id": fighter_id, "weight_category":unique_weight_categories, "fight_date": year}
-        statement = text("""
+        weight_category_query = db.query(distinct(FightInfo.weight_category)).filter((FightInfo.fighter_id == fighter_id) | (FightInfo.oponent_id == fighter_id))
+        unique_weight_categories = tuple([result[0] for result in weight_category_query.all()])
+        wrestling_type_query = db.query(distinct(FightInfo.wrestling_type)).filter((FightInfo.fighter_id == fighter_id) | (FightInfo.oponent_id == fighter_id))
+        unique_wrestling_type = tuple([result[0] for result in wrestling_type_query.all()])
+        params = {"fighter_id": fighter_id, "weight_category":unique_weight_categories, "fight_date": tuple(years), "wrestling_type": unique_wrestling_type}
+
+        statement_category = text("""
         -- win_percentage_percentile
             with 
             wins as (
-            select fighter_id, count(*) win_matches from fightinfos where weight_category in :weight_category and extract(year from fight_date) = :fight_date group by fighter_id
+            select fighter_id, count(*) win_matches from fightinfos where weight_category in :weight_category and extract(year from fight_date) in :fight_date group by fighter_id
             ),
             loses as (
-            select oponent_id, count(*) lose_matches from fightinfos where weight_category in :weight_category and extract(year from fight_date) = :fight_date group by oponent_id 
+            select oponent_id, count(*) lose_matches from fightinfos where weight_category in :weight_category and extract(year from fight_date) in :fight_date group by oponent_id 
+            )
+            select * from (
+            select *, round(1 - cast(ranks as decimal) / cast(max(ranks) over() as decimal), 2) 
+            from (
+            select *, rank() over(order by percentage desc) ranks 
+            from (
+            select fighter_id, round(cast(wins as decimal) / cast(total as decimal), 2) percentage 
+            from(
+            select fighter_id, wins, wins + loses total 
+            from(
+            select coalesce(fighter_id, oponent_id) fighter_id, coalesce(win_matches,0) wins , coalesce(lose_matches, 0)loses from loses l full outer join wins w
+            on w.fighter_id = l.oponent_id))))) where fighter_id = :fighter_id
+        """)
+        statement_style = text("""
+        -- win_percentage_percentile
+            with 
+            wins as (
+            select fighter_id, count(*) win_matches from fightinfos where wrestling_type in :wrestling_type and extract(year from fight_date) in :fight_date group by fighter_id
+            ),
+            loses as (
+            select oponent_id, count(*) lose_matches from fightinfos where wrestling_type in :wrestling_type and extract(year from fight_date) in :fight_date group by oponent_id 
             )
             select * from (
             select *, round(1 - cast(ranks as decimal) / cast(max(ranks) over() as decimal), 2) 
@@ -165,13 +190,16 @@ class MedalRightDashbordSerivices(Generic[ModelTypeVar]):
             on w.fighter_id = l.oponent_id))))) where fighter_id = :fighter_id
         """)
         with session_factory() as session:
-            stats_takedown = session.execute(statement, params)
-            fetch = stats_takedown.fetchone()
-        
-        if fetch is not None:
-            
-            response_obj["score_by_weight"] = float(fetch[-1])
+            weight_category = session.execute(statement_category, params)
+            fetch_category = weight_category.fetchone()
+        if fetch_category is not None:
+            response_obj["score_by_weight"] = float(fetch_category[-1])
 
+        with session_factory() as session:
+            w_style = session.execute(statement_style, params)
+            fetch_style = w_style.fetchone()
+        if fetch_style is not None:
+            response_obj["score_by_style"] = float(fetch_style[-1])
         return response_obj
     
     def get_total_points(self, fighter_id: int, year: str, db: Session) -> dict:
