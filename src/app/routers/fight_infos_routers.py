@@ -13,40 +13,44 @@ from src.app.helpers import get_currenct_date
 router = APIRouter()
 
 @router.get("/", response_model=FightInfoOut)
-def fight_infos(filter_model: FilterFightInfoBase = Depends(),db: Session = Depends(get_db)):
-    filter_obj = filter_model.dict()
+def fight_infos(tournament_id: int | None = None, place: str | None = None, wrestler_name: str | None = None,
+                author: str | None = None, is_submitted: bool | None = None, status: str | None = None,
+                weight_category: int | None = None, date: int | None = None, stage: str | None = None,
+                wrestling_type: str | None = None, check_author: str | None = None,
+                page: int = Query(1, ge=0),limit:int=Query(100, ge=100),db: Session = Depends(get_db)):
+    # filter_obj = filter_model.dict()
 
     query = db.query(FightInfo)
-    for k, v in filter_obj.items():
+    # for k, v in filter_obj.items():
 
-        if v != None and k != 'page' and k != 'limit':
-            query = query.filter(getattr(FightInfo, k) == v)
+    #     if v != None and k != 'page' and k != 'limit':
+    #         query = query.filter(getattr(FightInfo, k) == v)
 
 
-    # if wrestling_type is not None:
-    #     query = query.filter(FightInfo.wrestling_type == wrestling_type)
-    # if stage is not None:
-    #     query = query.filter(FightInfo.stage == stage)
-    # if tournament_id is not None:
-    #     query = query.filter(FightInfo.tournament_id == tournament_id)
-    # if place is not None:
-    #     query = query.filter(FightInfo.location == place)
-    # if wrestler_name is not None:
-    #     fighter_ids = db.query(Fighter.id).filter(func.lower(Fighter.name).like(func.lower(f"{wrestler_name}%")))
-    #     query = query.filter(or_(FightInfo.fighter_id.in_(fighter_ids), FightInfo.oponent_id.in_(fighter_ids)))
-    # if author is not None:
-    #     query = query.filter(func.upper(FightInfo.author) == func.upper((author)))
-    # if is_submitted is not None:
-    #     query = query.filter(FightInfo.is_submitted == is_submitted)
-    # if status is not None:
-    #     query = query.filter(FightInfo.status == status)
-    # if date is not None:
-        # query = query.filter(func.extract("year", FightInfo.fight_date) == date)
-    # if weight_category is not None:
-    #         query = query.filter(FightInfo.weight_category == weight_category)
-    # if check_author is not None:
-    #     query = query.filter(FightInfo.check_author == check_author)
-    response = fight_info.get_multi(db=db, page=filter_obj['page'], limit=filter_obj['limit'], data=query)
+    if wrestling_type is not None:
+        query = query.filter(FightInfo.wrestling_type == wrestling_type)
+    if stage is not None:
+        query = query.filter(FightInfo.stage == stage)
+    if tournament_id is not None:
+        query = query.filter(FightInfo.tournament_id == tournament_id)
+    if place is not None:
+        query = query.filter(FightInfo.location == place)
+    if wrestler_name is not None:
+        fighter_ids = db.query(Fighter.id).filter(func.lower(Fighter.name).like(func.lower(f"{wrestler_name}%")))
+        query = query.filter(or_(FightInfo.fighter_id.in_(fighter_ids), FightInfo.oponent_id.in_(fighter_ids)))
+    if author is not None:
+        query = query.filter(func.upper(FightInfo.author) == func.upper((author)))
+    if is_submitted is not None:
+        query = query.filter(FightInfo.is_submitted == is_submitted)
+    if status is not None:
+        query = query.filter(FightInfo.status == status)
+    if date is not None:
+        query = query.filter(func.extract("year", FightInfo.fight_date) == date)
+    if weight_category is not None:
+            query = query.filter(FightInfo.weight_category == weight_category)
+    if check_author is not None:
+        query = query.filter(FightInfo.check_author == check_author)
+    response = fight_info.get_multi(db=db, page=page, limit=limit, data=query)
     return response
 @router.post("/", response_model=FightInfoBase)
 def create_fight_info(data: CreateFighterInfoBase, db: Session = Depends(get_db)):
