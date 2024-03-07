@@ -1,13 +1,13 @@
 from datetime import datetime
 from typing import Generic, TypeVar, Type
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import Float, Integer, desc, func, select, text, or_, and_, case, extract, cast, outerjoin, literal_column, distinct
-from sqlalchemy.dialects import postgresql
+from sqlalchemy import Float,Numeric, desc, func, text, or_, and_, case, extract, cast, outerjoin, distinct
+
 from sqlalchemy.orm import Session
 from src.app.models import FightInfo
 from database import Base, session_factory
 
-ModelTypeVar = TypeVar("ModelTypeVar", bound=Base)
+ModelTypeVar = TypeVar('ModelTypeVar', bound=Base)
 
 
 
@@ -18,11 +18,11 @@ class MedalRightDashbordSerivices(Generic[ModelTypeVar]):
     
     def get_medals_count(self, fighter_id: int, year: str, db: Session):
         result_obj = {
-            "Gold": 0,
-            "Bronze": 0,
-            "Silver": 0
+            'Gold': 0,
+            'Bronze': 0,
+            'Silver': 0
         }
-        years = list(map(int,year.split(",")))
+        years = list(map(int,year.split(',')))
 
         
         gold_bronze_medal_count = db.query(self.model.stage, func.count().label('stage_count'))\
@@ -51,7 +51,7 @@ class MedalRightDashbordSerivices(Generic[ModelTypeVar]):
         return result_obj
     
     def get_medals_list(self, fighter_id: int, year: str, db: Session):
-        years = list(map(int,year.split(",")))
+        years = list(map(int,year.split(',')))
         gold_place = db.query(
             self.model
         ).filter(and_(or_(
@@ -81,14 +81,14 @@ class MedalRightDashbordSerivices(Generic[ModelTypeVar]):
 
     
     def get_fights_count(self, fighter_id: int, year: str, db: Session):
-        years = list(map(int,year.split(",")))
+        years = list(map(int,year.split(',')))
         response_obj = {
-            "win": 0,
-            "lose": 0,
-            "all_fights": 0,
-            "win_rate": 0,
-            "score_by_weight": 0,
-            "score_by_style": 0
+            'win': 0,
+            'lose': 0,
+            'all_fights': 0,
+            'win_rate': 0,
+            'score_by_weight': 0,
+            'score_by_style': 0
 
         }
         all_fight_count = db.query(self.model)\
@@ -107,106 +107,128 @@ class MedalRightDashbordSerivices(Generic[ModelTypeVar]):
         response_obj['lose'] = lose_fight_count
         response_obj['win_rate'] = round((win_fight_count / all_fight_count) * 100) if all_fight_count != 0 else 0
 
-        # wins = db.query(
-        #     FightInfo.fighter_id,
-        #     func.count().label('win_matches')
-        # ).filter(
-        #     FightInfo.weight_category == 97
-        # ).group_by(
-        #     FightInfo.fighter_id
-        # ).cte()
+        weight_category_query = db.query(distinct(self.model.weight_category)).filter((self.model.fighter_id == fighter_id) | (self.model.oponent_id == fighter_id))
+        unique_weight_categories = [result[0] for result in weight_category_query.all()]
 
-        # loses = db.query(
-        #     FightInfo.oponent_id,
-        #     func.count().label('lose_matches')
-        # ).filter(
-        #     FightInfo.weight_category == 97
-        # ).group_by(
-        #     FightInfo.oponent_id
-        # ).cte()
+        wrestling_type_query = db.query(distinct(self.model.wrestling_type)).filter((self.model.fighter_id == fighter_id) | (self.model.oponent_id == fighter_id))
+        unique_wrestling_type = [result[0] for result in wrestling_type_query.all()]
 
-        # full_join = db.query(
-        #     func.coalesce(wins.c.fighter_id, loses.c.oponent_id).label('fighter_id'),
-        #     func.coalesce(wins.c.win_matches, 0).label('wins'),
-        #     func.coalesce(loses.c.lose_matches, 0).label('loses')
-        # ).outerjoin(
-        #     wins, wins.c.fighter_id == loses.c.oponent_id
-        # ).subquery()
+        # Query by weight
+        wins_by_weight = db.query(
+            self.model.fighter_id,
+            func.count().label('win_matches')
+        ).filter(and_(
+            self.model.weight_category.in_(unique_weight_categories), func.extract('year', self.model.fight_date).in_(years))
+        ).group_by(
+            self.model.fighter_id
+        ).subquery()
+
+        loses_by_weight = db.query(
+            self.model.oponent_id,
+            func.count().label('lose_matches')
+        ).filter(and_(
+            self.model.weight_category.in_(unique_weight_categories), func.extract('year', self.model.fight_date).in_(years))
+        ).group_by(
+            self.model.oponent_id
+        ).subquery()
+
+        full_join_by_weight = db.query(
+            func.coalesce(wins_by_weight.c.fighter_id, loses_by_weight.c.oponent_id).label('fighter_id'),
+            func.coalesce(wins_by_weight.c.win_matches, 0).label('wins_by_weight'),
+            func.coalesce(loses_by_weight.c.lose_matches, 0).label('loses_by_weight')
+        ).outerjoin(
+            loses_by_weight, wins_by_weight.c.fighter_id == loses_by_weight.c.oponent_id, full=True
+        ).subquery()
+
+        percentage_by_weight = db.query(
+            full_join_by_weight.c.fighter_id,
+            func.round(
+                (cast(full_join_by_weight.c.wins_by_weight, Numeric) / cast(full_join_by_weight.c.wins_by_weight + full_join_by_weight.c.loses_by_weight, Numeric)
+                 ), 2)\
+                    .label('percentage_by_weight')).cte()
+        
+        ranks_by_weight = db.query(
+            percentage_by_weight.c.fighter_id,
+            percentage_by_weight.c.percentage_by_weight,
+            func.rank().over(order_by=percentage_by_weight.c.percentage_by_weight.desc()).label('ranks_by_weight')
+        ).subquery()
+
+        round_query = db.query(
+            ranks_by_weight.c.fighter_id,
+            ranks_by_weight.c.percentage_by_weight,
+            ranks_by_weight.c.ranks_by_weight,
+            func.round(
+                (1 - (cast(ranks_by_weight.c.ranks_by_weight, Numeric) / cast(func.max(ranks_by_weight.c.ranks_by_weight).over(), Numeric))), 2
+            ).label("finally_round_by_weight")
+        ).subquery()
+
+        finally_round_by_weight = db.query(round_query).filter(round_query.c.fighter_id == fighter_id).first()
+
+        # ------------------------------------------------
+
+        # Query by style
+        wins_by_style = db.query(
+            self.model.fighter_id,
+            func.count().label('win_matches')
+        ).filter(and_(
+            self.model.wrestling_type.in_(unique_wrestling_type), func.extract('year', self.model.fight_date).in_(years))
+        ).group_by(
+            self.model.fighter_id
+        ).subquery()
+
+        loses_by_style = db.query(
+            self.model.oponent_id,
+            func.count().label('lose_matches')
+        ).filter(and_(
+            self.model.wrestling_type.in_(unique_wrestling_type), func.extract('year', self.model.fight_date).in_(years))
+        ).group_by(
+            self.model.oponent_id
+        ).subquery()
 
 
-        # percentage = db.query(
-        #     full_join.c.fighter_id,
-        #     func.round(
-        #         func.cast(full_join.c.wins, Float) / func.cast(full_join.c.wins + full_join.c.loses, Float),
-        #         2
-        #     ).label('percentage')
-        # ).all()
-        weight_category_query = db.query(distinct(FightInfo.weight_category)).filter((FightInfo.fighter_id == fighter_id) | (FightInfo.oponent_id == fighter_id))
-        unique_weight_categories = tuple([result[0] for result in weight_category_query.all()])
-        wrestling_type_query = db.query(distinct(FightInfo.wrestling_type)).filter((FightInfo.fighter_id == fighter_id) | (FightInfo.oponent_id == fighter_id))
-        unique_wrestling_type = tuple([result[0] for result in wrestling_type_query.all()])
-        params = {"fighter_id": fighter_id, "weight_category":unique_weight_categories, "fight_date": tuple(years), "wrestling_type": unique_wrestling_type}
+        full_join_by_style = db.query(
+            func.coalesce(wins_by_style.c.fighter_id, loses_by_style.c.oponent_id).label('fighter_id'),
+            func.coalesce(wins_by_style.c.win_matches, 0).label('win_matches_style'),
+            func.coalesce(loses_by_style.c.lose_matches, 0).label('lose_matches_style')
+        ).outerjoin(
+            loses_by_style, wins_by_style.c.fighter_id == loses_by_style.c.oponent_id, full=True
+        ).subquery()
 
-        statement_category = text("""
-        -- win_percentage_percentile
-            with 
-            wins as (
-            select fighter_id, count(*) win_matches from fightinfos where weight_category in :weight_category and extract(year from fight_date) in :fight_date group by fighter_id
-            ),
-            loses as (
-            select oponent_id, count(*) lose_matches from fightinfos where weight_category in :weight_category and extract(year from fight_date) in :fight_date group by oponent_id 
-            )
-            select * from (
-            select *, round(1 - cast(ranks as decimal) / cast(max(ranks) over() as decimal), 2) 
-            from (
-            select *, rank() over(order by percentage desc) ranks 
-            from (
-            select fighter_id, round(cast(wins as decimal) / cast(total as decimal), 2) percentage 
-            from(
-            select fighter_id, wins, wins + loses total 
-            from(
-            select coalesce(fighter_id, oponent_id) fighter_id, coalesce(win_matches,0) wins , coalesce(lose_matches, 0)loses from loses l full outer join wins w
-            on w.fighter_id = l.oponent_id))))) where fighter_id = :fighter_id
-        """)
-        statement_style = text("""
-        -- win_percentage_percentile
-            with 
-            wins as (
-            select fighter_id, count(*) win_matches from fightinfos where wrestling_type in :wrestling_type and extract(year from fight_date) in :fight_date group by fighter_id
-            ),
-            loses as (
-            select oponent_id, count(*) lose_matches from fightinfos where wrestling_type in :wrestling_type and extract(year from fight_date) in :fight_date group by oponent_id 
-            )
-            select * from (
-            select *, round(1 - cast(ranks as decimal) / cast(max(ranks) over() as decimal), 2) 
-            from (
-            select *, rank() over(order by percentage desc) ranks 
-            from (
-            select fighter_id, round(cast(wins as decimal) / cast(total as decimal), 2) percentage 
-            from(
-            select fighter_id, wins, wins + loses total 
-            from(
-            select coalesce(fighter_id, oponent_id) fighter_id, coalesce(win_matches,0) wins , coalesce(lose_matches, 0)loses from loses l full outer join wins w
-            on w.fighter_id = l.oponent_id))))) where fighter_id = :fighter_id
-        """)
-        with session_factory() as session:
-            weight_category = session.execute(statement_category, params)
-            fetch_category = weight_category.fetchone()
-        if fetch_category is not None:
-            response_obj["score_by_weight"] = float(fetch_category[-1])
+        percentage_by_style = db.query(
+            full_join_by_style.c.fighter_id,
+            func.round(
+                (cast(full_join_by_style.c.win_matches_style, Numeric) / cast(full_join_by_style.c.win_matches_style + full_join_by_style.c.lose_matches_style, Numeric)
+                 ), 2)\
+                    .label('percentage_by_style')).cte()
+        ranks_by_style = db.query(
+            percentage_by_style.c.fighter_id,
+            percentage_by_style.c.percentage_by_style,
+            func.rank().over(order_by=percentage_by_style.c.percentage_by_style.desc()).label('ranks_by_style')
+        ).subquery()
+        round_query_by_style = db.query(
+            ranks_by_style.c.fighter_id,
+            ranks_by_style.c.percentage_by_style,
+            ranks_by_style.c.ranks_by_style,
+            func.round(
+                (1 - (cast(ranks_by_style.c.ranks_by_style, Numeric) / cast(func.max(ranks_by_style.c.ranks_by_style).over(), Numeric))), 2
+            ).label("finally_round_by_style")
+        ).subquery()
 
-        with session_factory() as session:
-            w_style = session.execute(statement_style, params)
-            fetch_style = w_style.fetchone()
-        if fetch_style is not None:
-            response_obj["score_by_style"] = float(fetch_style[-1])
+        finally_round_by_style = db.query(round_query_by_style).filter(round_query_by_style.c.fighter_id == fighter_id).first()
+
+        if finally_round_by_weight is not None:
+            response_obj['score_by_weight'] = float(finally_round_by_weight[-1])
+
+        if finally_round_by_style is not None:
+            response_obj['score_by_style'] = float(finally_round_by_style[-1])
+            
         return response_obj
     
     def get_total_points(self, fighter_id: int, year: str, db: Session) -> dict:
-        years = list(map(int,year.split(",")))
+        years = list(map(int,year.split(',')))
         response_obj = {
-            "gained":[],
-            "skipped": []
+            'gained':[],
+            'skipped': []
             }
         gained_obj = {}
         skipped_obj = {}
@@ -217,7 +239,7 @@ class MedalRightDashbordSerivices(Generic[ModelTypeVar]):
                     (self.model.oponent_id == fighter_id, self.model.oponent2_point),
                     else_=0
                 )
-            ).label("point1_total")
+            ).label('point1_total')
         ).filter(
             extract('year', self.model.fight_date).in_(years)
         ).scalar()
@@ -228,7 +250,7 @@ class MedalRightDashbordSerivices(Generic[ModelTypeVar]):
                     (self.model.oponent_id == fighter_id, self.model.oponent1_point),
                     else_=0
                 )
-            ).label("point1_total")
+            ).label('point1_total')
         ).filter(
             extract('year', self.model.fight_date).in_(years)
         ).scalar()
@@ -252,19 +274,19 @@ class MedalRightDashbordSerivices(Generic[ModelTypeVar]):
 
 
     def get_decision_point(self, fighter_id: int, year: str, db: Session):
-        years = list(map(int,year.split(",")))
+        years = list(map(int,year.split(',')))
         response_obj = {
             'win_decision': {},
             'lose_decision':{}
         }
 
         win_decision = db.query(
-            self.model.decision, func.count(self.model.decision).label("decision_count")
+            self.model.decision, func.count(self.model.decision).label('decision_count')
         ).filter(and_(
                 self.model.fighter_id == fighter_id),
                 func.extract('year', self.model.fight_date).in_(years)).group_by(self.model.decision).all()
         lose_decision = db.query(
-            self.model.decision, func.count(self.model.decision).label("decision_count")
+            self.model.decision, func.count(self.model.decision).label('decision_count')
         ).filter(and_(
                 self.model.oponent_id == fighter_id),
                 func.extract('year', self.model.fight_date).in_(years)).group_by(self.model.decision).all()

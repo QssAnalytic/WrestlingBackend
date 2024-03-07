@@ -12,7 +12,7 @@ from src.dashbord.utils.stats_takedown_utils import *
 from src.dashbord.utils.durability_score_utils import *
 from database import Base, engine, get_db, session_factory
 
-ModelTypeVar = TypeVar("ModelTypeVar", bound=Base)
+ModelTypeVar = TypeVar('ModelTypeVar', bound=Base)
 
 
 
@@ -22,11 +22,11 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         # session_factory = ses_factory
 
     def stats_score_statistic(self, params: dict, db: Session):
-        obj = {"metrics": "",
-            "score": 0,
-            "successful_count":0,
-            "total_count":0,
-            "bar_pct": 0}
+        obj = {'metrics': '',
+            'score': 0,
+            'successful_count':0,
+            'total_count':0,
+            'bar_pct': 0}
         response_list = []
         stats_takedown_obj = stats_takedown(session_factory=session_factory, params=params, obj=obj, db=db)
         stats_defence_obj = stats_defence(session_factory=session_factory, params=params, obj=obj, db=db)
@@ -34,23 +34,23 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response_list.append(stats_defence_obj)
         response_list.append(stats_takedown_obj)
         response_list.append(stats_offence_obj)
-        response_list.append({"metrics": "Durability Score",
-            "score": 0,
-            "successful_count":0,
-            "total_count":0,
-            "bar_pct": 0})
+        response_list.append({'metrics': 'Durability Score',
+            'score': 0,
+            'successful_count':0,
+            'total_count':0,
+            'bar_pct': 0})
         return response_list
     
 
     def durability_score_statistic(self, params: dict, db: Session):
-        obj = {"metrics": "",
-            "score": 0,
-            "successful_count":0,
-            "total_count":0,
-            "bar_pct": 0}
+        obj = {'metrics': '',
+            'score': 0,
+            'successful_count':0,
+            'total_count':0,
+            'bar_pct': 0}
         response = {}
         response = {}
-        response["name"] = "Durability Score"
+        response['name'] = 'Durability Score'
         takedown_durability_score_obj = takedown_durability_score_utils(session_factory=session_factory, params=params, obj=obj, db=db)
         defence_durability_score_obj = defence_durability_score_utils(session_factory=session_factory, params=params, obj=obj, db=db)
         offence_durability_score_obj = offence_durability_score_utils(session_factory=session_factory, params=params, obj=obj, db=db)
@@ -58,19 +58,19 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response_list.append(takedown_durability_score_obj)
         response_list.append(defence_durability_score_obj)
         response_list.append(offence_durability_score_obj)
-        response["metrics_list"] = response_list
+        response['metrics_list'] = response_list
         return response
     
 
     def offense_score_statistic(self, params:dict, db: Session):
-        obj = {"metrics": "",
-            "score": 0,
-            "successful_count":0,
-            "total_count":0,
-            "bar_pct": 0}
+        obj = {'metrics': '',
+            'score': 0,
+            'successful_count':0,
+            'total_count':0,
+            'bar_pct': 0}
         response_list = []
         response = {}
-        response["name"] = "Offense Score"
+        response['name'] = 'Offense Score'
         action_success_rate_obj = offence_action_success_rate_utils(session_factory=session_factory, params=params, obj=obj, db=db)
         action_count_per_fight_obj = offence_action_count_per_fight(session_factory=session_factory, params=params, obj=obj, db=db)
         offence_action_point_per_fight_obj = offence_action_point_per_fight(session_factory=session_factory, params=params, obj=obj, db=db)
@@ -89,18 +89,18 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response_list.append(roll_success_rate_obj)
         response_list.append(roll_count_per_fight_obj)
         response_list.append(parterre_success_rate_obj)
-        response["metrics_list"] = response_list
+        response['metrics_list'] = response_list
         return response
 
     def defence_score_statistic(self, params:dict, db: Session):
-        obj = {"metrics": "",
-            "score": 0,
-            "successful_count":0,
-            "total_count":0,
-            "bar_pct": 0}
+        obj = {'metrics': '',
+            'score': 0,
+            'successful_count':0,
+            'total_count':0,
+            'bar_pct': 0}
         response_list = []
         response = {}
-        response["name"] = "Defence Score"
+        response['name'] = 'Defence Score'
     
 
         action_escape_rate_obj = action_escape_rate_utils(session_factory=session_factory, params=params, obj = obj, db=db)
@@ -117,19 +117,19 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response_list.append(protection_zone_escape_rate_obj)
         response_list.append(parterre_escape_rate_obj)
         response_list.append(action_skipped_points_per_fight_obj)
-        response["metrics_list"] = response_list
+        response['metrics_list'] = response_list
         return response
 
     def takedown_statistic(self, params: dict, db: Session):
-        action = db.query(ActionName).filter(ActionName.name == "Takedown").first()
+        action = db.query(ActionName).filter(ActionName.name == 'Takedown').first()
         params['action_name_id'] = action.id
-        obj = {"metrics": "",
-            "score": 0,
-            "successful_count":0,
-            "total_count":0,
-            "bar_pct": 0}
+        obj = {'metrics': '',
+            'score': 0,
+            'successful_count':0,
+            'total_count':0,
+            'bar_pct': 0}
         response = {}
-        response["name"] = "Takedown Score"
+        response['name'] = 'Takedown Score'
         response_list = []
         takedown_success_rate_obj = takedown_success_rate_utils(params=params, obj = obj, session_factory=session_factory)
         takedown_per_match_obj = takedown_per_match_utils(session_factory=session_factory, params=params, obj = obj)
@@ -148,7 +148,7 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response_list.append(takedown_average_points_per_fight_obj)
         response_list.append(double_leg_takedown_count_obj)
         response_list.append(double_leg_takedown_success_rate_obj)
-        response["metrics_list"] = response_list
+        response['metrics_list'] = response_list
         return response
     
 
