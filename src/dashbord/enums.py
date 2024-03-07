@@ -1,7 +1,7 @@
 from enum import Enum
 
-class ActionNameEnum(Enum):
-    Takedown = "Takedown"
-    Roll = "Roll"
-    Protection_zone = "Protection zone"
-    Pin_to_parter = "Pin to parter"
+class MetricsEnum(Enum):
+    Takedown = "Takedown Score"
+    Defence = "Defence Score"
+    Offense = "Offense Score"
+    Durability = "Durability Score"
