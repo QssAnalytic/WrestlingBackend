@@ -3,6 +3,13 @@ from pydantic import BaseModel, validator, Field
 from typing import Optional, List, Union
 from decimal import Decimal
 
-class MetricsOutPut(BaseModel):
+class MetricsList(BaseModel):
     metrics: str
     score: float
+    successful_count: int
+    total_count: int
+    bar_pct: float
+
+class MetricsOutPut(BaseModel):
+    name: str
+    metrics_list: List[MetricsList]

@@ -11,7 +11,7 @@ from database import get_db
 router = APIRouter()
 
 
-@router.get("/metrics/")
+@router.get("/metrics/", response_model=List[MetricsOutPut])
 def metrics(fight_date: str, fighter_id: int, db: Session = Depends(get_db)):
     fight_date = tuple(list(map(int, fight_date.split(","))))
     params = {"fight_date": fight_date,  "fighter_id": fighter_id}
