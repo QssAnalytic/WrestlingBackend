@@ -221,7 +221,7 @@ class MedalRightDashbordSerivices(Generic[ModelTypeVar]):
 
         if finally_round_by_style is not None:
             response_obj['score_by_style'] = float(finally_round_by_style[-1])
-            
+
         return response_obj
     
     def get_total_points(self, fighter_id: int, year: str, db: Session) -> dict:
@@ -260,16 +260,16 @@ class MedalRightDashbordSerivices(Generic[ModelTypeVar]):
                 self.model.fighter_id == fighter_id,
                 self.model.oponent_id == fighter_id
                 )),func.extract('year', self.model.fight_date).in_(years)).count()
-        # total_average = round(gained_points / all_fight_count, 1)
-        # average_skip = round(skipped_points / all_fight_count, 1)
-        total_average = 5
-        average_skip = 2
+        total_average = round(gained_points / all_fight_count, 1)
+        average_skip = round(skipped_points / all_fight_count, 1)
+
         gained_obj['total_points'] = gained_points
         gained_obj['avg_points'] = total_average
         skipped_obj['total_points'] = skipped_points
         skipped_obj['avg_points'] = average_skip
         response_obj['gained'].append(gained_obj)
         response_obj['skipped'].append(skipped_obj)
+        
         return response_obj
 
 
