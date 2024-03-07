@@ -54,10 +54,12 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         takedown_durability_score_obj = takedown_durability_score_utils(session_factory=session_factory, params=params, obj=obj, db=db)
         defence_durability_score_obj = defence_durability_score_utils(session_factory=session_factory, params=params, obj=obj, db=db)
         offence_durability_score_obj = offence_durability_score_utils(session_factory=session_factory, params=params, obj=obj, db=db)
+        passivity_durability_per_fight_obj = passivity_durability_per_fight(session_factory=session_factory, params=params, obj=obj, db=db)
         response_list = []
         response_list.append(takedown_durability_score_obj)
         response_list.append(defence_durability_score_obj)
         response_list.append(offence_durability_score_obj)
+        response_list.append(passivity_durability_per_fight_obj)
         response['metrics_list'] = response_list
         return response
     
@@ -117,6 +119,7 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response_list.append(protection_zone_escape_rate_obj)
         response_list.append(parterre_escape_rate_obj)
         response_list.append(action_skipped_points_per_fight_obj)
+        
         response['metrics_list'] = response_list
         return response
 
@@ -142,10 +145,12 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
 
         response_list.append(takedown_success_rate_obj)
         response_list.append(takedown_per_match_obj)
-        response_list.append(takedown_count_obj)
-        response_list.append(single_leg_takedown_success_obj)
-        response_list.append(single_leg_takedown_count_obj)
         response_list.append(takedown_average_points_per_fight_obj)
+        response_list.append(takedown_count_obj)
+
+        response_list.append(single_leg_takedown_count_obj)
+        response_list.append(single_leg_takedown_success_obj)
+        
         response_list.append(double_leg_takedown_count_obj)
         response_list.append(double_leg_takedown_success_rate_obj)
         response['metrics_list'] = response_list
