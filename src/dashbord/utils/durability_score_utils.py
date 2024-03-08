@@ -51,7 +51,7 @@ def passivity_durability_per_fight(session_factory, params: dict, obj:dict, db: 
 
     obj_copy["metrics"] = "Passivity per fight"
     if fetch is not None:  
-        obj_copy["score"] = float(fetch[-1])
+        obj_copy["score"] = float(fetch[-1])*100
     return obj_copy
 
 def offence_durability_score_utils(session_factory, params: dict, obj:dict, db: Session):
@@ -162,7 +162,7 @@ def offence_durability_score_utils(session_factory, params: dict, obj:dict, db: 
 
     obj_copy["metrics"] = "Offence Score"
     if fetch is not None:  
-        obj_copy["score"] = float(fetch[-1])
+        obj_copy["score"] = float(fetch[-1])*100
     return obj_copy
 
 
@@ -212,7 +212,7 @@ def defence_durability_score_utils(session_factory, params: dict, obj:dict, db: 
 
     obj_copy["metrics"] = "Defence score"
     if fetch is not None:  
-        obj_copy["score"] = float(fetch[-1])
+        obj_copy["score"] = float(fetch[-1])*100
         obj_copy["bar_pct"] = float(fetch[1])
     return obj_copy
 
@@ -330,6 +330,6 @@ def takedown_durability_score_utils(session_factory, params: dict, obj:dict, db:
         fetch = takedown_durability_score.fetchone()
     obj_copy["metrics"] = "Takedown score"
     if fetch is not None:  
-        obj_copy["score"] = float(fetch[-1])
+        obj_copy["score"] = float(fetch[-1])*100
         obj_copy["bar_pct"] = float(fetch[1])
     return obj_copy

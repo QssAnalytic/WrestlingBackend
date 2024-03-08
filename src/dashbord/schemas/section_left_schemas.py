@@ -7,7 +7,7 @@ class MetricsList(BaseModel):
     metrics: str
     score: float
     successful_count: int
-    total_count: int
+    total_count: int | float
     bar_pct: float
 
 class MetricsOutPut(BaseModel):
