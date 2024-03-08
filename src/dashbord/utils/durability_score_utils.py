@@ -210,7 +210,7 @@ def defence_durability_score_utils(session_factory, params: dict, obj:dict, db: 
         defence_durability_score = session.execute(statement, params)
         fetch = defence_durability_score.fetchone()
 
-    obj_copy["metrics"] = "Defence score"
+    obj_copy["metrics"] = "Defence Score"
     if fetch is not None:  
         obj_copy["score"] = float(fetch[-1])*100
         obj_copy["bar_pct"] = float(fetch[1])
@@ -328,7 +328,7 @@ def takedown_durability_score_utils(session_factory, params: dict, obj:dict, db:
     with session_factory() as session:
         takedown_durability_score = session.execute(statement, params)
         fetch = takedown_durability_score.fetchone()
-    obj_copy["metrics"] = "Takedown score"
+    obj_copy["metrics"] = "Takedown Score"
     if fetch is not None:  
         obj_copy["score"] = float(fetch[-1])*100
         obj_copy["bar_pct"] = float(fetch[1])

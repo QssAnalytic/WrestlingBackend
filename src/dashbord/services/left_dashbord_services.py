@@ -31,14 +31,11 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         stats_takedown_obj = stats_takedown(session_factory=session_factory, params=params, obj=obj, db=db)
         stats_defence_obj = stats_defence(session_factory=session_factory, params=params, obj=obj, db=db)
         stats_offence_obj = stats_offence(session_factory=session_factory, params=params, obj=obj, db=db)
+        stats_durability_obj =stats_durability(session_factory=session_factory, params=params, obj=obj, db=db)
         response_list.append(stats_defence_obj)
         response_list.append(stats_takedown_obj)
         response_list.append(stats_offence_obj)
-        response_list.append({'metrics': 'Durability Score',
-            'score': 0,
-            'successful_count':0,
-            'total_count':0,
-            'bar_pct': 0})
+        response_list.append(stats_durability_obj)
         return response_list
     
 

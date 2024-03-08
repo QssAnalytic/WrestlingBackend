@@ -21,8 +21,6 @@ def fight_infos(tournament_id: int | None = None, place: str | None = None, wres
 
     query = db.query(FightInfo)
 
-
-
     if wrestling_type is not None:
         query = query.filter(FightInfo.wrestling_type == wrestling_type)
     if stage is not None:
@@ -49,18 +47,18 @@ def fight_infos(tournament_id: int | None = None, place: str | None = None, wres
     response = fight_info.get_multi(db=db, page=page, limit=limit, data=query)
     return response
 
-# @router.get("/", response_model=FightInfoOut)
-# def fight_infos(filter_model: FilterFightInfoBase = Depends(),db: Session = Depends(get_db)):
-#     filter_obj = filter_model.dict()
+@router.get("/", response_model=FightInfoOut)
+def fight_infos(filter_model: FilterFightInfoBase = Depends(),db: Session = Depends(get_db)):
+    filter_obj = filter_model.dict()
 
-#     query = db.query(FightInfo)
-#     for k, v in filter_obj.items():
+    query = db.query(FightInfo)
+    for k, v in filter_obj.items():
 
-#         if v != None and k != 'page' and k != 'limit':
-#             query = query.filter(getattr(FightInfo, k) == v)
+        if v != None and k != 'page' and k != 'limit':
+            query = query.filter(getattr(FightInfo, k) == v)
 
-#     response = fight_info.get_multi(db=db, page=filter_obj['page'], limit=filter_obj['limit'], data=query)
-#     return response
+    response = fight_info.get_multi(db=db, page=filter_obj['page'], limit=filter_obj['limit'], data=query)
+    return response
 
 
 @router.post("/", response_model=FightInfoBase)
