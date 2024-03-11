@@ -4,10 +4,13 @@ from typing import Optional, List, Union
 from decimal import Decimal
 from src.dashbord.enums import ChartNameEnum, MetricsEnum
 
-
-class MetricsChartOutPut(BaseModel):
+class MetricsChartBase(BaseModel):
     year: int
     score: float
+
+class MetricsChartOutPut(BaseModel):
+    data: List[MetricsChartBase]
+    stats_list: list
 
 
 class ChartParams(BaseModel):

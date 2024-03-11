@@ -1,9 +1,12 @@
 from sqlalchemy import text
 from database import session_factory
+from src.dashbord.enums import DefenceStatsChartEnum
 class MetricsChartRepo:
 
     @classmethod
     def defence_metrics_chart(cls, params: dict):
+        defence_stats = [member.value for member in DefenceStatsChartEnum]
+        
         statement = text("""
             with action_escape_rate as(
                 with total as (
@@ -37,4 +40,4 @@ class MetricsChartRepo:
         with session_factory() as session:
             exc = session.execute(statement, params)
             fetch = exc.fetchall()
-        return fetch
+        return fetch, defence_stats

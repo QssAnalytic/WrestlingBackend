@@ -5,7 +5,7 @@ from sqlalchemy.sql import text
 from sqlalchemy.orm import Session
 
 from src.dashbord.services.left_dashbord_services import medal_left_dashbord_service
-from src.dashbord.schemas.section_left_schemas import MetricsOutPut, ChartParams, MetricsChartOutPut
+from src.dashbord.schemas.section_left_schemas import MetricsOutPut, ChartParams, MetricsChartOutPut, MetricsChartBase
 from src.dashbord.enums import MetricsEnum
 from database import get_db
 router = APIRouter()
@@ -39,9 +39,11 @@ def metrics(fight_date: str, fighter_id: int, db: Session = Depends(get_db)):
     response = medal_left_dashbord_service.stats_score_statistic(params=params, db=db)
     return response
 
-@router.get("/chart/", response_model=List[MetricsChartOutPut])
+@router.get("/chart/", response_model=MetricsChartOutPut)
 def chart(request_body: ChartParams = Depends()):
     params = request_body.dict()
-    response = medal_left_dashbord_service.chart_statistic(params=params)
-    response_list = [MetricsChartOutPut(year = data[1], score=data[-1]*100) for data in response]
-    return response_list
+    response_list = []
+    r, stats_list = medal_left_dashbord_service.chart_statistic(params=params)
+    p_model = [MetricsChartBase(year = data[1], score=data[-1]*100) for data in r]
+    response = MetricsChartOutPut(data=p_model, stats_list=stats_list)
+    return response

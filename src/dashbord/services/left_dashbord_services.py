@@ -21,8 +21,8 @@ class ChartMetricsServices(MetricsChartRepo):
 
     @classmethod
     def defence_metrics_chart(cls, params: dict):
-        data = super().defence_metrics_chart(params=params)
-        return data
+        data, defence_stats = super().defence_metrics_chart(params=params)
+        return data, defence_stats
 
 
 
@@ -35,8 +35,8 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
     def chart_statistic(self, params: dict):
         if params['chart_name'] == ChartNameEnum.MetricsChart:
             if params.get('metrics') != None and params.get('metrics') == MetricsEnum.Defence:
-                r = ChartMetricsServices.defence_metrics_chart(params=params)
-                return r
+                r, defence_stats = ChartMetricsServices.defence_metrics_chart(params=params)
+                return r, defence_stats
 
         elif params['chart_name'] == ChartNameEnum.StatsChart:
             pass
