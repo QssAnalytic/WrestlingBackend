@@ -5,3 +5,8 @@ class MetricsEnum(Enum):
     Defence = "Defence Score"
     Offense = "Offense Score"
     Durability = "Durability Score"
+
+
+class ChartNameEnum(Enum):
+    MetricsChart = "MetricsChart"
+    StatsChart = "StatsChart"

@@ -5,21 +5,41 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from src.app.models import FightInfo, Technique, ActionName
+from src.dashbord.enums import ChartNameEnum, MetricsEnum
 from src.dashbord.utils.takedown_utils import *
 from src.dashbord.utils.defence_score_utils import *
 from src.dashbord.utils.offence_score_utils import *
 from src.dashbord.utils.stats_takedown_utils import *
 from src.dashbord.utils.durability_score_utils import *
+from src.dashbord.repos.metrics_chart_repo import MetricsChartRepo
 from database import Base, engine, get_db, session_factory
 
 ModelTypeVar = TypeVar('ModelTypeVar', bound=Base)
+
+
+class ChartMetricsServices(MetricsChartRepo):
+
+    @classmethod
+    def defence_metrics_chart(cls, params: dict):
+        data = super().defence_metrics_chart(params=params)
+        return data
+
 
 
 
 class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
     def __init__(self, model: Type[ModelTypeVar]) -> None:
         self.model = model
-        # session_factory = ses_factory
+
+
+    def chart_statistic(self, params: dict):
+        if params['chart_name'] == ChartNameEnum.MetricsChart:
+            if params.get('metrics') != None and params.get('metrics') == MetricsEnum.Defence:
+                r = ChartMetricsServices.defence_metrics_chart(params=params)
+                return r
+
+        elif params['chart_name'] == ChartNameEnum.StatsChart:
+            pass
 
     def stats_score_statistic(self, params: dict, db: Session):
         obj = {'metrics': '',
