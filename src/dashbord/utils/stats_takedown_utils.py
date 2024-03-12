@@ -261,10 +261,10 @@ def stats_offence(session_factory, params: dict, obj:dict, db: Session):
 
 def stats_durability(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
-    t_d = takedown_durability_score_utils(session_factory=session_factory, params=params,obj=obj_copy, db=db)
-    d_d = defence_durability_score_utils(session_factory=session_factory, params=params,obj=obj_copy, db=db)
-    o_d = offence_durability_score_utils(session_factory=session_factory, params=params,obj=obj_copy, db=db)
+    # t_d = takedown_durability_score_utils(session_factory=session_factory, params=params,obj=obj_copy, db=db)
+    # d_d = defence_durability_score_utils(session_factory=session_factory, params=params,obj=obj_copy, db=db)
+    # o_d = offence_durability_score_utils(session_factory=session_factory, params=params,obj=obj_copy, db=db)
 
     obj_copy["metrics"] = "Durability Score"
-    obj_copy["score"] = round((t_d["score"] + d_d["score"] + o_d["score"])/3, 2)
+    # obj_copy["score"] = round((t_d["score"] + d_d["score"] + o_d["score"])/3, 2)
     return obj_copy
