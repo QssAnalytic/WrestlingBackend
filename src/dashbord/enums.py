@@ -12,6 +12,21 @@ class ChartNameEnum(Enum):
     StatsChart = "StatsChart"
 
 
+class OffenceStatsChartEnum(Enum):
+    Action_Success_rate = "Action Success rate"
+    Action_count_per_fight = "Action count per fight" 
+    Action_points_per_fight = "Action points per fight"
+    Protection_zone_success_rate = "Protection zone success rate"
+    Protection_zone_count_per_fight = "Protection zone count per fight"
+    Protection_zone_points_per_fight = "Protection zone points per fight"
+    Roll_success_rate = "Roll success rate"
+    Roll_count_per_fight = "Roll count per fight"
+    Roll_points_per_fight = "Roll points per fight"
+    Parterre_success_rate = "Parterre success rate"
+    Parterre_count_per_fight = "Parterre count per fight"
+    Parterre_points_per_fight = "Parterre points per fight"
+
+
 class TakedownStatsChartEnum(Enum):
     Takedown_Success_rate = "Takedown Success rate"
     Takedown_per_fight_total = "Takedown per fight total"

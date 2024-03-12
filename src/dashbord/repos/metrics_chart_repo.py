@@ -1,7 +1,107 @@
 from sqlalchemy import text
 from database import session_factory
-from src.dashbord.enums import DefenceStatsChartEnum, TakedownStatsChartEnum
+from src.dashbord.enums import DefenceStatsChartEnum, TakedownStatsChartEnum, OffenceStatsChartEnum
 class MetricsChartRepo:
+    @classmethod
+    def offence_metrics_chart(cls, params: dict):
+        stats_list = [member.value for member in OffenceStatsChartEnum]
+        
+        statement = text("""
+            --offense_score
+            with action_success_rate as(
+            with total as (
+                    select f.fighter_id, count(*) as total_count, extract(year from f2.fight_date) as total_date from fightstatistics f
+                    inner join fightinfos f2 on f.fight_id = f2.id
+                    group by f.fighter_id, total_date
+                    ),
+                    success as (
+                    select f.fighter_id, count(*) as successful_count, extract(year from f2.fight_date) as success_date from fightstatistics f
+                    inner join fightinfos f2 on f.fight_id = f2.id
+                    where f.successful = true 
+                    group by f.fighter_id, success_date
+                    )
+                select * from (    
+                select fighter_id,total_date,takedown_success_rate, successful_count, total_count,round((takedown_success_rate- 0) /(max(takedown_success_rate) over() - 0), 2) bar_pct from 
+                    (select t.fighter_id,t.total_date as total_date, coalesce(successful_count, 0) successful_count, total_count, round(coalesce(cast(successful_count as decimal) / cast(total_count as decimal), 0), 2) takedown_success_rate
+                    from success s right join total t on s.fighter_id = t.fighter_id and t.total_date = s.success_date))
+                
+            ),
+            --Action counts per fight
+            action_count_per_fight as(
+            with fighter_matches as (
+            select s.fighter_id, array_agg(distinct fight_id) fighter_array,extract(year from i.fight_date) as fi_m_date from fightstatistics s
+                inner join fightinfos i on s.fight_id = i.id
+                group by s.fighter_id, fi_m_date
+            ),
+            opponent_matches as (
+            select s.opponent_id, array_agg(distinct fight_id) opponent_array, extract(year from i.fight_date) as op_m_date from fightstatistics s
+                inner join fightinfos i on s.fight_id = i.id
+                group by s.opponent_id, op_m_date
+            ),
+            com as (select fighter, com_date, cardinality(array(select distinct unnest_array from unnest(combine_array) as unnest_array)) unique_matches from (
+            select coalesce(fighter_id, opponent_id) fighter, (fighter_array || opponent_array) as combine_array, coalesce(fi.fi_m_date,op.op_m_date) as com_date
+            from fighter_matches fi full outer join opponent_matches op on fi.fighter_id = opponent_id and fi.fi_m_date = op.op_m_date
+            )),
+            successful_action_attempts as (select f.fighter_id, count(*) as successful_attempts, extract(year from f2.fight_date) as suc_attempt_date from fightstatistics f
+            inner join fightinfos f2 on f.fight_id = f2.id
+            inner join actions a on f.action_name_id = a.id
+            where f.successful = true 
+            group by f.fighter_id, suc_attempt_date),
+            total_action_attempts as (select f.fighter_id, count(*) as total_count, extract(year from f2.fight_date) as total_attemp_date from fightstatistics f
+            inner join fightinfos f2 on f.fight_id = f2.id
+            inner join actions a on f.action_name_id = a.id
+            group by f.fighter_id,total_attemp_date),
+
+            calculation as(
+            select fighter, com_date as action_count_per_fight_date,coalesce(round(cast(successful_attempts as decimal)/cast(unique_matches as decimal), 2), 0) as successful_attempts_per_match,
+            coalesce(round(cast(total_count as decimal)/cast(unique_matches as decimal), 2), 1) as total_attempts_per_match
+            from com c left join successful_action_attempts t on c.fighter = t.fighter_id and c.com_date = t.suc_attempt_date
+                    left join total_action_attempts tc on c.fighter = tc.fighter_id and c.com_date = tc.total_attemp_date
+            )
+            select *, round(cast(successful_attempts_per_match as decimal)/ cast(max(successful_attempts_per_match) over() as decimal), 2) count_pct from calculation),
+            avg_points_per_fight as(
+                    with fighter_matches as (
+                        select s.fighter_id, array_agg(distinct fight_id) fighter_array,extract(year from i.fight_date) as fi_mat_date from fightstatistics s
+                            inner join fightinfos i on s.fight_id = i.id
+                            group by s.fighter_id, fi_mat_date
+                        ),
+                        opponent_matches as (
+                        select s.opponent_id, array_agg(distinct fight_id) opponent_array, extract(year from i.fight_date) as op_mat_date from fightstatistics s
+                            inner join fightinfos i on s.fight_id = i.id
+                            
+                            group by s.opponent_id,op_mat_date
+                        ),
+                        com as (select fighter, com_av_date,cardinality(array(select distinct unnest_array from unnest(combine_array) as unnest_array)) unique_matches from (
+                        select coalesce(fighter_id, opponent_id) fighter, (fighter_array || opponent_array) as combine_array, coalesce(fi.fi_mat_date,op.op_mat_date) as com_av_date
+                        from fighter_matches fi full outer join opponent_matches op on fi.fighter_id = opponent_id and fi.fi_mat_date = op.op_mat_date
+                        )),
+                        total_points as (select f.fighter_id, sum(score) as total_points, extract(year from f2.fight_date) as total_av_date from fightstatistics f
+                        inner join fightinfos f2 on f.fight_id = f2.id
+                        inner join actions a on f.action_name_id = a.id
+                        where f.successful = true
+                        group by f.fighter_id, total_av_date),
+                        calculation as(
+                        select fighter,coalesce(t.total_av_date,c.com_av_date) as cal_av_date,coalesce(round(cast(total_points as decimal)/cast(unique_matches as decimal), 2), 0) as avg_points_per_match
+                        from com c left join total_points t on c.fighter = t.fighter_id and c.com_av_date = t.total_av_date)
+                select * from (
+                select *, round(cast(avg_points_per_match as decimal)/ cast(max(avg_points_per_match) over() as decimal), 2) point_pct from calculation
+            ))
+            --select * from avg_points_per_fight
+            select * from (
+                select fighter_id,total_date, round(1 - cast(offense_rank as decimal) / cast(max(offense_rank) over() as decimal), 2) offense_score from(
+                select *, rank() over(order by offense_pct desc) offense_rank from(
+                    select fighter_id, (bar_pct + count_pct + point_pct) /3 offense_pct, a.total_date
+            from action_success_rate a 
+            left join action_count_per_fight c 
+            on a.fighter_id = c.fighter and a.total_date = c.action_count_per_fight_date
+            left join avg_points_per_fight p 
+            on a.fighter_id = p.fighter and a.total_date = p.cal_av_date
+            ))) where fighter_id = :fighter_id order by total_date
+        """)
+        with session_factory() as session:
+            exc = session.execute(statement, params)
+            fetch = exc.fetchall()
+        return fetch, stats_list
 
     @classmethod
     def defence_metrics_chart(cls, params: dict):

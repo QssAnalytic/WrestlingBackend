@@ -23,10 +23,16 @@ class ChartMetricsServices(MetricsChartRepo):
     def defence_metrics_chart(cls, params: dict):
         data, defence_stats = super().defence_metrics_chart(params=params)
         return data, defence_stats
+    
     @classmethod
     def takedown_metrics_chart(cls, params: dict):
         data, takedown_stats = super().takedown_metrics_chart(params=params)
         return data, takedown_stats
+    
+    @classmethod
+    def offence_metrics_chart(cls, params: dict):
+        data, offence_stats = super().offence_metrics_chart(params=params)
+        return data, offence_stats
 
 
 
@@ -43,6 +49,10 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
                 return r, stats_list
             elif params.get('metrics') != None and params.get('metrics') == MetricsEnum.Takedown:
                 r, stats_list = ChartMetricsServices.takedown_metrics_chart(params=params)
+                return r, stats_list
+            
+            elif params.get('metrics') != None and params.get('metrics') == MetricsEnum.Offense:
+                r, stats_list = ChartMetricsServices.offence_metrics_chart(params=params)
                 return r, stats_list
 
         elif params['chart_name'] == ChartNameEnum.StatsChart:
