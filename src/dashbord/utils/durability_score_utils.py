@@ -46,7 +46,7 @@ def total_late_attempts_per_fight_utils(session_factory, params: dict, obj:dict,
 
     obj_copy["metrics"] = "Total late attempts per fight"
     if fetch is not None:
-        obj_copy["score"] = float(fetch[1])*100
+        obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[-1])
     return obj_copy
 
@@ -93,7 +93,7 @@ def total_late_defences_per_fight_utils(session_factory, params: dict, obj:dict,
 
     obj_copy["metrics"] = "Total late defences per fight"
     if fetch is not None:
-        obj_copy["score"] = float(fetch[1])*100
+        obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[-1])
     return obj_copy
 
