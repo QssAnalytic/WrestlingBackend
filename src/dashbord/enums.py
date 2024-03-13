@@ -3,7 +3,7 @@ from enum import Enum
 class MetricsEnum(Enum):
     Takedown = "Takedown Score"
     Defence = "Defence Score"
-    Offense = "Offense Score"
+    Offense = "Offence Score"
     Durability = "Durability Score"
 
 
@@ -33,7 +33,7 @@ class TakedownStatsChartEnum(Enum):
     Average_takedown_points_per_fight = "Average takedown points per fight"
     Takedown_Count = "Takedown Count"
     Single_leg_takedown_count = "Single leg takedown count"
-    Singe_Leg_takedown_Success_Rate = "Singe Leg takedown Success Rate"
+    Singe_Leg_takedown_Success_Rate = "Single Leg takedown Success Rate"
     Double_leg_takedown_counts = "Double leg takedown counts"
     Double_leg_takedown = "Double leg takedown"
 

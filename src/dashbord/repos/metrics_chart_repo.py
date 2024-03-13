@@ -1,6 +1,15 @@
 from sqlalchemy import text
 from database import session_factory
 from src.dashbord.enums import DefenceStatsChartEnum, TakedownStatsChartEnum, OffenceStatsChartEnum
+
+class MetricsChartRepo:
+    @classmethod
+    def per_fight_total(cls, params: dict):
+        pass
+
+
+
+
 class MetricsChartRepo:
     @classmethod
     def offence_metrics_chart(cls, params: dict):

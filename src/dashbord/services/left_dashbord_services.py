@@ -5,7 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from src.app.models import FightInfo, Technique, ActionName
-from src.dashbord.enums import ChartNameEnum, MetricsEnum
+from src.dashbord.enums import ChartNameEnum, MetricsEnum, TakedownStatsChartEnum
 from src.dashbord.utils.takedown_utils import *
 from src.dashbord.utils.defence_score_utils import *
 from src.dashbord.utils.offence_score_utils import *
@@ -35,6 +35,11 @@ class ChartMetricsServices(MetricsChartRepo):
         return data, offence_stats
 
 
+class ChartStatsServices():
+
+    @classmethod
+    def per_fight_total(cls, params: dict):
+        pass
 
 
 class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
@@ -42,21 +47,23 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         self.model = model
 
 
-    def chart_statistic(self, params: dict):
-        if params['chart_name'] == ChartNameEnum.MetricsChart:
-            if params.get('metrics') != None and params.get('metrics') == MetricsEnum.Defence:
-                r, stats_list = ChartMetricsServices.defence_metrics_chart(params=params)
-                return r, stats_list
-            elif params.get('metrics') != None and params.get('metrics') == MetricsEnum.Takedown:
-                r, stats_list = ChartMetricsServices.takedown_metrics_chart(params=params)
-                return r, stats_list
-            
-            elif params.get('metrics') != None and params.get('metrics') == MetricsEnum.Offense:
-                r, stats_list = ChartMetricsServices.offence_metrics_chart(params=params)
-                return r, stats_list
+    def chart_metrics_statistic(self, params: dict):
+        if params.get('metrics') == MetricsEnum.Defence:
+            r, stats_list = ChartMetricsServices.defence_metrics_chart(params=params)
+            return r, stats_list
+        elif params.get('metrics') == MetricsEnum.Takedown:
+            r, stats_list = ChartMetricsServices.takedown_metrics_chart(params=params)
+            return r, stats_list
+        
+        elif params.get('metrics') == MetricsEnum.Offense:
+            r, stats_list = ChartMetricsServices.offence_metrics_chart(params=params)
+            return r, stats_list
 
-        elif params['chart_name'] == ChartNameEnum.StatsChart:
+    def chart_stats_statistic(self, params: dict):
+        if params.get('stats') == TakedownStatsChartEnum.Takedown_per_fight_total:
             pass
+
+            
 
     def stats_score_statistic(self, params: dict, db: Session):
         obj = {'metrics': '',

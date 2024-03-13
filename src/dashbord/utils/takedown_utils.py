@@ -173,7 +173,7 @@ def single_leg_takedown_success_rate_utils(session_factory, params:dict, model: 
     with session_factory() as session:
         single_leg_takedown_success_rate = session.execute(statement, params)
         fetch = single_leg_takedown_success_rate.fetchone()
-    obj_copy["metrics"] = "Singe Leg takedown Success Rate"
+    obj_copy["metrics"] = "Single Leg takedown Success Rate"
     if fetch is not None:
         obj_copy["successful_count"] = fetch[2]
         obj_copy["score"] = float(fetch[1])

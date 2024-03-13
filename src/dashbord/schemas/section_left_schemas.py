@@ -2,7 +2,7 @@ from datetime import date
 from pydantic import BaseModel, validator, Field
 from typing import Optional, List, Union
 from decimal import Decimal
-from src.dashbord.enums import ChartNameEnum, MetricsEnum
+from src.dashbord.enums import ChartNameEnum, MetricsEnum, OffenceStatsChartEnum, DefenceStatsChartEnum, TakedownStatsChartEnum
 
 class MetricsChartBase(BaseModel):
     year: int
@@ -15,7 +15,7 @@ class MetricsChartOutPut(BaseModel):
 
 class ChartParams(BaseModel):
     metrics: Optional[MetricsEnum] = Field(None)
-    stats: Optional[str] = Field(None)
+    stats: Optional[OffenceStatsChartEnum | DefenceStatsChartEnum | TakedownStatsChartEnum] = Field(None)
     chart_name: ChartNameEnum = Field()
     fighter_id: int = Field()
 
