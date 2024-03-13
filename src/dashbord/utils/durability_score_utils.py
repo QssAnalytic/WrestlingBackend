@@ -5,6 +5,99 @@ from database import Base
 from src.app.models import ActionName
 
 
+def total_late_attempts_per_fight_utils(session_factory, params: dict, obj:dict, model, db: Session):
+    obj_copy = obj.copy()
+    statement = text("""
+        --DURABILITY
+        --total_late_attempts_per_fight
+        with fighter_matches as (
+        select s.fighter_id, array_agg(distinct fight_id) fighter_array from fightstatistics s
+            inner join fightinfos i on s.fight_id = i.id
+            where extract(year from i.fight_date) in :fight_date
+            group by s.fighter_id 
+        ),
+        opponent_matches as (
+        select s.opponent_id, array_agg(distinct fight_id) opponent_array from fightstatistics s
+            inner join fightinfos i on s.fight_id = i.id
+            where extract(year from i.fight_date) in :fight_date
+            group by s.opponent_id 
+        ),
+        com as (select fighter, cardinality(array(select distinct unnest_array from unnest(combine_array) as unnest_array)) unique_matches from (
+        select coalesce(fighter_id, opponent_id) fighter, (fighter_array || opponent_array) as combine_array 
+        from fighter_matches fi full outer join opponent_matches op on fi.fighter_id = opponent_id
+        )),
+        total_late_attempts as (select f.fighter_id, count(*) as total_count from fightstatistics f
+        inner join fightinfos f2 on f.fight_id = f2.id
+        inner join actions a on f.action_name_id = a.id
+        where extract(year from f2.fight_date) in :fight_date  and (((f2.order = 'ascending') and (f.action_time_second > 180)) 
+                                or ((f2.order = 'descending') and (f.action_time_second < 180)))
+        group by f.fighter_id)
+        select * from (
+        select *, round(cast (percent_rank() over(order by total_late_attempts_per_match asc) as decimal), 2) from(
+        select fighter, coalesce(round(cast(total_count as decimal)/cast(unique_matches as decimal), 2), 0) 
+                        as total_late_attempts_per_match
+        from com c
+                left join total_late_attempts tc on c.fighter = tc.fighter_id))
+        where fighter = :fighter_id
+""")
+    with session_factory() as session:
+        exc = session.execute(statement, params)
+        fetch = exc.fetchone()
+
+    obj_copy["metrics"] = "Total late attempts per fight"
+    if fetch is not None:
+        obj_copy["score"] = float(fetch[1])*100
+        obj_copy["bar_pct"] = float(fetch[-1])
+    return obj_copy
+
+
+
+def total_late_defences_per_fight_utils(session_factory, params: dict, obj:dict, model, db: Session):
+    obj_copy = obj.copy()
+    statement = text("""
+        --DURABILITY
+        --total_late_defences_per_fight
+        with fighter_matches as (
+        select s.fighter_id, array_agg(distinct fight_id) fighter_array from fightstatistics s
+            inner join fightinfos i on s.fight_id = i.id
+            where extract(year from i.fight_date) in :fight_date
+            group by s.fighter_id 
+        ),
+        opponent_matches as (
+        select s.opponent_id, array_agg(distinct fight_id) opponent_array from fightstatistics s
+            inner join fightinfos i on s.fight_id = i.id
+            where extract(year from i.fight_date) in :fight_date
+            group by s.opponent_id 
+        ),
+        com as (select fighter, cardinality(array(select distinct unnest_array from unnest(combine_array) as unnest_array)) unique_matches from (
+        select coalesce(fighter_id, opponent_id) fighter, (fighter_array || opponent_array) as combine_array 
+        from fighter_matches fi full outer join opponent_matches op on fi.fighter_id = opponent_id
+        )),
+        total_late_defences as (select f.opponent_id, count(*) as total_count from fightstatistics f
+        inner join fightinfos f2 on f.fight_id = f2.id
+        inner join actions a on f.action_name_id = a.id
+        where extract(year from f2.fight_date) in :fight_date  and (((f2.order = 'ascending') and (f.action_time_second > 180)) 
+                                or ((f2.order = 'descending') and (f.action_time_second < 180)))
+        group by f.opponent_id)
+        select * from (
+        select *, round(cast (percent_rank() over(order by total_late_defences_per_match asc) as decimal), 2) from(
+        select fighter, coalesce(round(cast(total_count as decimal)/cast(unique_matches as decimal), 2), 0) 
+                        as total_late_defences_per_match
+        from com c
+                left join total_late_defences tc on c.fighter = tc.opponent_id)) 
+        where fighter = :fighter_id
+""")
+    with session_factory() as session:
+        exc = session.execute(statement, params)
+        fetch = exc.fetchone()
+
+    obj_copy["metrics"] = "Total late defences per fight"
+    if fetch is not None:
+        obj_copy["score"] = float(fetch[1])*100
+        obj_copy["bar_pct"] = float(fetch[-1])
+    return obj_copy
+
+
 def passivity_durability_per_fight(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     statement = text("""

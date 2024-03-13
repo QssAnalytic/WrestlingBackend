@@ -6,6 +6,9 @@ from src.app.models import ActionName
 
 ModelTypeVar = TypeVar("ModelTypeVar", bound=Base)
 
+
+
+
 def action_skipped_points_per_fight_utils(session_factory, params: dict, obj:dict, model, db: Session):
     obj_copy = obj.copy()
     statement = text("""

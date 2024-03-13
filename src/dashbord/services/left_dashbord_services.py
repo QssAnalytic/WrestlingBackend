@@ -96,11 +96,15 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         defence_durability_score_obj = defence_durability_score_utils(session_factory=session_factory, params=params, obj=obj, db=db)
         offence_durability_score_obj = offence_durability_score_utils(session_factory=session_factory, params=params, obj=obj, db=db)
         passivity_durability_per_fight_obj = passivity_durability_per_fight(session_factory=session_factory, params=params, obj=obj, db=db)
+        total_late_defences_per_fight_obj = total_late_defences_per_fight_utils(session_factory=session_factory, params=params, obj=obj, model=self.model,db=db)
+        total_late_attempts_per_fight_obj = total_late_attempts_per_fight_utils(session_factory=session_factory, params=params, obj=obj, model=self.model,db=db)
         response_list = []
         response_list.append(takedown_durability_score_obj)
         response_list.append(defence_durability_score_obj)
         response_list.append(offence_durability_score_obj)
         response_list.append(passivity_durability_per_fight_obj)
+        response_list.append(total_late_defences_per_fight_obj)
+        response_list.append(total_late_attempts_per_fight_obj)
         response['metrics_list'] = response_list
         return response
     
@@ -153,6 +157,7 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         protection_zone_escape_rate_obj = protection_zone_escape_rate_utils(session_factory=session_factory, params=params,obj=obj, db=db)
         parterre_escape_rate_obj = parterre_escape_rate_utils(session_factory=session_factory, params=params, obj=obj, model=self.model,db=db)
         action_skipped_points_per_fight_obj = action_skipped_points_per_fight_utils(session_factory=session_factory, params=params, obj=obj, model=self.model,db=db)
+        
         response_list.append(action_escape_rate_obj)
         response_list.append(takedown_escape_rate_obj)
         response_list.append(pin_to_parter_escape_rate_obj)
@@ -160,6 +165,7 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response_list.append(protection_zone_escape_rate_obj)
         response_list.append(parterre_escape_rate_obj)
         response_list.append(action_skipped_points_per_fight_obj)
+
         
         response['metrics_list'] = response_list
         return response
