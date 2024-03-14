@@ -4,18 +4,20 @@ from typing import Optional, List, Union
 from decimal import Decimal
 from src.dashbord.enums import ChartNameEnum, MetricsEnum, OffenceStatsChartEnum, DefenceStatsChartEnum, TakedownStatsChartEnum
 
-class MetricsChartBase(BaseModel):
+class ChartBase(BaseModel):
     year: int
     score: float
 
+
+
 class MetricsChartOutPut(BaseModel):
-    data: List[MetricsChartBase]
+    data: List[ChartBase]
     stats_list: list
 
 
 class ChartParams(BaseModel):
     metrics: Optional[MetricsEnum] = Field(None)
-    stats: Optional[OffenceStatsChartEnum | DefenceStatsChartEnum | TakedownStatsChartEnum] = Field(None)
+    stats: Optional[TakedownStatsChartEnum | OffenceStatsChartEnum | DefenceStatsChartEnum] = Field(None)
     chart_name: ChartNameEnum = Field()
     fighter_id: int = Field()
 

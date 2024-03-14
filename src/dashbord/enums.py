@@ -47,3 +47,4 @@ class DefenceStatsChartEnum(Enum):
     Roll_escape_rate = "Roll escape rate"
     Protection_zone_escape_rate = "Protection zone escape rate"
     Parterre_escape_rate = "Parterre escape rate"
+

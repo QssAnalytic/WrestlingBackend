@@ -5,7 +5,7 @@ from sqlalchemy.sql import text
 from sqlalchemy.orm import Session
 
 from src.dashbord.services.left_dashbord_services import medal_left_dashbord_service
-from src.dashbord.schemas.section_left_schemas import MetricsOutPut, ChartParams, MetricsChartOutPut, MetricsChartBase
+from src.dashbord.schemas.section_left_schemas import MetricsOutPut, ChartParams, MetricsChartOutPut, ChartBase
 from src.dashbord.enums import ChartNameEnum, MetricsEnum
 from database import get_db
 router = APIRouter()
@@ -40,13 +40,15 @@ def metrics(fight_date: str, fighter_id: int, db: Session = Depends(get_db)):
     return response
 
 @router.get("/chart/")
-def chart(request_body: ChartParams = Depends()):
+def chart(request_body: ChartParams = Depends(), db: Session = Depends(get_db)):
     params = request_body.dict()
     if params.get('metrics') != None and params.get('chart_name') == ChartNameEnum.MetricsChart:
         r, stats_list = medal_left_dashbord_service.chart_metrics_statistic(params=params)
-        p_model = [MetricsChartBase(year = data[1], score=data[-1]*100).dict() for data in r]
+        p_model = [ChartBase(year = data[1], score=data[-1]*100).dict() for data in r]
         response = MetricsChartOutPut(data=p_model, stats_list=stats_list).dict()
         return response
-    if params.get('metrics') != None and params.get('chart_name') == ChartNameEnum.StatsChart:
-        pass
+    if params.get('stats') != None and params.get('chart_name') == ChartNameEnum.StatsChart:
+        res_data = medal_left_dashbord_service.chart_stats_statistic(params=params, db=db)
+        response = [ChartBase(year = data[1], score=data[-1]).dict() for data in res_data]
+        return response
     raise HTTPException(status_code=400, detail="Invalid parameters")

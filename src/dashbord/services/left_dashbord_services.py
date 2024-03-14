@@ -11,57 +11,41 @@ from src.dashbord.utils.defence_score_utils import *
 from src.dashbord.utils.offence_score_utils import *
 from src.dashbord.utils.stats_takedown_utils import *
 from src.dashbord.utils.durability_score_utils import *
-from src.dashbord.repos.metrics_chart_repo import MetricsChartRepo
+from src.dashbord.services.chart_services import *
+
 from database import Base, engine, get_db, session_factory
 
 ModelTypeVar = TypeVar('ModelTypeVar', bound=Base)
 
 
-class ChartMetricsServices(MetricsChartRepo):
-
-    @classmethod
-    def defence_metrics_chart(cls, params: dict):
-        data, defence_stats = super().defence_metrics_chart(params=params)
-        return data, defence_stats
-    
-    @classmethod
-    def takedown_metrics_chart(cls, params: dict):
-        data, takedown_stats = super().takedown_metrics_chart(params=params)
-        return data, takedown_stats
-    
-    @classmethod
-    def offence_metrics_chart(cls, params: dict):
-        data, offence_stats = super().offence_metrics_chart(params=params)
-        return data, offence_stats
 
 
-class ChartStatsServices():
 
-    @classmethod
-    def per_fight_total(cls, params: dict):
-        pass
 
 
 class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
-    def __init__(self, model: Type[ModelTypeVar]) -> None:
+    def __init__(self, model: Type[ModelTypeVar], metrics_services: ChartMetricsServices, stats_services: ChartStatsServices) -> None:
         self.model = model
+        self.metrics_services = metrics_services
+        self.stats_services = stats_services
 
 
     def chart_metrics_statistic(self, params: dict):
         if params.get('metrics') == MetricsEnum.Defence:
-            r, stats_list = ChartMetricsServices.defence_metrics_chart(params=params)
+            r, stats_list = self.metrics_services.defence_metrics_chart(params=params)
             return r, stats_list
         elif params.get('metrics') == MetricsEnum.Takedown:
-            r, stats_list = ChartMetricsServices.takedown_metrics_chart(params=params)
+            r, stats_list = self.metrics_services.takedown_metrics_chart(params=params)
             return r, stats_list
         
         elif params.get('metrics') == MetricsEnum.Offense:
-            r, stats_list = ChartMetricsServices.offence_metrics_chart(params=params)
+            r, stats_list = self.metrics_services.offence_metrics_chart(params=params)
             return r, stats_list
+        return None
 
-    def chart_stats_statistic(self, params: dict):
-        if params.get('stats') == TakedownStatsChartEnum.Takedown_per_fight_total:
-            pass
+    def chart_stats_statistic(self, params: dict, db: Session):
+        r = self.stats_services.get_stats_statistic(params=params, db=db)
+        return r
 
             
 
@@ -205,4 +189,6 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
     
 
     
-medal_left_dashbord_service = MedalLeftDashbordSerivices(Technique)
+medal_left_dashbord_service = MedalLeftDashbordSerivices(Technique, 
+                                                         metrics_services=ChartMetricsServices, 
+                                                         stats_services=ChartStatsServices)
