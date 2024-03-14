@@ -14,6 +14,11 @@ class MetricsChartOutPut(BaseModel):
     data: List[ChartBase]
     stats_list: list
 
+class StatsChartOutPut(BaseModel):
+    data: List[ChartBase]
+    start_interval: int
+    end_interval: int
+
 
 class ChartParams(BaseModel):
     metrics: Optional[MetricsEnum] = Field(None)
