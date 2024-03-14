@@ -17,7 +17,7 @@ class MetricsChartOutPut(BaseModel):
 class StatsChartOutPut(BaseModel):
     data: List[ChartBase]
     start_interval: int
-    end_interval: int
+    end_interval: float
 
 
 class ChartParams(BaseModel):

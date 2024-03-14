@@ -171,8 +171,7 @@ def roll_escape_rate_utils(session_factory, params: dict, obj:dict, db: Session)
 
 def action_escape_rate_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
-    # action = db.query(ActionName).filter(ActionName.name == "Roll").first()
-    # params['action_name_id'] = action.id
+
     statement = text("""
         --action escape rate
             with total as (
