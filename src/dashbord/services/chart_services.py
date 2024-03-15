@@ -59,4 +59,7 @@ class ChartStatsServices(StatsChartRepo):
             response_data = super().protection_zone_escape_rate(params=params, db=db)
         elif params.get('stats') == DefenceStatsChartEnum.Parterre_escape_rate:
             response_data = super().parterre_escape_rate(params=params, db=db)
+        
+        # elif params.get('stats') == Du
+        
         return response_data

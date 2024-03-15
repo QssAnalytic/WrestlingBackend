@@ -39,7 +39,7 @@ class FightInfo(Base):
     tournament: Mapped["Tournament"] = relationship(
         back_populates="fightinfos"
     )
-    fight_statistic: Mapped[List["FightStatistic"]] = relationship(back_populates="fightinfos",
+    fight_statistic: Mapped[List["FightStatistic"]] = relationship(back_populates="fightinfos",order_by="FightStatistic.action_time_second",
                                                              primaryjoin="FightInfo.id==FightStatistic.fight_id")
     fighter: Mapped["Fighter"] = relationship(
         back_populates="fighter_info", uselist=False, foreign_keys=[fighter_id]

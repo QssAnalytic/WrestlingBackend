@@ -20,13 +20,13 @@ class CRUDFightInfos(CRUDBase[FightInfo,CreateFighterInfoBase, UpdateFighterInfo
 
     def get_by_id(self, id:int, db:Session) -> Optional[FightInfo]:
         data = db.execute(
-        select(FightInfo).filter(FightInfo.id==id).options(
-        joinedload(FightInfo.fighter),
-        joinedload(FightInfo.oponent),
-        joinedload(FightInfo.winner),
-        joinedload(FightInfo.tournament),
-        joinedload(FightInfo.fight_statistic).joinedload(FightStatistic.action_name)
-        )
+            select(FightInfo).filter(FightInfo.id == id).options(
+                joinedload(FightInfo.fighter),
+                joinedload(FightInfo.oponent),
+                joinedload(FightInfo.winner),
+                joinedload(FightInfo.tournament),
+                joinedload(FightInfo.fight_statistic).joinedload(FightStatistic.action_name)
+            )
         ).scalars().unique().first()
         return data
     
