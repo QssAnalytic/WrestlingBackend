@@ -109,17 +109,24 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         offence_protection_count_per_fight_obj = offence_protection_count_per_fight(session_factory=session_factory, params=params, obj=obj, db=db)
         protection_zone_points_per_fight_obj = protection_zone_points_per_fight_utils(session_factory=session_factory, params=params, obj=obj, db=db)
         roll_success_rate_obj = roll_success_rate_utils(session_factory=session_factory, params=params, obj=obj, db=db)
-        roll_count_per_fight_obj = roll_points_per_fight_utils(session_factory=session_factory, params=params, obj=obj, db=db)
+        roll_points_per_fight_obj = roll_points_per_fight_utils(session_factory=session_factory, params=params, obj=obj, db=db)
+        roll_count_per_fight_obj = roll_count_per_fight_utils(session_factory=session_factory, params=params, obj=obj, db=db)
         parterre_success_rate_obj = parterre_success_rate_utils(session_factory=session_factory, params=params, obj=obj, db=db)
-        response_list.append(offence_protection_count_per_fight_obj)
-        response_list.append(offence_action_point_per_fight_obj)
-        response_list.append(action_count_per_fight_obj)
+        parterre_count_rate_obj = parterre_count_rate_utils(session_factory=session_factory, params=params, obj=obj, db=db)
+        parterre_points_rate_obj = parterre_points_rate_utils(session_factory=session_factory, params=params, obj=obj, db=db)
         response_list.append(action_success_rate_obj)
+        response_list.append(action_count_per_fight_obj)
+        response_list.append(offence_action_point_per_fight_obj)
         response_list.append(offence_protection_zone_success_rate_obj)
+        response_list.append(offence_protection_count_per_fight_obj)
+
         response_list.append(protection_zone_points_per_fight_obj)
         response_list.append(roll_success_rate_obj)
         response_list.append(roll_count_per_fight_obj)
+        response_list.append(roll_points_per_fight_obj)
         response_list.append(parterre_success_rate_obj)
+        response_list.append(parterre_count_rate_obj)
+        response_list.append(parterre_points_rate_obj)
         response['metrics_list'] = response_list
         return response
 

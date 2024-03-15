@@ -60,6 +60,20 @@ class ChartStatsServices(StatsChartRepo):
         elif params.get('stats') == DefenceStatsChartEnum.Parterre_escape_rate:
             response_data = super().parterre_escape_rate(params=params, db=db)
         
-        # elif params.get('stats') == Du
+        elif params.get('stats') == OffenceStatsChartEnum.Action_Success_rate:
+            response_data = super().action_escape_rate(params=params, db=db)
+        elif params.get('stats') == OffenceStatsChartEnum.Action_count_per_fight:
+            response_data = super().action_counts_per_fight(params=params, db=db)
+        elif params.get('stats') == OffenceStatsChartEnum.Action_points_per_fight:
+            response_data = super().action_point_per_fight(params=params, db=db)
+        elif params.get('stats') == OffenceStatsChartEnum.Protection_zone_success_rate:
+            response_data = super().protection_zone_success_rate(params=params, db=db)
+        elif params.get('stats') == OffenceStatsChartEnum.Protection_zone_count_per_fight:
+            response_data = super().protection_zone_counts_per_fight(params=params, db=db)
+        elif params.get('stats') == OffenceStatsChartEnum.Protection_zone_points_per_fight:
+            response_data = super().protection_zone_points_per_fight(params=params, db=db)
+
+    
+            
         
         return response_data
