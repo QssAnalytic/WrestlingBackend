@@ -83,12 +83,15 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         total_late_defences_per_fight_obj = total_late_defences_per_fight_utils(session_factory=session_factory, params=params, obj=obj, model=self.model,db=db)
         total_late_attempts_per_fight_obj = total_late_attempts_per_fight_utils(session_factory=session_factory, params=params, obj=obj, model=self.model,db=db)
         response_list = []
+        response_list.append(total_late_attempts_per_fight_obj)
+        response_list.append(total_late_defences_per_fight_obj)
+        response_list.append(passivity_durability_per_fight_obj)
         response_list.append(takedown_durability_score_obj)
         response_list.append(defence_durability_score_obj)
         response_list.append(offence_durability_score_obj)
-        response_list.append(passivity_durability_per_fight_obj)
-        response_list.append(total_late_defences_per_fight_obj)
-        response_list.append(total_late_attempts_per_fight_obj)
+
+
+
         response['metrics_list'] = response_list
         return response
     
@@ -150,12 +153,13 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         action_skipped_points_per_fight_obj = action_skipped_points_per_fight_utils(session_factory=session_factory, params=params, obj=obj, model=self.model,db=db)
         
         response_list.append(action_escape_rate_obj)
+        response_list.append(action_skipped_points_per_fight_obj)
         response_list.append(takedown_escape_rate_obj)
         response_list.append(pin_to_parter_escape_rate_obj)
         response_list.append(roll_escape_rate_obj)
         response_list.append(protection_zone_escape_rate_obj)
         response_list.append(parterre_escape_rate_obj)
-        response_list.append(action_skipped_points_per_fight_obj)
+
 
         
         response['metrics_list'] = response_list
