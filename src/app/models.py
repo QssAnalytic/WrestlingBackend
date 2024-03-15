@@ -1,6 +1,6 @@
 import enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import TIMESTAMP, Table, Column, String, Date, ForeignKey, text
+from sqlalchemy import TIMESTAMP, Table, Column, String, Date, ForeignKey, text, desc
 from typing import Annotated, List, Optional
 from datetime import date, time
 from database import Base
@@ -39,7 +39,7 @@ class FightInfo(Base):
     tournament: Mapped["Tournament"] = relationship(
         back_populates="fightinfos"
     )
-    fight_statistic: Mapped[List["FightStatistic"]] = relationship(back_populates="fightinfos",order_by="FightStatistic.action_time_second",
+    fight_statistic: Mapped[List["FightStatistic"]] = relationship(back_populates="fightinfos",order_by="FightStatistic.action_time_second.desc()",
                                                              primaryjoin="FightInfo.id==FightStatistic.fight_id")
     fighter: Mapped["Fighter"] = relationship(
         back_populates="fighter_info", uselist=False, foreign_keys=[fighter_id]
