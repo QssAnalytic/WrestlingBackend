@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from src.app.models import ActionName
 from src.dashbord.repos.metrics_chart_repo import MetricsChartRepo
 from src.dashbord.repos.stats_chart_repo import StatsChartRepo
-from src.dashbord.enums import DefenceStatsChartEnum, TakedownStatsChartEnum, OffenceStatsChartEnum, DefenceStatsChartEnum
+from src.dashbord.enums import DefenceStatsChartEnum, TakedownStatsChartEnum, OffenceStatsChartEnum, DefenceStatsChartEnum, DurabilityStatsChartEnum
 
 
 class ChartMetricsServices(MetricsChartRepo):
@@ -44,7 +44,7 @@ class ChartStatsServices(StatsChartRepo):
             response_data = super().double_leg_takedown_count(params=params, db=db)
         elif params.get('stats') == TakedownStatsChartEnum.Double_leg_takedown:
             response_data = super().double_leg_takedown_success_rate(params=params, db=db)
-
+        #------------------------------- DEFFENCE ------------------------------------------
         elif params.get('stats') == DefenceStatsChartEnum.Action_escape_rate:
             response_data = super().action_escape_rate(params=params, db=db)
         elif params.get('stats') == DefenceStatsChartEnum.Action_skipped_points_per_fight:
@@ -59,7 +59,7 @@ class ChartStatsServices(StatsChartRepo):
             response_data = super().protection_zone_escape_rate(params=params, db=db)
         elif params.get('stats') == DefenceStatsChartEnum.Parterre_escape_rate:
             response_data = super().parterre_escape_rate(params=params, db=db)
-        
+        #------------------------------- OFFENCE ------------------------------------------
         elif params.get('stats') == OffenceStatsChartEnum.Action_Success_rate:
             response_data = super().action_escape_rate(params=params, db=db)
         elif params.get('stats') == OffenceStatsChartEnum.Action_count_per_fight:
@@ -84,6 +84,11 @@ class ChartStatsServices(StatsChartRepo):
             response_data = super().parterre_count_per_fight(params=params, db=db)
         elif params.get('stats') == OffenceStatsChartEnum.Parterre_points_per_fight:
             response_data = super().parterre_points_per_fight(params=params, db=db)
-            
-        
+        #------------------------------- DURABILITY ------------------------------------------
+        elif params.get('stats') == DurabilityStatsChartEnum.Total_successful_defenses_per_fight_2nd_part:
+            response_data = super().total_successful_defenses_per_fight_2nd_part(params=params, db=db)
+        elif params.get('stats') == DurabilityStatsChartEnum.Total_action_counts_per_fight_2nd_part:
+            response_data = super().total_action_counts_per_fight_2nd_part(params=params, db=db)
+        elif params.get('stats') == DurabilityStatsChartEnum.Passivity_per_fight:
+            response_data = super().passivity_per_fight(params=params, db=db)
         return response_data

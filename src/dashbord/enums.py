@@ -48,3 +48,12 @@ class DefenceStatsChartEnum(Enum):
     Protection_zone_escape_rate = "Protection zone escape rate"
     Parterre_escape_rate = "Parterre escape rate"
 
+
+class DurabilityStatsChartEnum(Enum):
+    Takedown_score_2nd_part = "Takedown score 2nd part"
+    Defence_Score_2nd_part = "Defence Score 2nd part"
+    Offence_Score_2nd_part = "Offence Score 2nd part"
+    Passivity_per_fight = "Passivity per fight"
+    Total_successful_defenses_per_fight_2nd_part = "Total successful defenses per fight (2nd part)"
+    Total_action_counts_per_fight_2nd_part = "Total action counts per fight (2nd part)"
+
