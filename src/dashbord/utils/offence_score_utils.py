@@ -225,7 +225,7 @@ def roll_count_per_fight_utils(session_factory, params: dict, obj:dict, db: Sess
 
 def roll_success_rate_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
-    """"""
+
     statement = text("""
 with total as (
         select f.fighter_id, count(*) as total_count from fightstatistics f
@@ -354,7 +354,7 @@ def offence_protection_count_per_fight(session_factory, params: dict, obj:dict, 
 
 def offence_protection_zone_success_rate(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
-    """"""
+
     statement = text("""
     --protection_zone_success_rate
     with total as (
