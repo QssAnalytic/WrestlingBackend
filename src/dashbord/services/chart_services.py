@@ -72,8 +72,18 @@ class ChartStatsServices(StatsChartRepo):
             response_data = super().protection_zone_counts_per_fight(params=params, db=db)
         elif params.get('stats') == OffenceStatsChartEnum.Protection_zone_points_per_fight:
             response_data = super().protection_zone_points_per_fight(params=params, db=db)
-
-    
+        elif params.get('stats') == OffenceStatsChartEnum.Roll_success_rate:
+            response_data = super().roll_success_rate(params=params, db=db)
+        elif params.get('stats') == OffenceStatsChartEnum.Roll_count_per_fight:
+            response_data = super().roll_count_per_fight(params=params, db=db)
+        elif params.get('stats') == OffenceStatsChartEnum.Roll_points_per_fight:
+            response_data = super().roll_points_per_fight(params=params, db=db)
+        elif params.get('stats') == OffenceStatsChartEnum.Parterre_success_rate:
+            response_data = super().parterre_success_rate(params=params, db=db)
+        elif params.get('stats') == OffenceStatsChartEnum.Parterre_count_per_fight:
+            response_data = super().parterre_count_per_fight(params=params, db=db)
+        elif params.get('stats') == OffenceStatsChartEnum.Parterre_points_per_fight:
+            response_data = super().parterre_points_per_fight(params=params, db=db)
             
         
         return response_data

@@ -8,6 +8,222 @@ from src.app.models import ActionName, Technique
 class OffenceStatsChartRepo:
 
     @classmethod
+    def parterre_points_per_fight(cls, params:dict, db:Session):
+        technique_names = ['Leg lace', 'Roll from parter', 'Arm-lock roll on parter', 'Gator roll', 'Pin to parter']
+        result = db.query(Technique.id).filter(Technique.name.in_(technique_names)).all()
+        technique_ids = tuple((row[0] for row in result))
+        params['technique_id'] = technique_ids
+        statement = text("""
+            --Parterre points per fight by year
+				with fighter_matches as (
+				select s.fighter_id, extract(year from i.fight_date) as year, array_agg(distinct fight_id) fighter_array from fightstatistics s
+					inner join fightinfos i on s.fight_id = i.id
+					group by s.fighter_id, extract(year from i.fight_date)
+				),
+				opponent_matches as (
+				select s.opponent_id, extract(year from i.fight_date) as year, array_agg(distinct fight_id) opponent_array from fightstatistics s
+					inner join fightinfos i on s.fight_id = i.id
+					group by s.opponent_id, extract(year from i.fight_date)
+				),
+				com as (select fighter, year,  cardinality(array(select distinct unnest_array from unnest(combine_array) as unnest_array)) unique_matches from (
+				select coalesce(fighter_id, opponent_id) fighter, coalesce(fi.year, op.year) as year, (fighter_array || opponent_array) as combine_array 
+				from fighter_matches fi full outer join opponent_matches op on fi.fighter_id = op.opponent_id and fi.year = op.year
+				)),
+				total_points as (select f.fighter_id, extract(year from f2.fight_date) as year, sum(score) as total_points from fightstatistics f
+				inner join fightinfos f2 on f.fight_id = f2.id
+				where f.successful = true and f.technique_id in :technique_id
+				group by f.fighter_id, extract(year from f2.fight_date))
+				select * from (
+				select fighter, c.year, coalesce(round(cast(total_points as decimal)/cast(unique_matches as decimal), 2), 0) as avg_points_per_match
+				from com c left join total_points t on c.fighter = t.fighter_id and c.year = t.year order by year)
+	 where fighter = :fighter_id
+        """)
+        with session_factory() as session:
+            exc = session.execute(statement, params)
+            fetch = exc.fetchall()
+        return fetch
+
+
+    @classmethod
+    def parterre_count_per_fight(cls, params:dict, db:Session):
+        technique_names = ['Leg lace', 'Roll from parter', 'Arm-lock roll on parter', 'Gator roll', 'Pin to parter']
+        result = db.query(Technique.id).filter(Technique.name.in_(technique_names)).all()
+        technique_ids = tuple((row[0] for row in result))
+        params['technique_id'] = technique_ids
+        statement = text("""
+            --Partere counts per fight by year
+            with fighter_matches as (
+            select s.fighter_id, array_agg(distinct fight_id) fighter_array, extract(year from i.fight_date) as year from fightstatistics s
+                inner join fightinfos i on s.fight_id = i.id
+                group by s.fighter_id, extract(year from i.fight_date)
+            ),
+            opponent_matches as (
+            select s.opponent_id, array_agg(distinct fight_id) opponent_array, extract(year from i.fight_date) as year from fightstatistics s
+                inner join fightinfos i on s.fight_id = i.id
+                group by s.opponent_id,  extract(year from i.fight_date)
+            ),
+            com as (select fighter, year , cardinality(array(select distinct unnest_array from unnest(combine_array) as unnest_array)) unique_matches from (
+            select coalesce(fighter_id, opponent_id) fighter, coalesce(fi.year, op.year)as year, (fighter_array || opponent_array) as combine_array 
+            from fighter_matches fi full outer join opponent_matches op on fi.fighter_id = opponent_id and fi.year = op.year
+            )),
+            successful_roll_attempts as (select f.fighter_id, count(*) as successful_attempts, extract(year from f2.fight_date) as year from fightstatistics f
+            inner join fightinfos f2 on f.fight_id = f2.id
+            inner join actions a on f.action_name_id = a.id
+            where f.successful = true and f.technique_id in :technique_id
+            group by f.fighter_id, extract(year from f2.fight_date)),
+            total_roll_attempts as (select f.fighter_id, count(*) as total_count, extract(year from f2.fight_date) as year from fightstatistics f
+            inner join fightinfos f2 on f.fight_id = f2.id
+            inner join actions a on f.action_name_id = a.id
+            where f.technique_id in :technique_id
+            group by f.fighter_id, extract(year from f2.fight_date))
+            select * from (
+            select fighter, t.year, coalesce(round(cast(successful_attempts as decimal)/cast(unique_matches as decimal), 2), 0) as successful_roll_attempts_per_match
+            from successful_roll_attempts t left join total_roll_attempts tc on t.fighter_id = tc.fighter_id and t.year = tc.year
+            left join com c on c.fighter = t.fighter_id and c.year = t.year order by t.year)
+            where fighter = :fighter_id
+        """)
+        with session_factory() as session:
+            exc = session.execute(statement, params)
+            fetch = exc.fetchall()
+        return fetch
+
+    @classmethod
+    def parterre_success_rate(cls, params:dict, db:Session):
+        technique_names = ['Leg lace', 'Roll from parter', 'Arm-lock roll on parter', 'Gator roll', 'Pin to parter']
+        result = db.query(Technique.id).filter(Technique.name.in_(technique_names)).all()
+        technique_ids = tuple((row[0] for row in result))
+        params['technique_id'] = technique_ids
+        statement = text("""
+        --parterre success rate by years
+			with total as (
+						select f.fighter_id, extract(year from f2.fight_date) as year, count(*) as total_count from fightstatistics f
+						inner join fightinfos f2 on f.fight_id = f2.id
+
+							where f.technique_id in :technique_id
+							group by f.fighter_id, extract(year from f2.fight_date)
+							),
+							success as (
+							select f.fighter_id,extract(year from f2.fight_date) as year,
+								count(*) as successful_offense from fightstatistics f
+							inner join fightinfos f2 on f.fight_id = f2.id
+
+							where f.successful = true and f.technique_id in :technique_id
+							group by f.fighter_id, extract(year from f2.fight_date)
+							)
+				select * from (
+				  select t.fighter_id , coalesce(t.year,s.year) as f_date, round(coalesce(cast(successful_offense as decimal) / cast(total_count as decimal), 0), 2) partere_success_rate
+				  from total t 
+				  left join success s 
+				  on t.fighter_id = s.fighter_id and t.year = s.year) where fighter_id = :fighter_id order by f_date 
+        """)
+        with session_factory() as session:
+            exc = session.execute(statement, params)
+            fetch = exc.fetchall()
+        return fetch  
+
+
+    @classmethod
+    def roll_points_per_fight(cls, params:dict, db:Session):
+        statement = text("""
+            --Roll points per fight by year
+				with fighter_matches as (
+				select s.fighter_id, extract(year from i.fight_date) as year, array_agg(distinct fight_id) fighter_array from fightstatistics s
+					inner join fightinfos i on s.fight_id = i.id
+					group by s.fighter_id, extract(year from i.fight_date)
+				),
+				opponent_matches as (
+				select s.opponent_id, extract(year from i.fight_date) as year, array_agg(distinct fight_id) opponent_array from fightstatistics s
+					inner join fightinfos i on s.fight_id = i.id
+					group by s.opponent_id, extract(year from i.fight_date)
+				),
+				com as (select fighter, year,  cardinality(array(select distinct unnest_array from unnest(combine_array) as unnest_array)) unique_matches from (
+				select coalesce(fighter_id, opponent_id) fighter, coalesce(fi.year, op.year) as year, (fighter_array || opponent_array) as combine_array 
+				from fighter_matches fi full outer join opponent_matches op on fi.fighter_id = op.opponent_id and fi.year = op.year
+				)),
+				total_points as (select f.fighter_id, extract(year from f2.fight_date) as year, sum(score) as total_points from fightstatistics f
+				inner join fightinfos f2 on f.fight_id = f2.id
+				where f.successful = true and f.action_name_id = 2
+				group by f.fighter_id, extract(year from f2.fight_date))
+				select * from (
+				select fighter, coalesce(c.year,t.year) as f_date, coalesce(round(cast(total_points as decimal)/cast(unique_matches as decimal), 2), 0) as avg_points_per_match
+				from com c left join total_points t on c.fighter = t.fighter_id and c.year = t.year order by f_date)
+	        where fighter = :fighter_id
+        """)
+        with session_factory() as session:
+            exc = session.execute(statement, params)
+            fetch = exc.fetchall()
+        return fetch  
+
+    @classmethod
+    def roll_count_per_fight(cls, params:dict, db:Session):
+        statement = text("""
+        --Roll counts per fight by year
+        with fighter_matches as (
+        select s.fighter_id, array_agg(distinct fight_id) fighter_array, extract(year from i.fight_date) as year from fightstatistics s
+            inner join fightinfos i on s.fight_id = i.id
+            group by s.fighter_id, extract(year from i.fight_date)
+        ),
+        opponent_matches as (
+        select s.opponent_id, array_agg(distinct fight_id) opponent_array, extract(year from i.fight_date) as year from fightstatistics s
+            inner join fightinfos i on s.fight_id = i.id
+            group by s.opponent_id,  extract(year from i.fight_date)
+        ),
+        com as (select fighter, year , cardinality(array(select distinct unnest_array from unnest(combine_array) as unnest_array)) unique_matches from (
+        select coalesce(fighter_id, opponent_id) fighter, coalesce(fi.year, op.year)as year, (fighter_array || opponent_array) as combine_array 
+        from fighter_matches fi full outer join opponent_matches op on fi.fighter_id = opponent_id and fi.year = op.year
+        )),
+        successful_roll_attempts as (select f.fighter_id, count(*) as successful_attempts, extract(year from f2.fight_date) as year from fightstatistics f
+        inner join fightinfos f2 on f.fight_id = f2.id
+        inner join actions a on f.action_name_id = a.id
+        where f.successful = true and  f.action_name_id = 2
+        group by f.fighter_id, extract(year from f2.fight_date)),
+        total_roll_attempts as (select f.fighter_id, count(*) as total_count, extract(year from f2.fight_date) as year from fightstatistics f
+        inner join fightinfos f2 on f.fight_id = f2.id
+        inner join actions a on f.action_name_id = a.id
+        where  f.action_name_id = 2
+        group by f.fighter_id, extract(year from f2.fight_date))
+        select * from (
+        select fighter, coalesce(t.year,tc.year) as f_date, coalesce(round(cast(successful_attempts as decimal)/cast(unique_matches as decimal), 2), 0) as successful_roll_attempts_per_match
+        from successful_roll_attempts t left join total_roll_attempts tc on t.fighter_id = tc.fighter_id and t.year = tc.year
+        left join com c on c.fighter = t.fighter_id and c.year = t.year order by f_date)
+        where fighter = :fighter_id 
+        """)
+        with session_factory() as session:
+            exc = session.execute(statement, params)
+            fetch = exc.fetchall()
+        return fetch    
+
+    @classmethod
+    def roll_success_rate(cls, params:dict, db: Session):
+        statement = text("""
+            --roll success rate by years
+			with total as (
+						select f.fighter_id, extract(year from f2.fight_date) as t_year, count(*) as total_count from fightstatistics f
+						inner join fightinfos f2 on f.fight_id = f2.id
+
+							where f.action_name_id = 2
+							group by f.fighter_id, extract(year from f2.fight_date)
+							),
+							success as (
+							select f.fighter_id,extract(year from f2.fight_date) as s_year,
+								count(*) as successful_offense from fightstatistics f
+							inner join fightinfos f2 on f.fight_id = f2.id
+
+							where f.successful = true and f.action_name_id = 2
+							group by f.fighter_id, extract(year from f2.fight_date)
+							)
+				  select t.fighter_id , coalesce(t.t_year,s.s_year) as f_date, round(coalesce(cast(successful_offense as decimal) / cast(total_count as decimal), 0), 2) roll_success_rate
+				  from total t 
+				  left join success s 
+				  on t.fighter_id = s.fighter_id and t.t_year = s.s_year where s.fighter_id = :fighter_id order by f_date
+        """)
+        with session_factory() as session:
+            exc = session.execute(statement, params)
+            fetch = exc.fetchall()
+        return fetch
+
+
+    @classmethod
     def protection_zone_points_per_fight(cls, params:dict, db: Session):
         action = db.query(ActionName).filter(ActionName.name == 'Protection zone').first()
         params['action_name_id'] = action.id
