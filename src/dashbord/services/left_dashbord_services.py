@@ -41,6 +41,10 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         elif params.get('metrics') == MetricsEnum.Offense:
             r, stats_list = self.metrics_services.offence_metrics_chart(params=params)
             return r, stats_list
+        
+        elif params.get('metrics') == MetricsEnum.Durability:
+            r, stats_list = self.metrics_services.durability_metrics_chart(params=params)
+            return r, stats_list
         return None
 
     def chart_stats_statistic(self, params: dict, db: Session):

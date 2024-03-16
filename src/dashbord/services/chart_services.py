@@ -21,6 +21,11 @@ class ChartMetricsServices(MetricsChartRepo):
     def offence_metrics_chart(cls, params: dict):
         data, offence_stats = super().offence_metrics_chart(params=params)
         return data, offence_stats
+
+    @classmethod
+    def durability_metrics_chart(cls, params: dict):
+        data, offence_stats = super().durability_metrics_chart(params=params)
+        return data, offence_stats
     
 
 class ChartStatsServices(StatsChartRepo):

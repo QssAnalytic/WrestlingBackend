@@ -1,6 +1,6 @@
 from sqlalchemy import text
 from database import session_factory
-from src.dashbord.enums import DefenceStatsChartEnum, TakedownStatsChartEnum, OffenceStatsChartEnum
+from src.dashbord.enums import DefenceStatsChartEnum, TakedownStatsChartEnum, OffenceStatsChartEnum, DurabilityStatsChartEnum
 
 
 
@@ -8,6 +8,11 @@ from src.dashbord.enums import DefenceStatsChartEnum, TakedownStatsChartEnum, Of
 
 
 class MetricsChartRepo:
+
+    @classmethod
+    def durability_metrics_chart(cls, params: dict):
+        stats_list = [member.value for member in DurabilityStatsChartEnum]
+        return None, stats_list
     @classmethod
     def offence_metrics_chart(cls, params: dict):
         stats_list = [member.value for member in OffenceStatsChartEnum]
