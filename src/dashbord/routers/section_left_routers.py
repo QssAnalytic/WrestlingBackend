@@ -22,7 +22,7 @@ def metrics(fight_date: str, fighter_id: int, metrics_name: MetricsEnum, db: Ses
     elif metrics_name == MetricsEnum.Defence: 
         response_obj = medal_left_dashbord_service.defence_score_statistic(params=params, db=db)
 
-    elif metrics_name == MetricsEnum.Offense: 
+    elif metrics_name == MetricsEnum.Offence: 
         response_obj = medal_left_dashbord_service.offense_score_statistic(params=params, db=db)
 
     elif metrics_name == MetricsEnum.Durability:
