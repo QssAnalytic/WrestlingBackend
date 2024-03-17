@@ -267,6 +267,8 @@ with total as (
     obj_copy["metrics"] = OffenceStatsChartEnum.Roll_success_rate
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
+        obj_copy["successful_count"] = float(fetch[2])
+        obj_copy["total_count"] = float(fetch[3])
         obj_copy["bar_pct"] = float(fetch[-1])
     return obj_copy
 
@@ -433,7 +435,9 @@ def offence_action_success_rate_utils(session_factory, params: dict, obj:dict, d
     obj_copy["metrics"] = OffenceStatsChartEnum.Action_Success_rate
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
-        obj_copy["bar_pct"] = float(fetch[4])
+        obj_copy["successful_count"] = float(fetch[2])
+        obj_copy["total_count"] = float(fetch[3])
+        obj_copy["bar_pct"] = float(fetch[-1])
     return obj_copy
 
 
