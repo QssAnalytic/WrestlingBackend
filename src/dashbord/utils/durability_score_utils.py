@@ -153,19 +153,20 @@ def offence_durability_score_utils(session_factory, params: dict, obj:dict, db: 
     obj_copy["star"] = True
     statement = text("""
         --offense_score_durability
-        --offense_score_durability
-        with action_success_rate as(
+  with action_success_rate as(
         with total as (
                 select f.fighter_id, count(*) as total_count from fightstatistics f
                 inner join fightinfos f2 on f.fight_id = f2.id
                 
-                where extract(year from f2.fight_date) in :fight_date
+                where extract(year from f2.fight_date) in :fight_date  and (((f2.order = 'ascending') and (f.action_time_second > 180)) 
+						  or ((f2.order = 'descending') and (f.action_time_second < 180)))
                 group by f.fighter_id
                 ),
                 success as (
                 select f.fighter_id, count(*) as successful_count from fightstatistics f
                 inner join fightinfos f2 on f.fight_id = f2.id
-                where extract(year from f2.fight_date) in :fight_date and f.successful = true 
+                where extract(year from f2.fight_date) in :fight_date and f.successful = true  and (((f2.order = 'ascending') and (f.action_time_second > 180)) 
+						  or ((f2.order = 'descending') and (f.action_time_second < 180)))
                 group by f.fighter_id
                 )
             select * from (    
@@ -195,14 +196,15 @@ def offence_durability_score_utils(session_factory, params: dict, obj:dict, db: 
         successful_action_attempts as (select f.fighter_id, count(*) as successful_attempts from fightstatistics f
         inner join fightinfos f2 on f.fight_id = f2.id
         inner join actions a on f.action_name_id = a.id
-        where extract(year from f2.fight_date) in :fight_date  and f.successful = true 
+        where extract(year from f2.fight_date) in :fight_date  and f.successful = true  and (((f2.order = 'ascending') and (f.action_time_second > 180)) 
+						  or ((f2.order = 'descending') and (f.action_time_second < 180))) 
         group by f.fighter_id),
         total_action_attempts as (select f.fighter_id, count(*) as total_count from fightstatistics f
         inner join fightinfos f2 on f.fight_id = f2.id
         inner join actions a on f.action_name_id = a.id
-        where extract(year from f2.fight_date) in :fight_date
+        where extract(year from f2.fight_date) in :fight_date  and (((f2.order = 'ascending') and (f.action_time_second > 180)) 
+						  or ((f2.order = 'descending') and (f.action_time_second < 180)))
         group by f.fighter_id),
-
         calculation as(
         select fighter, coalesce(round(cast(successful_attempts as decimal)/cast(unique_matches as decimal), 2), 0) as successful_attempts_per_match,
         coalesce(round(cast(total_count as decimal)/cast(unique_matches as decimal), 2), 1) as total_attempts_per_match
@@ -210,7 +212,6 @@ def offence_durability_score_utils(session_factory, params: dict, obj:dict, db: 
                 left join total_action_attempts tc on c.fighter = tc.fighter_id
         )
         select *, round(cast(successful_attempts_per_match as decimal)/ cast(max(successful_attempts_per_match) over() as decimal), 2) count_pct from calculation),
-
         avg_points_per_fight as(
                 with fighter_matches as (
                     select s.fighter_id, array_agg(distinct fight_id) fighter_array from fightstatistics s
@@ -231,7 +232,8 @@ def offence_durability_score_utils(session_factory, params: dict, obj:dict, db: 
                     total_points as (select f.fighter_id, sum(score) as total_points from fightstatistics f
                     inner join fightinfos f2 on f.fight_id = f2.id
                     inner join actions a on f.action_name_id = a.id
-                    where extract(year from f2.fight_date) in :fight_date  and f.successful = true
+                    where extract(year from f2.fight_date) in :fight_date  and f.successful = true  and (((f2.order = 'ascending') and (f.action_time_second > 180)) 
+						  or ((f2.order = 'descending') and (f.action_time_second < 180)))
                     group by f.fighter_id),
                     calculation as(
                     select fighter, coalesce(round(cast(total_points as decimal)/cast(unique_matches as decimal), 2), 0) as avg_points_per_match
@@ -239,8 +241,6 @@ def offence_durability_score_utils(session_factory, params: dict, obj:dict, db: 
             select * from (
             select *, round(cast(avg_points_per_match as decimal)/ cast(max(avg_points_per_match) over() as decimal), 2) point_pct from calculation
         ))
-
-
         select fighter_id, offense_score, round(cast(bar_pct as decimal), 2) from (
         select *, percent_rank() over(order by offense_score asc) as bar_pct  from(
             select fighter_id, round(1 - cast(offense_rank as decimal) / cast(max(offense_rank) over() as decimal), 2) offense_score from(
@@ -252,6 +252,7 @@ def offence_durability_score_utils(session_factory, params: dict, obj:dict, db: 
         left join avg_points_per_fight p
         on a.fighter_id = p.fighter
             )))) where fighter_id = :fighter_id
+
         """)
     with session_factory() as session:
         offence_durability_score = session.execute(statement, params)
@@ -311,7 +312,7 @@ def defence_durability_score_utils(session_factory, params: dict, obj:dict, db: 
 # "Defence Score 2nd part"
     obj_copy["metrics"] = DurabilityStatsChartEnum.Defence_Score_2nd_part
     if fetch is not None:  
-        obj_copy["score"] = float(fetch[-1])*100
+        obj_copy["score"] = round(float(fetch[-1])*100,2)
         obj_copy["bar_pct"] = float(fetch[1])
     return obj_copy
 
