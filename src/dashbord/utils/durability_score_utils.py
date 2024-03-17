@@ -3,7 +3,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from database import Base
 from src.app.models import ActionName
-
+from src.dashbord.enums import DurabilityStatsChartEnum
 
 def total_late_attempts_per_fight_utils(session_factory, params: dict, obj:dict, model, db: Session):
     obj_copy = obj.copy()
@@ -44,7 +44,7 @@ def total_late_attempts_per_fight_utils(session_factory, params: dict, obj:dict,
         exc = session.execute(statement, params)
         fetch = exc.fetchone()
 
-    obj_copy["metrics"] = "Total action counts per fight (2nd part)"
+    obj_copy["metrics"] = DurabilityStatsChartEnum.Total_action_counts_per_fight_2nd_part
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[-1])
@@ -91,7 +91,7 @@ def total_late_defences_per_fight_utils(session_factory, params: dict, obj:dict,
         exc = session.execute(statement, params)
         fetch = exc.fetchone()
 
-    obj_copy["metrics"] = "Total successful defenses per fight (2nd part)"
+    obj_copy["metrics"] =  DurabilityStatsChartEnum.Total_successful_defenses_per_fight_2nd_part
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[-1])
@@ -141,8 +141,8 @@ def passivity_durability_per_fight(session_factory, params: dict, obj:dict, db: 
     with session_factory() as session:
         passivity_durability_per_fight = session.execute(statement, params)
         fetch = passivity_durability_per_fight.fetchone()
-
-    obj_copy["metrics"] = "Passivity per fight"
+    #"Passivity per fight" 
+    obj_copy["metrics"] = DurabilityStatsChartEnum.Passivity_per_fight
     if fetch is not None:  
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[-1])
@@ -256,8 +256,8 @@ def offence_durability_score_utils(session_factory, params: dict, obj:dict, db: 
     with session_factory() as session:
         offence_durability_score = session.execute(statement, params)
         fetch = offence_durability_score.fetchone()
-
-    obj_copy["metrics"] = "Offence Score 2nd part"
+# "Offence Score 2nd part"
+    obj_copy["metrics"] = DurabilityStatsChartEnum.Offence_Score_2nd_part
     if fetch is not None:  
         obj_copy["score"] = round(float(fetch[1])*100,2)
         obj_copy["bar_pct"] = float(fetch[-1])
@@ -308,8 +308,8 @@ def defence_durability_score_utils(session_factory, params: dict, obj:dict, db: 
     with session_factory() as session:
         defence_durability_score = session.execute(statement, params)
         fetch = defence_durability_score.fetchone()
-
-    obj_copy["metrics"] = "Defence Score 2nd part"
+# "Defence Score 2nd part"
+    obj_copy["metrics"] = DurabilityStatsChartEnum.Defence_Score_2nd_part
     if fetch is not None:  
         obj_copy["score"] = float(fetch[-1])*100
         obj_copy["bar_pct"] = float(fetch[1])
@@ -428,7 +428,8 @@ def takedown_durability_score_utils(session_factory, params: dict, obj:dict, db:
     with session_factory() as session:
         takedown_durability_score = session.execute(statement, params)
         fetch = takedown_durability_score.fetchone()
-    obj_copy["metrics"] = "Takedown score 2nd part"
+        #"Takedown score 2nd part"
+    obj_copy["metrics"] = DurabilityStatsChartEnum.Takedown_score_2nd_part
     if fetch is not None:  
         obj_copy["score"] = round(float(fetch[1])*100,2)
         obj_copy["bar_pct"] = float(fetch[-1])

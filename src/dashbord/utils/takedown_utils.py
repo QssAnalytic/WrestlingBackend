@@ -2,10 +2,11 @@ from typing import TypeVar
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from database import Base, session_factory
-
+from src.dashbord.enums import TakedownStatsChartEnum
 ModelTypeVar = TypeVar("ModelTypeVar", bound=Base)
 def takedown_success_rate_utils(session_factory, params: dict, obj: dict):
-    takedown_success_rate_string = "Takedown Success rate"
+    # "Takedown Success rate"
+    takedown_success_rate_string = TakedownStatsChartEnum.Takedown_Success_rate
     obj_copy = obj.copy()
     obj_copy["star"] = True
     statement = text("""
@@ -79,7 +80,8 @@ def takedown_per_match_utils(session_factory, params: dict, obj:dict):
     if fetch != None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[2])
-    obj_copy["metrics"] = "Takedown per fight total"
+        # "Takedown per fight total"
+    obj_copy["metrics"] = TakedownStatsChartEnum.Takedown_per_fight_total
     return obj_copy
 
 def takedown_average_points_per_fight_utils(session_factory, params: dict, obj: dict):
@@ -119,7 +121,8 @@ def takedown_average_points_per_fight_utils(session_factory, params: dict, obj: 
     with session_factory() as session:
         takedown_average_points_per_fight = session.execute(statement, params)
         fetch = takedown_average_points_per_fight.fetchone()
-    obj_copy["metrics"] = "Average takedown points per fight"
+        # "Average takedown points per fight"
+    obj_copy["metrics"] = TakedownStatsChartEnum.Average_takedown_points_per_fight
     if fetch is not None:
         
         obj_copy["score"] = float(fetch[1])
@@ -141,7 +144,8 @@ def takedown_count_utils(session_factory, params: dict, obj: dict):
     with session_factory() as session:
         takedown_count = session.execute(statement, params)
         fetch = takedown_count.fetchone()
-    obj_copy["metrics"] = "Takedown Count"
+        # "Takedown Count"
+    obj_copy["metrics"] = TakedownStatsChartEnum.Takedown_Count
     if fetch is not None:
         
         obj_copy["score"] = float(fetch[1])
@@ -176,7 +180,8 @@ def single_leg_takedown_success_rate_utils(session_factory, params:dict, model: 
     with session_factory() as session:
         single_leg_takedown_success_rate = session.execute(statement, params)
         fetch = single_leg_takedown_success_rate.fetchone()
-    obj_copy["metrics"] = "Single Leg takedown Success Rate"
+        # "Single Leg takedown Success Rate"
+    obj_copy["metrics"] = TakedownStatsChartEnum.Singe_Leg_takedown_Success_Rate
     if fetch is not None:
         obj_copy["successful_count"] = fetch[2]
         obj_copy["score"] = float(fetch[1])
@@ -202,8 +207,8 @@ def single_leg_takedown_count_utils(session_factory, params:dict, model: ModelTy
     with session_factory() as session:
         single_leg_takedown_count = session.execute(statement, params)
         fetch = single_leg_takedown_count.fetchone()
-
-    obj_copy["metrics"] = "Single leg takedown count"
+# "Single leg takedown count"
+    obj_copy["metrics"] = TakedownStatsChartEnum.Single_leg_takedown_count
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[2])
@@ -225,7 +230,8 @@ def double_leg_takedown_count_utils(session_factory, params:dict, model: ModelTy
     with session_factory() as session:
         double_leg_takedown_count = session.execute(statement, params)
         fetch = double_leg_takedown_count.fetchone()
-    obj_copy["metrics"] = "Double leg takedown counts"
+        # "Double leg takedown counts"
+    obj_copy["metrics"] = TakedownStatsChartEnum.Double_leg_takedown_counts
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[2])
@@ -259,7 +265,8 @@ def double_leg_takedown_success_rate_utils(session_factory, params:dict, model: 
         double_leg_takedown_success_rate = session.execute(statement, params)
 
         fetch = double_leg_takedown_success_rate.fetchone()
-    obj_copy["metrics"] = "Double Leg takedown Success Rate"
+        # "Double Leg takedown Success Rate"
+    obj_copy["metrics"] = TakedownStatsChartEnum.Double_leg_takedown
     if fetch is not None:
         obj_copy["successful_count"] = fetch[2]
         obj_copy["score"] = float(fetch[1])
