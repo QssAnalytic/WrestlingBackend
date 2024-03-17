@@ -35,7 +35,7 @@ class TakedownStatsChartEnum(Enum):
     Single_leg_takedown_count = "Single leg takedown count"
     Singe_Leg_takedown_Success_Rate = "Single Leg takedown Success Rate"
     Double_leg_takedown_counts = "Double leg takedown counts"
-    Double_leg_takedown = "Double leg takedown Double leg takedown success rate"
+    Double_leg_takedown = "Double leg takedown success rate"
 
 
 
