@@ -8,6 +8,43 @@ from src.app.models import ActionName, Technique
 class DurabilityStatsChartRepo:
 
     @classmethod
+    def defence_score_2nd_part(cls, params: dict, db:Session):
+        statement = text("""
+            --defense_score_durability
+            with action_escape_rate as(
+                with total as (
+                        select f.opponent_id, count(*) as total_count, extract(year from f2.fight_date) as t_date from fightstatistics f
+                        inner join fightinfos f2 on f.fight_id = f2.id
+                            where ((action_time_second > 180 and f2.order = 'ascending') or (action_time_second < 180 and f2.order = 'descending'))
+                            group by f.opponent_id, t_date
+                            ),
+                            success as (
+                            select f.opponent_id, count(*) as successful_escape, extract(year from f2.fight_date) as s_date from fightstatistics f
+                            inner join fightinfos f2 on f.fight_id = f2.id
+            
+                            where f.successful = false and ( (action_time_second > 180 and f2.order = 'ascending') or  (action_time_second < 180 and f2.order = 'descending'))
+                            group by f.opponent_id, s_date
+                            ),
+                
+                calculation as (
+                select t.opponent_id,t.t_date as cal_date, round(coalesce(cast(successful_escape as decimal) / cast(total_count as decimal), 0), 2) action_escape_rate
+                    from total t left join success s on s.opponent_id = t.opponent_id and t.t_date = s.s_date)  
+
+            select * from (select opponent_id,cal_date as action_escape_rate_date, action_escape_rate,
+                        round((action_escape_rate - min(action_escape_rate) over()) /(max(action_escape_rate) over() - min(action_escape_rate) over()), 2) bar_pct
+                        from calculation)
+            )
+            select * from(
+            select *, round(1 - cast(defense_rank as decimal) / cast(max(defense_rank) over() as decimal), 2) from(
+            select *, rank() over(order by bar_pct desc) defense_rank from(
+            select opponent_id, action_escape_rate_date, bar_pct from action_escape_rate))) where opponent_id = :fighter_id order by action_escape_rate_date
+        """)
+        with session_factory() as session:
+            exc = session.execute(statement, params)
+            fetch = exc.fetchall()
+        return fetch
+
+    @classmethod
     def takedown_score_2nd_part(cls, params:dict, db:Session):
         action = db.query(ActionName).filter(ActionName.name == 'Takedown').first()
         params['action_name_id'] = action.id

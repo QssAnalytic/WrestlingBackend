@@ -3,8 +3,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from database import Base
 from src.app.models import ActionName
-from src.dashbord.utils.durability_score_utils import takedown_durability_score_utils,  defence_durability_score_utils, offence_durability_score_utils
-
+from src.dashbord.enums import MetricsEnum
 def stats_takedown(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
     statement = text("""
@@ -99,8 +98,8 @@ def stats_takedown(session_factory, params: dict, obj:dict, db: Session):
     with session_factory() as session:
         stats_takedown = session.execute(statement, params)
         fetch = stats_takedown.fetchone()
-
-    obj_copy["metrics"] = "Takedown Score"
+#"Takedown Score"
+    obj_copy["metrics"] = MetricsEnum.Takedown
     if fetch is not None:
         obj_copy["score"] = float(fetch[-1])
     return obj_copy
@@ -143,8 +142,8 @@ def stats_defence(session_factory, params: dict, obj:dict, db: Session):
     with session_factory() as session:
         stats_defence = session.execute(statement, params)
         fetch = stats_defence.fetchone()
-
-    obj_copy["metrics"] = "Defence Score"
+# "Defence Score"
+    obj_copy["metrics"] = MetricsEnum.Defence
     if fetch is not None:
         obj_copy["score"] = float(fetch[-1])
     return obj_copy
@@ -253,8 +252,8 @@ def stats_offence(session_factory, params: dict, obj:dict, db: Session):
     with session_factory() as conn:
         stats_defence = conn.execute(statement, params)
         fetch = stats_defence.fetchone()
-
-    obj_copy["metrics"] = "Offence Score"
+# "Offence Score"
+    obj_copy["metrics"] = MetricsEnum.Offence
     if fetch is not None:
         obj_copy["score"] = float(fetch[-1])
     return obj_copy
@@ -377,7 +376,8 @@ def stats_durability(session_factory, params: dict, obj:dict, db: Session):
     with session_factory() as conn:
         stats_defence = conn.execute(statement, params)
         fetch = stats_defence.fetchone()
-    obj_copy["metrics"] = "Durability Score"
+        # "Durability Score"
+    obj_copy["metrics"] = MetricsEnum.Durability
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
     return obj_copy

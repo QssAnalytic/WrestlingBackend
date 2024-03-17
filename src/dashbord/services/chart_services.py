@@ -98,4 +98,6 @@ class ChartStatsServices(StatsChartRepo):
             response_data = super().passivity_per_fight(params=params, db=db)
         elif params.get('stats') == DurabilityStatsChartEnum.Takedown_score_2nd_part:
             response_data = super().takedown_score_2nd_part(params=params, db=db)
+        elif params.get('stats') == DurabilityStatsChartEnum.Defence_Score_2nd_part:
+            response_data = super().defence_score_2nd_part(params=params, db=db)
         return response_data

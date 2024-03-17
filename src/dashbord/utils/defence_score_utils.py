@@ -3,7 +3,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from database import Base
 from src.app.models import ActionName
-
+from src.dashbord.enums import DefenceStatsChartEnum
 ModelTypeVar = TypeVar("ModelTypeVar", bound=Base)
 
 
@@ -45,7 +45,8 @@ def action_skipped_points_per_fight_utils(session_factory, params: dict, obj:dic
     with session_factory() as session:
         action_skipped_points_per_fight_rate = session.execute(statement, params)
         fetch = action_skipped_points_per_fight_rate.fetchone()
-    obj_copy["metrics"] = "Action skipped points per fight"
+        # "Action skipped points per fight"
+    obj_copy["metrics"] = DefenceStatsChartEnum.Action_skipped_points_per_fight
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[-1])
@@ -84,7 +85,8 @@ def pin_to_parter_escape_rate_utils(session_factory, params: dict, obj:dict, db:
     with session_factory() as session:
         pin_to_parter_escape_rate = session.execute(statement, params)
         fetch = pin_to_parter_escape_rate.fetchone()
-    obj_copy["metrics"] = "Pin to parter escape rate"
+        # "Pin to parter escape rate"
+    obj_copy["metrics"] = DefenceStatsChartEnum.Pin_to_parter_escape_rate
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[2])
@@ -124,7 +126,8 @@ def takedown_escape_rate_utils(session_factory, params: dict, obj: dict, db:Sess
     with session_factory() as session:
         takedown_escape_rate = session.execute(statement, params)
         fetch = takedown_escape_rate.fetchone()
-    obj_copy["metrics"] = "Takedown escape rate"
+        # "Takedown escape rate"
+    obj_copy["metrics"] = DefenceStatsChartEnum.Takedown_escape_rate
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[2])
@@ -161,7 +164,8 @@ def roll_escape_rate_utils(session_factory, params: dict, obj:dict, db: Session)
     with session_factory() as session:
         roll_escape_rate = session.execute(statement, params)
         fetch = roll_escape_rate.fetchone()
-    obj_copy["metrics"] = "Roll escape rate"
+        # "Roll escape rate"
+    obj_copy["metrics"] = DefenceStatsChartEnum.Roll_escape_rate
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[2])
@@ -198,7 +202,8 @@ def action_escape_rate_utils(session_factory, params: dict, obj:dict, db: Sessio
     with session_factory() as session:
         action_escape_rate = session.execute(statement, params)
         fetch = action_escape_rate.fetchone()
-    obj_copy["metrics"] = "Action escape rate"
+        # "Action escape rate"
+    obj_copy["metrics"] = DefenceStatsChartEnum.Action_escape_rate
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[2])
@@ -276,8 +281,8 @@ def parterre_escape_rate_utils(session_factory, params: dict, model: ModelTypeVa
         parterre_escape_rate = session.execute(statement, params)
 
         fetch = parterre_escape_rate.fetchone()
-
-    obj_copy["metrics"] = "Parterre escape rate"
+# "Parterre escape rate"
+    obj_copy["metrics"] = DefenceStatsChartEnum.Parterre_escape_rate
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[2])

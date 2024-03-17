@@ -2,11 +2,15 @@ from typing import TypeVar
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from database import Base
-from src.app.models import ActionName
-
+from src.app.models import ActionName, Technique
+from src.dashbord.enums import OffenceStatsChartEnum
 
 def parterre_points_rate_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
+    technique_names = ['Leg lace', 'Roll from parter', 'Arm-lock roll on parter', 'Gator roll', 'Pin to parter']
+    result = db.query(Technique.id).filter(Technique.name.in_(technique_names)).all()
+    technique_ids = tuple((row[0] for row in result))
+    params['technique_id'] = technique_ids
     statement = text("""
         --Parterre points per fight
 
@@ -29,7 +33,7 @@ def parterre_points_rate_utils(session_factory, params: dict, obj:dict, db: Sess
 			total_points as (select f.fighter_id, sum(score) as total_points from fightstatistics f
 			inner join fightinfos f2 on f.fight_id = f2.id
 			inner join actions a on f.action_name_id = a.id
-			where extract(year from f2.fight_date) in (2023)  and f.successful = true and  f.technique_id in (26, 29, 30, 38, 40)
+			where extract(year from f2.fight_date) in (2023)  and f.successful = true and  f.technique_id in :technique_id
 
 			group by f.fighter_id)
 			select fighter, coalesce(round(cast(total_points as decimal)/cast(unique_matches as decimal), 2), 0) as avg_parterre_per_match
@@ -38,8 +42,8 @@ def parterre_points_rate_utils(session_factory, params: dict, obj:dict, db: Sess
     with session_factory() as session:
         parterre_success_rate_utils = session.execute(statement, params)
         fetch = parterre_success_rate_utils.fetchone()
-
-    obj_copy["metrics"] = "Parterre points per fight"
+    # "Parterre points per fight"
+    obj_copy["metrics"] = OffenceStatsChartEnum.Parterre_points_per_fight
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         # obj_copy["bar_pct"] = float(fetch[-1])
@@ -48,6 +52,10 @@ def parterre_points_rate_utils(session_factory, params: dict, obj:dict, db: Sess
 
 def parterre_count_rate_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
+    technique_names = ['Leg lace', 'Roll from parter', 'Arm-lock roll on parter', 'Gator roll', 'Pin to parter']
+    result = db.query(Technique.id).filter(Technique.name.in_(technique_names)).all()
+    technique_ids = tuple((row[0] for row in result))
+    params['technique_id'] = technique_ids
     statement = text("""
         --Parterre counts per fight
         with fighter_matches as (
@@ -69,12 +77,12 @@ def parterre_count_rate_utils(session_factory, params: dict, obj:dict, db: Sessi
         successful_parterre_attempts as (select f.fighter_id, count(*) as successful_attempts from fightstatistics f
         inner join fightinfos f2 on f.fight_id = f2.id
         inner join actions a on f.action_name_id = a.id
-        where extract(year from f2.fight_date) in :fight_date   and f.successful = true and f.technique_id in (26, 29, 30, 38, 40)
+        where extract(year from f2.fight_date) in :fight_date   and f.successful = true and f.technique_id in :technique_id
         group by f.fighter_id),
         total_parterre_attempts as (select f.fighter_id, count(*) as total_count from fightstatistics f
         inner join fightinfos f2 on f.fight_id = f2.id
         inner join actions a on f.action_name_id = a.id
-        where extract(year from f2.fight_date) in :fight_date and f.technique_id in (26, 29, 30, 38, 40)
+        where extract(year from f2.fight_date) in :fight_date and f.technique_id in :technique_id
         group by f.fighter_id)
         select fighter, coalesce(round(cast(successful_attempts as decimal)/cast(unique_matches as decimal), 2), 0) as successful_parterre_attempts_per_match,
         coalesce(round(cast(total_count as decimal)/cast(unique_matches as decimal), 2), 0) as total_parterre_per_match
@@ -84,8 +92,8 @@ def parterre_count_rate_utils(session_factory, params: dict, obj:dict, db: Sessi
     with session_factory() as session:
         parterre_success_rate_utils = session.execute(statement, params)
         fetch = parterre_success_rate_utils.fetchone()
-
-    obj_copy["metrics"] = "Parterre count per fight"
+# "Parterre count per fight"
+    obj_copy["metrics"] = OffenceStatsChartEnum.Parterre_count_per_fight
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[-1])
@@ -93,20 +101,23 @@ def parterre_count_rate_utils(session_factory, params: dict, obj:dict, db: Sessi
 
 def parterre_success_rate_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
-    """"""
+    technique_names = ['Leg lace', 'Roll from parter', 'Arm-lock roll on parter', 'Gator roll', 'Pin to parter']
+    result = db.query(Technique.id).filter(Technique.name.in_(technique_names)).all()
+    technique_ids = tuple((row[0] for row in result))
+    params['technique_id'] = technique_ids
     statement = text("""
---parterre_success_rate
+        --parterre_success_rate
 	with total as (
 			select f.fighter_id, count(*) as total_count from fightstatistics f
 			inner join fightinfos f2 on f.fight_id = f2.id
 
-			where extract(year from f2.fight_date) in :fight_date and  f.technique_id in (26, 29, 30, 38, 40)
+			where extract(year from f2.fight_date) in :fight_date and  f.technique_id in :technique_id
 			group by f.fighter_id
 			),
 			success as (
 			select f.fighter_id, count(*) as successful_count from fightstatistics f
 			inner join fightinfos f2 on f.fight_id = f2.id
-			where extract(year from f2.fight_date) in :fight_date and f.successful = true and  f.technique_id in (26, 29, 30, 38, 40)
+			where extract(year from f2.fight_date) in :fight_date and f.successful = true and  f.technique_id in :technique_id
 			group by f.fighter_id
 			)
 		select * from (    
@@ -117,10 +128,12 @@ def parterre_success_rate_utils(session_factory, params: dict, obj:dict, db: Ses
     with session_factory() as session:
         parterre_success_rate_utils = session.execute(statement, params)
         fetch = parterre_success_rate_utils.fetchone()
-
-    obj_copy["metrics"] = "Parterre success rate"
+# --parterre_success_rate
+    obj_copy["metrics"] = OffenceStatsChartEnum.Parterre_success_rate
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
+        obj_copy["successful_count"] = float(fetch[2])
+        obj_copy["total_count"] = float(fetch[3])
         obj_copy["bar_pct"] = float(fetch[-1])
     return obj_copy
 
@@ -161,8 +174,8 @@ def roll_points_per_fight_utils(session_factory, params: dict, obj:dict, db: Ses
     with session_factory() as session:
         roll_count_per_fight_rate = session.execute(statement, params)
         fetch = roll_count_per_fight_rate.fetchone()
-
-    obj_copy["metrics"] = "Roll points per fight"
+#"Roll points per fight"
+    obj_copy["metrics"] = OffenceStatsChartEnum.Roll_points_per_fight
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[-1])
@@ -216,8 +229,8 @@ def roll_count_per_fight_utils(session_factory, params: dict, obj:dict, db: Sess
     with session_factory() as session:
         roll_count_per_fight = session.execute(statement, params)
         fetch = roll_count_per_fight.fetchone()
-
-    obj_copy["metrics"] = "Roll count per fight"
+#"Roll count per fight"
+    obj_copy["metrics"] = OffenceStatsChartEnum.Roll_count_per_fight
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[-1])
@@ -249,8 +262,8 @@ with total as (
     with session_factory() as session:
         roll_success_rate = session.execute(statement, params)
         fetch = roll_success_rate.fetchone()
-
-    obj_copy["metrics"] = "Roll success rate"
+#"Roll success rate"
+    obj_copy["metrics"] = OffenceStatsChartEnum.Roll_success_rate
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[-1])
@@ -345,8 +358,8 @@ def offence_protection_count_per_fight(session_factory, params: dict, obj:dict, 
     with session_factory() as session:
         offence_protection_count_per_fight = session.execute(statement, params)
         fetch = offence_protection_count_per_fight.fetchone()
-
-    obj_copy["metrics"] = "Protection zone count per fight"
+#"Protection zone count per fight"
+    obj_copy["metrics"] = OffenceStatsChartEnum.Protection_zone_count_per_fight
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[-1])
@@ -415,8 +428,8 @@ def offence_action_success_rate_utils(session_factory, params: dict, obj:dict, d
     with session_factory() as session:
         action_success_rate = session.execute(statement, params)
         fetch = action_success_rate.fetchone()
-
-    obj_copy["metrics"] = "Action Success rate"
+#"Action Success rate"
+    obj_copy["metrics"] = OffenceStatsChartEnum.Action_Success_rate
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["bar_pct"] = float(fetch[4])
@@ -460,7 +473,8 @@ def offence_action_point_per_fight(session_factory, params: dict, obj:dict, db: 
     with session_factory() as session:
         offence_action_point_per_fight = session.execute(statement, params)
         fetch = offence_action_point_per_fight.fetchone()
-    obj_copy["metrics"] = "Action points per fight"
+        #"Action points per fight"
+    obj_copy["metrics"] = OffenceStatsChartEnum.Action_points_per_fight
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
 
@@ -511,7 +525,8 @@ def offence_action_count_per_fight(session_factory, params: dict, obj:dict, db: 
     with session_factory() as session:
         action_count_per_fight = session.execute(statement, params)
         fetch = action_count_per_fight.fetchone()
-    obj_copy["metrics"] = "Action count per fight"
+        #"Action count per fight"
+    obj_copy["metrics"] = OffenceStatsChartEnum.Action_count_per_fight
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
         obj_copy["total_count"] =float(fetch[2])
