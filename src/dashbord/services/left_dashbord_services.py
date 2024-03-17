@@ -38,7 +38,7 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
             r, stats_list = self.metrics_services.takedown_metrics_chart(params=params)
             return r, stats_list
         
-        elif params.get('metrics') == MetricsEnum.Offense:
+        elif params.get('metrics') == MetricsEnum.Offence:
             r, stats_list = self.metrics_services.offence_metrics_chart(params=params)
             return r, stats_list
         
