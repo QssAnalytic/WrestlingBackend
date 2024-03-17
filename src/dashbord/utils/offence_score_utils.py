@@ -12,7 +12,7 @@ def parterre_points_rate_utils(session_factory, params: dict, obj:dict, db: Sess
     technique_ids = tuple((row[0] for row in result))
     params['technique_id'] = technique_ids
     statement = text("""
-        --Parterre points per fight
+--Parterre points per fight
 
 			with fighter_matches as (
 			select s.fighter_id, array_agg(distinct fight_id) fighter_array from fightstatistics s
@@ -33,11 +33,12 @@ def parterre_points_rate_utils(session_factory, params: dict, obj:dict, db: Sess
 			total_points as (select f.fighter_id, sum(score) as total_points from fightstatistics f
 			inner join fightinfos f2 on f.fight_id = f2.id
 			inner join actions a on f.action_name_id = a.id
-			where extract(year from f2.fight_date) in (2023)  and f.successful = true and  f.technique_id in :technique_id
-
+			where extract(year from f2.fight_date) in :fight_date and f.successful = true and  f.technique_id in :technique_id
 			group by f.fighter_id)
+			select * from(
+			select *, round(cast(percent_rank() over(order by avg_parterre_per_match asc) as decimal), 2) bar_pct from(
 			select fighter, coalesce(round(cast(total_points as decimal)/cast(unique_matches as decimal), 2), 0) as avg_parterre_per_match
-			from com c left join total_points t on c.fighter = t.fighter_id where fighter = :fighter_id
+			from com c left join total_points t on c.fighter = t.fighter_id)) where fighter = :fighter_id
         """)
     with session_factory() as session:
         parterre_success_rate_utils = session.execute(statement, params)
@@ -46,7 +47,7 @@ def parterre_points_rate_utils(session_factory, params: dict, obj:dict, db: Sess
     obj_copy["metrics"] = OffenceStatsChartEnum.Parterre_points_per_fight
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
-        # obj_copy["bar_pct"] = float(fetch[-1])
+        obj_copy["bar_pct"] = float(fetch[-1])
     return obj_copy
 
 

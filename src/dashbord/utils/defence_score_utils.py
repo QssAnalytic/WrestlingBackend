@@ -59,28 +59,61 @@ def pin_to_parter_escape_rate_utils(session_factory, params: dict, obj:dict, db:
     params['action_name_id'] = action.id
     statement = text("""
         --pin to parterre escape rate
-        with total as (
-                    select f.opponent_id, count(*) as total_count from fightstatistics f
-                    inner join fightinfos f2 on f.fight_id = f2.id
-                        
-                        where extract(year from f2.fight_date) in :fight_date and f.action_name_id = :action_name_id
-                        group by f.opponent_id
-                        ),
-                        success as (
-                        select f.opponent_id, count(*) as successful_escape from fightstatistics f
-                        inner join fightinfos f2 on f.fight_id = f2.id
-        
-                        where extract(year from f2.fight_date) in :fight_date and f.successful = false and f.action_name_id = :action_name_id
-                        group by f.opponent_id
-                        ),
-            
-        calculation as (
-        select t.opponent_id,round(coalesce(cast(successful_escape as decimal) / cast(total_count as decimal), 1), 2) action_escape_rate
-            from total t left join success s on s.opponent_id = t.opponent_id)  
-
-        select * from (select opponent_id, action_escape_rate,
-                    round((action_escape_rate) /(max(action_escape_rate) over()), 2) bar_pct
-                    from calculation)  where opponent_id = :fighter_id
+		WITH total AS (
+		    SELECT 
+		        f.opponent_id, 
+		        COUNT(*) AS total_count 
+		    FROM 
+		        fightstatistics f
+		    INNER JOIN 
+		        fightinfos f2 ON f.fight_id = f2.id
+		    WHERE 
+		        EXTRACT(YEAR FROM f2.fight_date) IN :fight_date 
+		        AND f.action_name_id = :action_name_id
+		    GROUP BY 
+		        f.opponent_id
+		),
+		success AS (
+		    SELECT 
+		        f.opponent_id, 
+		        COUNT(*) AS successful_escape 
+		    FROM 
+		        fightstatistics f
+		    INNER JOIN 
+		        fightinfos f2 ON f.fight_id = f2.id
+		    WHERE 
+		        EXTRACT(YEAR FROM f2.fight_date) IN :fight_date 
+		        AND f.successful = FALSE 
+		        AND f.action_name_id = :action_name_id
+		    GROUP BY 
+		        f.opponent_id
+		),
+		calculation AS (
+		    SELECT 
+		        t.opponent_id,
+		        ROUND(CAST(COALESCE(successful_escape, 0) AS DECIMAL), 2) AS succ,
+		        ROUND(CAST(total_count AS DECIMAL), 2) AS tot,
+		        ROUND(COALESCE(CAST(successful_escape AS DECIMAL), 0) / COALESCE(CAST(total_count AS DECIMAL), 1), 2) AS action_escape_rate
+		    FROM 
+		        total t 
+		    LEFT JOIN 
+		        success s ON s.opponent_id = t.opponent_id
+		)  
+		SELECT 
+		    * 
+		FROM 
+		    (
+		        SELECT 
+		            opponent_id, 
+		            action_escape_rate, 
+		            succ, 
+		            tot,
+		            ROUND((action_escape_rate) / (MAX(action_escape_rate) OVER()), 2) AS bar_pct
+		        FROM 
+		            calculation
+		    )  
+		WHERE 
+		    opponent_id = :fighter_id;
         """)
     with session_factory() as session:
         pin_to_parter_escape_rate = session.execute(statement, params)
@@ -89,7 +122,9 @@ def pin_to_parter_escape_rate_utils(session_factory, params: dict, obj:dict, db:
     obj_copy["metrics"] = DefenceStatsChartEnum.Pin_to_parter_escape_rate
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
-        obj_copy["bar_pct"] = float(fetch[2])
+        obj_copy["successful_count"] = fetch[2]
+        obj_copy["total_count"] = fetch[3]
+        obj_copy["bar_pct"] = float(fetch[-1])
     return obj_copy
 
 
@@ -115,10 +150,12 @@ def takedown_escape_rate_utils(session_factory, params: dict, obj: dict, db:Sess
                         group by f.opponent_id
                         ),
         calculation as (
-        select t.opponent_id,round(coalesce(cast(successful_escape as decimal) / cast(total_count as decimal), 0), 2) action_escape_rate
-            from total t left join success s on s.opponent_id = t.opponent_id)  
-
-        select * from (select opponent_id, action_escape_rate,
+	        select t.opponent_id,ROUND(CAST(s.successful_escape AS DECIMAL), 2) AS succ,
+           ROUND(CAST(t.total_count AS DECIMAL), 2) AS tot,
+	        round(coalesce(cast(successful_escape as decimal) / cast(total_count as decimal), 0), 2) action_escape_rate
+            from total t left join success s on s.opponent_id = t.opponent_id
+            )  
+        select * from (select opponent_id, action_escape_rate, succ,tot, 
                     round((action_escape_rate) /(max(action_escape_rate) over()), 2) bar_pct
                     from calculation)
         where opponent_id = :fighter_id
@@ -130,7 +167,9 @@ def takedown_escape_rate_utils(session_factory, params: dict, obj: dict, db:Sess
     obj_copy["metrics"] = DefenceStatsChartEnum.Takedown_escape_rate
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
-        obj_copy["bar_pct"] = float(fetch[2])
+        obj_copy['successful_count'] = float(fetch[2])
+        obj_copy['total_count'] = float(fetch[3])
+        obj_copy["bar_pct"] = float(fetch[-1])
     return obj_copy
 
 
@@ -155,9 +194,12 @@ def roll_escape_rate_utils(session_factory, params: dict, obj:dict, db: Session)
                         group by f.opponent_id
                         ),    
         calculation as (
-        select t.opponent_id,round(coalesce(cast(successful_escape as decimal) / cast(total_count as decimal), 0), 2) action_escape_rate
+        select t.opponent_id,
+        round(coalesce(cast(successful_escape as decimal), 0),2) as succ,
+        round(coalesce(cast(total_count as decimal), 0),2) as tot,
+        ROUND(COALESCE(CAST(successful_escape AS DECIMAL), 0) / CAST(total_count AS DECIMAL), 2) AS action_escape_rate
             from total t left join success s on s.opponent_id = t.opponent_id)  
-        select * from (select opponent_id, action_escape_rate,
+        select * from (select opponent_id, action_escape_rate, succ, tot,
                     round(action_escape_rate /(max(action_escape_rate) over()), 2) bar_pct
                     from calculation) where opponent_id = :fighter_id
         """)
@@ -168,7 +210,9 @@ def roll_escape_rate_utils(session_factory, params: dict, obj:dict, db: Session)
     obj_copy["metrics"] = DefenceStatsChartEnum.Roll_escape_rate
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
-        obj_copy["bar_pct"] = float(fetch[2])
+        obj_copy['successful_count'] = float(fetch[2])
+        obj_copy['total_count'] = float(fetch[3])
+        obj_copy["bar_pct"] = float(fetch[-1])
     return obj_copy
 
 
@@ -192,9 +236,10 @@ def action_escape_rate_utils(session_factory, params: dict, obj:dict, db: Sessio
                                     group by f.opponent_id
                                     ),
                     calculation as (
-                    select t.opponent_id,round(coalesce(cast(successful_escape as decimal) / cast(total_count as decimal), 0), 2) action_escape_rate
+                    select t.opponent_id,round(cast(successful_escape as decimal),2) as succ, round(cast(total_count as decimal), 2) as tot,
+                    round(coalesce(cast(successful_escape as decimal) / cast(total_count as decimal), 0), 2) action_escape_rate
                         from total t left join success s on s.opponent_id = t.opponent_id)  
-                    select * from (select opponent_id, action_escape_rate,
+                    select * from (select opponent_id,action_escape_rate,succ,tot, 
                     round((action_escape_rate - min(action_escape_rate) over()) /(max(action_escape_rate) over() - min(action_escape_rate) over()), 2) bar_pct
                     from calculation)
             where opponent_id = :fighter_id
@@ -206,7 +251,9 @@ def action_escape_rate_utils(session_factory, params: dict, obj:dict, db: Sessio
     obj_copy["metrics"] = DefenceStatsChartEnum.Action_escape_rate
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
-        obj_copy["bar_pct"] = float(fetch[2])
+        obj_copy["successful_count"] = float(fetch[2])
+        obj_copy["total_count"] = float(fetch[3])
+        obj_copy["bar_pct"] = float(fetch[-1])
     return obj_copy
 
 def protection_zone_escape_rate_utils(session_factory, params: dict,obj:dict, db: Session):
@@ -270,10 +317,12 @@ def parterre_escape_rate_utils(session_factory, params: dict, model: ModelTypeVa
                         ),
             
         calculation as (
-        select t.opponent_id,round(coalesce(cast(successful_escape as decimal) / cast(total_count as decimal), 0), 2) action_escape_rate
+        select t.opponent_id,
+        coalesce(successful_escape,0) as succ,
+        coalesce(total_count,0) as tot,
+        round(coalesce(cast(successful_escape as decimal) / cast(total_count as decimal), 0), 2) action_escape_rate
             from total t left join success s on s.opponent_id = t.opponent_id)  
-
-        select * from (select opponent_id, action_escape_rate,
+        select * from (select opponent_id, action_escape_rate, succ, tot,
                     round(action_escape_rate /(max(action_escape_rate) over()), 2) bar_pct
                     from calculation) where opponent_id = :fighter_id
         """)
@@ -285,5 +334,7 @@ def parterre_escape_rate_utils(session_factory, params: dict, model: ModelTypeVa
     obj_copy["metrics"] = DefenceStatsChartEnum.Parterre_escape_rate
     if fetch is not None:
         obj_copy["score"] = float(fetch[1])
-        obj_copy["bar_pct"] = float(fetch[2])
+        obj_copy["successful_count"] = float(fetch[2])
+        obj_copy["total_count"] = float(fetch[3])
+        obj_copy["bar_pct"] = float(fetch[-1])
     return obj_copy
