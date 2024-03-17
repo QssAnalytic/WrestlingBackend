@@ -1,5 +1,7 @@
 from sqlalchemy import text
+from sqlalchemy.orm import Session
 from database import session_factory
+from src.app.models import ActionName
 from src.dashbord.enums import DefenceStatsChartEnum, TakedownStatsChartEnum, OffenceStatsChartEnum, DurabilityStatsChartEnum
 
 
@@ -10,9 +12,120 @@ from src.dashbord.enums import DefenceStatsChartEnum, TakedownStatsChartEnum, Of
 class MetricsChartRepo:
 
     @classmethod
-    def durability_metrics_chart(cls, params: dict):
+    def durability_metrics_chart(cls, params: dict, db:Session):
         stats_list = [member.value for member in DurabilityStatsChartEnum]
-        return None, stats_list
+        action = db.query(ActionName).filter(ActionName.name == "Roll").first()
+        params['action_name_id'] = action.id
+        statement = text("""
+        --DURABILITY_SCORE
+            with passivity_per_fight as (
+		        with fighter_matches as (
+		        select s.fighter_id, array_agg(distinct fight_id) fighter_array,extract(year from i.fight_date) as fi_date from fightstatistics s
+		            inner join fightinfos i on s.fight_id = i.id
+		            
+		            group by s.fighter_id, fi_date
+		        ),
+		        opponent_matches as (
+		        select s.opponent_id, array_agg(distinct fight_id) opponent_array,extract(year from i.fight_date) as op_date from fightstatistics s
+		            inner join fightinfos i on s.fight_id = i.id
+		            
+		            group by s.opponent_id, op_date
+		        ),
+		        com as (select fighter, com_date, cardinality(array(select distinct unnest_array from unnest(combine_array) as unnest_array)) unique_matches from (
+		        select coalesce(fighter_id, opponent_id) fighter, (fighter_array || opponent_array) as combine_array, coalesce(fi.fi_date,op.op_date) as com_date
+		        from fighter_matches fi full outer join opponent_matches op on fi.fighter_id = opponent_id and fi.fi_date = op.op_date
+		        )),
+		        successful_action_attempts as (select f.fighter_id, count(*) as successful_attempts, extract(year from f2.fight_date) as s_a_date from fightstatistics f
+		        inner join fightinfos f2 on f.fight_id = f2.id
+		        where f.successful = true and f.action_name_id = :action_name_id
+		        group by f.fighter_id, s_a_date),
+		        total_action_attempts as (select f.fighter_id, count(*) as total_count, extract(year from f2.fight_date) as t_a_date from fightstatistics f
+		        inner join fightinfos f2 on f.fight_id = f2.id
+		        where f.action_name_id = :action_name_id
+		        group by f.fighter_id, t_a_date),
+		        calculation as(
+		        select fighter, c.com_date, coalesce(round(cast(successful_attempts as decimal)/cast(unique_matches as decimal), 2), 0) as successful_attempts_per_match,
+		        coalesce(round(cast(total_count as decimal)/cast(unique_matches as decimal), 2), 0) as total_attempts_per_match
+		        from com c left join successful_action_attempts s on c.fighter = s.fighter_id and c.com_date = s.s_a_date
+		                left join total_action_attempts tc on c.fighter = tc.fighter_id and c.com_date = tc.t_a_date
+		        )
+            select * from (
+                select *, round(cast(successful_attempts_per_match as decimal)/ cast(max(successful_attempts_per_match) over() as decimal), 2) passivity_rank from calculation
+            ) order by passivity_rank desc
+            ),
+            late_defences_per_fight as (
+            --DURABILITY
+            --total_late_defences_per_fight
+            with fighter_matches as (
+            select s.fighter_id, array_agg(distinct fight_id) fighter_array,extract(year from i.fight_date) as fi_date from fightstatistics s
+                inner join fightinfos i on s.fight_id = i.id  
+                group by s.fighter_id, fi_date
+            ),
+            opponent_matches as (
+            select s.opponent_id, array_agg(distinct fight_id) opponent_array,extract(year from i.fight_date) as op_date from fightstatistics s
+                inner join fightinfos i on s.fight_id = i.id
+                
+                group by s.opponent_id, op_date
+            ),
+            com as (select fighter, com_date,cardinality(array(select distinct unnest_array from unnest(combine_array) as unnest_array)) unique_matches from (
+            select coalesce(fighter_id, opponent_id) fighter, (fighter_array || opponent_array) as combine_array, coalesce(fi.fi_date,op.op_date) as com_date
+            from fighter_matches fi full outer join opponent_matches op on fi.fighter_id = opponent_id and fi.fi_date = op.op_date
+            )),
+            total_late_defences as (select f.opponent_id, count(*) as total_count, extract(year from f2.fight_date) as t_l_d_date from fightstatistics f
+            inner join fightinfos f2 on f.fight_id = f2.id
+            where (((f2.order = 'ascending') and (f.action_time_second > 180)) 
+                                    or ((f2.order = 'descending') and (f.action_time_second < 180)))
+            group by f.opponent_id, t_l_d_date)
+            select * from (
+            select *, round(cast (percent_rank() over(order by total_late_defences_per_match asc) as decimal), 2) defense_rank from(
+            select fighter,coalesce(tc.t_l_d_date,c.com_date) as total_late_defence_date, coalesce(round(cast(total_count as decimal)/cast(unique_matches as decimal), 2), 0) 
+                            as total_late_defences_per_match
+            from com c
+                    left join total_late_defences tc on c.fighter = tc.opponent_id and tc.t_l_d_date = c.com_date)) 
+            ),
+            late_attempts_per_fight as (
+--            --DURABILITY
+--            --total_late_attempts_per_fight
+                with fighter_matches as (
+                select s.fighter_id, array_agg(distinct fight_id) fighter_array,extract(year from i.fight_date) as fi_date from fightstatistics s
+                    inner join fightinfos i on s.fight_id = i.id
+                    group by s.fighter_id , fi_date
+                ),
+                opponent_matches as (
+                select s.opponent_id, array_agg(distinct fight_id) opponent_array,extract(year from i.fight_date) as op_date from fightstatistics s
+                    inner join fightinfos i on s.fight_id = i.id
+                    
+                    group by s.opponent_id, op_date
+                ),
+                com as (select fighter,com_date, cardinality(array(select distinct unnest_array from unnest(combine_array) as unnest_array)) unique_matches from (
+                select coalesce(fighter_id, opponent_id) fighter, (fighter_array || opponent_array) as combine_array, coalesce(fi.fi_date,op.op_date) as com_date
+                from fighter_matches fi full outer join opponent_matches op on fi.fighter_id = opponent_id and fi.fi_date = op.op_date
+                )),
+                total_late_attempts as (select f.fighter_id, count(*) as total_count, extract(year from f2.fight_date) as t_l_date from fightstatistics f
+                inner join fightinfos f2 on f.fight_id = f2.id
+                inner join actions a on f.action_name_id = a.id
+                where  (((f2.order = 'ascending') and (f.action_time_second > 180)) 
+                                        or ((f2.order = 'descending') and (f.action_time_second < 180)))
+                group by f.fighter_id, t_l_date)
+            select * from (
+            select *, round(cast (percent_rank() over(order by total_late_attempts_per_match asc) as decimal), 2) offense_rank from(
+            select fighter,c.com_date as total_late_attempts_per_match_date, coalesce(round(cast(total_count as decimal)/cast(unique_matches as decimal), 2), 0) 
+                            as total_late_attempts_per_match
+            from com c
+                    left join total_late_attempts tc on c.fighter = tc.fighter_id and c.com_date = tc.t_l_date))
+            ),
+            calculation as(
+            select coalesce(p.fighter, d.fighter, a.fighter) fighter,coalesce(p.com_date, d.total_late_defence_date,a.total_late_attempts_per_match_date) as f_date, cast(((passivity_rank + defense_rank + offense_rank) /3) as decimal) durability_score from passivity_per_fight p
+            full outer join late_defences_per_fight d on p.fighter = d.fighter and p.com_date = d.total_late_defence_date
+            full outer join late_attempts_per_fight a on p.fighter = a.fighter and p.com_date = a.total_late_attempts_per_match_date)
+            select fighter,f_date, round(durability_score, 2) as durability_score from calculation where fighter = :fighter_id order by f_date
+        """)
+        with session_factory() as session:
+            exc = session.execute(statement, params)
+            fetch = exc.fetchall()
+        return fetch, stats_list
+
+
     @classmethod
     def offence_metrics_chart(cls, params: dict):
         stats_list = [member.value for member in OffenceStatsChartEnum]

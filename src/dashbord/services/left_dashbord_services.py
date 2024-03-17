@@ -30,7 +30,7 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         self.stats_services = stats_services
 
 
-    def chart_metrics_statistic(self, params: dict):
+    def chart_metrics_statistic(self, params: dict, db:Session):
         if params.get('metrics') == MetricsEnum.Defence:
             r, stats_list = self.metrics_services.defence_metrics_chart(params=params)
             return r, stats_list
@@ -43,7 +43,7 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
             return r, stats_list
         
         elif params.get('metrics') == MetricsEnum.Durability:
-            r, stats_list = self.metrics_services.durability_metrics_chart(params=params)
+            r, stats_list = self.metrics_services.durability_metrics_chart(params=params, db=db)
             return r, stats_list
         return None
 
@@ -112,9 +112,9 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         action_success_rate_obj = offence_action_success_rate_utils(session_factory=session_factory, params=params, obj=obj, db=db)
         action_count_per_fight_obj = offence_action_count_per_fight(session_factory=session_factory, params=params, obj=obj, db=db)
         offence_action_point_per_fight_obj = offence_action_point_per_fight(session_factory=session_factory, params=params, obj=obj, db=db)
-        offence_protection_zone_success_rate_obj = offence_protection_zone_success_rate(session_factory=session_factory, params=params, obj=obj, db=db)
+        # offence_protection_zone_success_rate_obj = offence_protection_zone_success_rate(session_factory=session_factory, params=params, obj=obj, db=db)
         offence_protection_count_per_fight_obj = offence_protection_count_per_fight(session_factory=session_factory, params=params, obj=obj, db=db)
-        protection_zone_points_per_fight_obj = protection_zone_points_per_fight_utils(session_factory=session_factory, params=params, obj=obj, db=db)
+        # protection_zone_points_per_fight_obj = protection_zone_points_per_fight_utils(session_factory=session_factory, params=params, obj=obj, db=db)
         roll_success_rate_obj = roll_success_rate_utils(session_factory=session_factory, params=params, obj=obj, db=db)
         roll_points_per_fight_obj = roll_points_per_fight_utils(session_factory=session_factory, params=params, obj=obj, db=db)
         roll_count_per_fight_obj = roll_count_per_fight_utils(session_factory=session_factory, params=params, obj=obj, db=db)
@@ -124,10 +124,10 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response_list.append(action_success_rate_obj)
         response_list.append(action_count_per_fight_obj)
         response_list.append(offence_action_point_per_fight_obj)
-        response_list.append(offence_protection_zone_success_rate_obj)
+        # response_list.append(offence_protection_zone_success_rate_obj)
         response_list.append(offence_protection_count_per_fight_obj)
 
-        response_list.append(protection_zone_points_per_fight_obj)
+        # response_list.append(protection_zone_points_per_fight_obj)
         response_list.append(roll_success_rate_obj)
         response_list.append(roll_count_per_fight_obj)
         response_list.append(roll_points_per_fight_obj)
@@ -152,7 +152,7 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         pin_to_parter_escape_rate_obj = pin_to_parter_escape_rate_utils(session_factory=session_factory, params=params,obj=obj, db=db)
         takedown_escape_rate_obj = takedown_escape_rate_utils(session_factory=session_factory, params=params,obj = obj, db=db)
         roll_escape_rate_obj= roll_escape_rate_utils(session_factory=session_factory, params=params,obj=obj, db=db)
-        protection_zone_escape_rate_obj = protection_zone_escape_rate_utils(session_factory=session_factory, params=params,obj=obj, db=db)
+        # protection_zone_escape_rate_obj = protection_zone_escape_rate_utils(session_factory=session_factory, params=params,obj=obj, db=db)
         parterre_escape_rate_obj = parterre_escape_rate_utils(session_factory=session_factory, params=params, obj=obj, model=self.model,db=db)
         action_skipped_points_per_fight_obj = action_skipped_points_per_fight_utils(session_factory=session_factory, params=params, obj=obj, model=self.model,db=db)
         
@@ -161,7 +161,7 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
         response_list.append(takedown_escape_rate_obj)
         response_list.append(pin_to_parter_escape_rate_obj)
         response_list.append(roll_escape_rate_obj)
-        response_list.append(protection_zone_escape_rate_obj)
+        # response_list.append(protection_zone_escape_rate_obj)
         response_list.append(parterre_escape_rate_obj)
 
 

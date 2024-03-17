@@ -43,7 +43,7 @@ def metrics(fight_date: str, fighter_id: int, db: Session = Depends(get_db)):
 def chart(request_body: ChartParams = Depends(), db: Session = Depends(get_db)):
     params = request_body.dict()
     if params.get('metrics') != None and params.get('chart_name') == ChartNameEnum.MetricsChart:
-        r, stats_list = medal_left_dashbord_service.chart_metrics_statistic(params=params)
+        r, stats_list = medal_left_dashbord_service.chart_metrics_statistic(params=params, db=db)
         p_model = [ChartBase(year = data[1], score=data[-1]*100).dict() for data in r]
         response = MetricsChartOutPut(data=p_model, stats_list=stats_list).dict()
         return response

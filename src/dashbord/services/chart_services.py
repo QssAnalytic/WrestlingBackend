@@ -23,8 +23,8 @@ class ChartMetricsServices(MetricsChartRepo):
         return data, offence_stats
 
     @classmethod
-    def durability_metrics_chart(cls, params: dict):
-        data, offence_stats = super().durability_metrics_chart(params=params)
+    def durability_metrics_chart(cls, params: dict, db:Session):
+        data, offence_stats = super().durability_metrics_chart(params=params, db=db)
         return data, offence_stats
     
 
@@ -96,4 +96,6 @@ class ChartStatsServices(StatsChartRepo):
             response_data = super().total_action_counts_per_fight_2nd_part(params=params, db=db)
         elif params.get('stats') == DurabilityStatsChartEnum.Passivity_per_fight:
             response_data = super().passivity_per_fight(params=params, db=db)
+        elif params.get('stats') == DurabilityStatsChartEnum.Takedown_score_2nd_part:
+            response_data = super().takedown_score_2nd_part(params=params, db=db)
         return response_data

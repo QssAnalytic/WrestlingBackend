@@ -16,9 +16,9 @@ class OffenceStatsChartEnum(Enum):
     Action_Success_rate = "Action Success rate"
     Action_count_per_fight = "Action count per fight" 
     Action_points_per_fight = "Action points per fight"
-    Protection_zone_success_rate = "Protection zone success rate"
+    # Protection_zone_success_rate = "Protection zone success rate"
     Protection_zone_count_per_fight = "Protection zone count per fight"
-    Protection_zone_points_per_fight = "Protection zone points per fight"
+    # Protection_zone_points_per_fight = "Protection zone points per fight"
     Roll_success_rate = "Roll success rate"
     Roll_count_per_fight = "Roll count per fight"
     Roll_points_per_fight = "Roll points per fight"
@@ -35,7 +35,7 @@ class TakedownStatsChartEnum(Enum):
     Single_leg_takedown_count = "Single leg takedown count"
     Singe_Leg_takedown_Success_Rate = "Single Leg takedown Success Rate"
     Double_leg_takedown_counts = "Double leg takedown counts"
-    Double_leg_takedown = "Double leg takedown"
+    Double_leg_takedown = "Double leg takedown Double leg takedown success rate"
 
 
 
@@ -45,7 +45,7 @@ class DefenceStatsChartEnum(Enum):
     Takedown_escape_rate = "Takedown escape rate"
     Pin_to_parter_escape_rate = "Pin to parter escape rate"
     Roll_escape_rate = "Roll escape rate"
-    Protection_zone_escape_rate = "Protection zone escape rate"
+    # Protection_zone_escape_rate = "Protection zone escape rate"
     Parterre_escape_rate = "Parterre escape rate"
 
 
