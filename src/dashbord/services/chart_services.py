@@ -60,8 +60,8 @@ class ChartStatsServices(StatsChartRepo):
             response_data = super().pin_to_parter_escape_rate(params=params, db=db)
         elif params.get('stats') == DefenceStatsChartEnum.Roll_escape_rate:
             response_data = super().roll_escape_rate(params=params, db=db)
-        elif params.get('stats') == DefenceStatsChartEnum.Protection_zone_escape_rate:
-            response_data = super().protection_zone_escape_rate(params=params, db=db)
+        # elif params.get('stats') == DefenceStatsChartEnum.Protection_zone_escape_rate:
+        #     response_data = super().protection_zone_escape_rate(params=params, db=db)
         elif params.get('stats') == DefenceStatsChartEnum.Parterre_escape_rate:
             response_data = super().parterre_escape_rate(params=params, db=db)
         #------------------------------- OFFENCE ------------------------------------------
@@ -71,12 +71,12 @@ class ChartStatsServices(StatsChartRepo):
             response_data = super().action_counts_per_fight(params=params, db=db)
         elif params.get('stats') == OffenceStatsChartEnum.Action_points_per_fight:
             response_data = super().action_point_per_fight(params=params, db=db)
-        elif params.get('stats') == OffenceStatsChartEnum.Protection_zone_success_rate:
-            response_data = super().protection_zone_success_rate(params=params, db=db)
+        # elif params.get('stats') == OffenceStatsChartEnum.Protection_zone_success_rate:
+        #     response_data = super().protection_zone_success_rate(params=params, db=db)
         elif params.get('stats') == OffenceStatsChartEnum.Protection_zone_count_per_fight:
             response_data = super().protection_zone_counts_per_fight(params=params, db=db)
-        elif params.get('stats') == OffenceStatsChartEnum.Protection_zone_points_per_fight:
-            response_data = super().protection_zone_points_per_fight(params=params, db=db)
+        # elif params.get('stats') == OffenceStatsChartEnum.Protection_zone_points_per_fight:
+        #     response_data = super().protection_zone_points_per_fight(params=params, db=db)
         elif params.get('stats') == OffenceStatsChartEnum.Roll_success_rate:
             response_data = super().roll_success_rate(params=params, db=db)
         elif params.get('stats') == OffenceStatsChartEnum.Roll_count_per_fight:

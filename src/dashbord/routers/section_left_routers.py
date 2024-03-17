@@ -42,6 +42,8 @@ def metrics(fight_date: str, fighter_id: int, db: Session = Depends(get_db)):
 @router.get("/chart/")
 def chart(request_body: ChartParams = Depends(), db: Session = Depends(get_db)):
     params = request_body.dict()
+    if params.get('metrics') != None and params.get('stats') != None:
+        raise HTTPException(status_code=400, detail="Invalid parameters")
     if params.get('metrics') != None and params.get('chart_name') == ChartNameEnum.MetricsChart:
         r, stats_list = medal_left_dashbord_service.chart_metrics_statistic(params=params, db=db)
         p_model = [ChartBase(year = data[1], score=data[-1]*100).dict() for data in r]
@@ -54,4 +56,4 @@ def chart(request_body: ChartParams = Depends(), db: Session = Depends(get_db)):
                                     start_interval=0,
                                     end_interval=max(p_model, key=lambda x: x["score"])["score"]).dict()
         return response
-    raise HTTPException(status_code=400, detail="Invalid parameters")
+    
