@@ -176,7 +176,8 @@ class MedalLeftDashbordSerivices(Generic[ModelTypeVar]):
             'score': 0,
             'successful_count':0,
             'total_count':0,
-            'bar_pct': 0}
+            'bar_pct': 0,
+            'star': False}
         response = {}
         response['name'] = 'Takedown Score'
         response_list = []

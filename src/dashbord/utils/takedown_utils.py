@@ -7,6 +7,7 @@ ModelTypeVar = TypeVar("ModelTypeVar", bound=Base)
 def takedown_success_rate_utils(session_factory, params: dict, obj: dict):
     takedown_success_rate_string = "Takedown Success rate"
     obj_copy = obj.copy()
+    obj_copy["star"] = True
     statement = text("""
         with total as (
                 select f.fighter_id, count(*) as total_count from fightstatistics f
@@ -42,6 +43,7 @@ def takedown_success_rate_utils(session_factory, params: dict, obj: dict):
 def takedown_per_match_utils(session_factory, params: dict, obj:dict):
     
     obj_copy = obj.copy()
+    obj_copy["star"] = True
     statement = text("""
         with fighter_matches as (
         select s.fighter_id, array_agg(distinct fight_id) fighter_array from fightstatistics s
@@ -82,6 +84,7 @@ def takedown_per_match_utils(session_factory, params: dict, obj:dict):
 
 def takedown_average_points_per_fight_utils(session_factory, params: dict, obj: dict):
     obj_copy = obj.copy()
+    obj_copy["star"] = True
     statement = text("""
         --takedown average points per fight
         with fighter_matches as (

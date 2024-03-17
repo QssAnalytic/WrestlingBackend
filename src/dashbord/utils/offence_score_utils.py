@@ -389,6 +389,7 @@ def offence_protection_zone_success_rate(session_factory, params: dict, obj:dict
 
 def offence_action_success_rate_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
+    obj_copy["star"] = True
     """"""
     statement = text("""
     --action_success_rate
@@ -424,6 +425,7 @@ def offence_action_success_rate_utils(session_factory, params: dict, obj:dict, d
 
 def offence_action_point_per_fight(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
+    obj_copy["star"] = True
     """"""
     statement = text("""
         --Action points per fight
@@ -468,6 +470,7 @@ def offence_action_point_per_fight(session_factory, params: dict, obj:dict, db: 
 
 def offence_action_count_per_fight(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
+    obj_copy["star"] = True
     """"""
     statement = text("""
         --Action counts per fight

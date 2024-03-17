@@ -11,6 +11,7 @@ ModelTypeVar = TypeVar("ModelTypeVar", bound=Base)
 
 def action_skipped_points_per_fight_utils(session_factory, params: dict, obj:dict, model, db: Session):
     obj_copy = obj.copy()
+    obj_copy["star"] = True
     statement = text("""
         --Action skipped points per fight
                 with fighter_matches as (
@@ -171,7 +172,7 @@ def roll_escape_rate_utils(session_factory, params: dict, obj:dict, db: Session)
 
 def action_escape_rate_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
-
+    obj_copy["star"] = True
     statement = text("""
         --action escape rate
             with total as (

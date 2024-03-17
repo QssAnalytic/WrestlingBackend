@@ -33,6 +33,7 @@ class MetricsList(BaseModel):
     successful_count: int
     total_count: int | float
     bar_pct: float
+    star: bool
 
 class MetricsOutPut(BaseModel):
     name: str

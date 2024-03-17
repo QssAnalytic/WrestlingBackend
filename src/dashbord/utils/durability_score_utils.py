@@ -150,6 +150,7 @@ def passivity_durability_per_fight(session_factory, params: dict, obj:dict, db: 
 
 def offence_durability_score_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
+    obj_copy["star"] = True
     statement = text("""
         --offense_score_durability
         --offense_score_durability
@@ -265,6 +266,7 @@ def offence_durability_score_utils(session_factory, params: dict, obj:dict, db: 
 
 def defence_durability_score_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
+    obj_copy["star"] = True
     statement = text("""
         --defense_score_durability
         with action_escape_rate as(
@@ -317,6 +319,7 @@ def defence_durability_score_utils(session_factory, params: dict, obj:dict, db: 
 
 def takedown_durability_score_utils(session_factory, params: dict, obj:dict, db: Session):
     obj_copy = obj.copy()
+    obj_copy["star"] = True
     statement = text("""
         --takedown_durability_score
         with takedown_success as(
